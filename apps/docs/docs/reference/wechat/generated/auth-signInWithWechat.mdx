@@ -12,7 +12,7 @@ custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_
 ```js
 wx.login({
   success: async res => {
-    const { data, error } = await supabase.auth.wechatBindAccount({code:res.code})
+    const { data, error } = await supabase.auth.signInWithWechat({code:res.code})
   },
 })
 ```

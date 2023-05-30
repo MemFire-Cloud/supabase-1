@@ -41,7 +41,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Favicons />
-      <DefaultSeo
+      {/* <DefaultSeo
         title={SITE_TITLE}
         description={SITE_DESCRIPTION}
         openGraph={{
@@ -62,7 +62,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           site: '@supabase',
           cardType: 'summary_large_image',
         }}
-      />
+      /> */}
       <ThemeProvider>
         <SearchProvider>
           <Component {...pageProps} />

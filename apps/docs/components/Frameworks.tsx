@@ -17,7 +17,7 @@ const Frameworks = () => {
       name: 'Expo',
       logo: {
         light: '/docs/img/libraries/expo-icon.svg',
-        dark: '/docs/img/libraries/expo-icon-dark.svg',
+        dark: '/docs/img/libraries/expo-icon.svg',
       },
       href: '/guides/with-expo',
     },
@@ -41,7 +41,7 @@ const Frameworks = () => {
       name: 'Next.js',
       logo: {
         light: '/docs/img/libraries/nextjs-light-icon.svg',
-        dark: '/docs/img/libraries/nextjs-dark-icon.svg',
+        dark: '/docs/img/libraries/nextjs-light-icon.svg',
       },
       href: '/guides/with-nextjs',
     },
