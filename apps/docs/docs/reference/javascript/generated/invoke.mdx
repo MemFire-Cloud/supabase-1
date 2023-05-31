@@ -125,8 +125,9 @@ export const functions =  new FunctionsClient(supabase)
 
 ```js
 import { FunctionsHttpError, FunctionsRelayError, FunctionsFetchError } from "@supabase/supabase-js";
+import { FunctionsClient } from 'memfire-cloud-functions-js '
 
-const { data, error } = await supabase.functions.invoke('访问地址', {
+const { data, error } = await functions.invoke('访问地址', {
   headers: {
     "my-custom-header": 'my-custom-header-value'
   },
@@ -151,7 +152,7 @@ if (error instanceof FunctionsHttpError) {
 
 
 ```js
-const { data, error } = await supabase.functions.invoke('https://functions1.memfiredb.com/xxxxxxxxx/functionName?action=pay', {
+const { data, error } = await functions.invoke('https://functions1.memfiredb.com/xxxxxxxxx/functionName?action=pay', {
   headers: {
     "my-custom-header": 'my-custom-header-value'
   },

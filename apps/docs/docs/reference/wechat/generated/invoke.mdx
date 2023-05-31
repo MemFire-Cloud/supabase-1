@@ -12,8 +12,6 @@ custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_
 在根目录下执行命令，安装依赖
 
 ```js
-
-npm install memfire-cloud-functions-js
 npm install supabase-wechat-stable-v2
 
 ```
@@ -23,13 +21,11 @@ npm install supabase-wechat-stable-v2
 ```js
 
 import { createClient } from 'supabase-wechat-stable-v2'
-import { FunctionsClient } from 'memfire-cloud-functions-js '
 
 const supabaseUrl = ''
 const supabaseAnonKey = ''
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-export const functions =  new FunctionsClient(supabase)
 
 
 ```
