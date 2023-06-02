@@ -249,6 +249,16 @@ article p code {
   height: auto;
 
 }
+.t-c{
+  text-align:center ;
+}
+.flex-space-between{
+  display: flex;
+  justify-content: space-between;
+}
+.flex-space-between p{
+  margin: -26px 0px;
+}
 
 .image-text p img{
   width: 200px;
