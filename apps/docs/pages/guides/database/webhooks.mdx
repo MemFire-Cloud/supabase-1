@@ -1,23 +1,22 @@
 import Layout from '~/layouts/DefaultGuideLayout'
 
 export const meta = {
-  id: 'webhooks',
-  title: 'Database Webhooks',
-  description: 'Trigger external payloads on database events.',
+  id: 'Webhooks',
+  title: '数据库 Webhooks',
+  description: '数据库 Webhooks',
 }
 
-Database Webhooks allow you to send real-time data from your database to another system whenever a table event occurs.
+数据库 Webhooks 允许您在数据库发生表事件时将实时数据发送到另一个系统。
 
-You can hook into three table events: `INSERT`, `UPDATE`, and `DELETE`. All events are fired _after_ a database row is changed.
+你可以绑定三个事件: `插入`、`更新`、 和 `删除`。 所有事件在数据库行更改后触发。
 
-Database Webhooks are very similar to triggers, and that's because Database Webhooks are just a convenience wrapper around triggers
-using the [pg_net](/docs/guides/database/extensions/pgnet) extension. This extension is asynchronous, and therefore will not block your database changes for long-running network requests.
+数据库 Webhooks 非常类似于触发器，因为数据库Webhooks使用了[pg_net](/docs/guides/database/extensions/pgnet) 扩展，这使得它看上去更像是对触发器的便捷地封装。这个扩展是异步的，因此不会阻塞数据库更改以进行长时间运行的网络请求。
 
-This video demonstrates how you can create a new customer in Stripe each time a row is inserted into a `profiles` table:
+该视频演示了每次向`profiles`表插入一行时，如何在Stripe中创建一个新客户：
 
 <Admonition type="note">
 
-Database Webhooks were previously known as Function Hooks.
+数据库 Webhooks 以前叫做函数 Hooks。
 
 </Admonition>
 
@@ -30,18 +29,18 @@ Database Webhooks were previously known as Function Hooks.
   ></iframe>
 </div>
 
-## Creating a webhook
+## 创建 webhook
 
-1. Create a new [Database Webhook](https://app.supabase.com/project/_/database/hooks) in the Dashboard.
-1. Give your Webhook a name.
-1. Select the table you want to hook into.
-1. Select one or more events (table inserts, updates, or deletes) you want to hook into.
+1. 在控制台新建一个[数据库 Webhook](https://memfiredb.com)。
+1. 给新建的 Webhook 命名。
+1. 选择一个你想绑定的数据表。
+1. 选择一个或多个您想要连接到的事件(表的插入、更新、删除) 。 
 
-We currently support HTTP webhooks. These are sent as a `POST` request with a JSON payload.
+我们目前支持 HTTP webhooks。它们以带有 JSON 载荷的 POST 请求的形式发送。
 
-## Payload
+## 载荷
 
-The payload is automatically generated from the underlying table record:
+载荷是从底层表记录自动生成的:
 
 ```typescript
 type InsertPayload = {
@@ -67,9 +66,9 @@ type DeletePayload = {
 }
 ```
 
-## Resources
+## 资源
 
-- [pg_net](/docs/guides/database/extensions/pgnet): an async networking extension for PostgreSQL
+- [pg_net](/docs/guides/database/extensions/pgnet): 用于 PostgreSQL 的异步网络扩展。
 
 export const Page = ({ children }) => <Layout meta={meta} children={children} />
 

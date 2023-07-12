@@ -2,39 +2,47 @@ import Layout from '~/layouts/DefaultGuideLayout'
 
 export const meta = {
   id: 'api',
-  title: '无服务API',
+  title: '无服务器 API',
   description: 'Auto-generating and Realtime APIs.',
   sidebar_label: 'Overview',
 }
 
 Supabase直接从你的数据库模式中自动生成三种类型的API。
 
-- REST - 通过restful接口与你的数据库互动。
-- 实时 - 倾听数据库的变化。
-- GraphQL - [beta测试](https://supabase.com/blog/pg-graphql)。
+- REST - 通过restful接口连接到你的数据库。
+- Realtime - 监听数据库的变化。
+- GraphQL - 使用类似于图形查询语言操作您的数据库。
 
-这些API是：
+所有的API都是从您的数据库中自动生成的，其设计目的是让您无需编写一行代码就能尽可能快地构建。
 
-- **即时自动生成。**<br/>当您更新数据库时，可以通过API立即访问更改。
+您可以直接从浏览器中使用它们（两层架构），或者作为您自己的API服务器（三层架构）的补充。
 
-- **自我记录。**<br/>Supabase在Dashboard中生成文档，当您更改数据库时，这些文档会更新。
+## 特征
 
-- **安全。**<br/>API配置为与PostgreSQL的行级安全一起工作，在启用密钥验证的API网关后面提供。
+- **即时自动生成**<br/>当您更新数据库时，可以通过API立即访问更改。
 
-- **速度快。**<br/>我们的基本读取基准比Firebase快300%以上。API是Postgres之上的一个非常薄的层，它完成了大部分繁重的工作。
+- **自我记录**<br/>Supabase在Dashboard中生成文档，当您更改数据库时，这些文档会更新。
 
-- **可扩展。**<br/>API可以同时处理数千个请求，并且适用于无服务器工作负载。
+- **安全**<br/>API配置为与PostgreSQL的行级安全一起工作，在启用密钥验证的API网关后面提供。
 
-## REST API {#rest-api-overview}
+- **速度快**<br/>我们的基本读取基准比Firebase快300%以上。API是Postgres之上的一个非常薄的层，它完成了大部分繁重的工作。
 
-Supabase使用[PostgREST](https://postgrest.org/)提供了一个RESTful API。这是在Postgres之上的一个非常薄的API层。
-它提供了你在CRUD API中需要的一切：
+- **可扩展**<br/>API可以同时处理数千个请求，并且适用于无服务器工作负载。
 
-- 基本的CRUD操作
+## REST API [#rest-api-overview]
+
+Supabase使用 [PostgREST](https://postgrest.org/) 提供了一个RESTful API。这是在 Postgres 之上的一个非常薄的API层。
+它提供了你在 CRUD API 中需要的一切。
+
+Supabase的REST接口会自动根据你的数据库模式进行反射，并提供以下功能支持：
+
+- 基本的CRUD操作(创建/读取/更新/删除）
 - 深度嵌套的连接，允许你在一次获取中从多个表中获取数据
-- 与Postgres视图一起工作
-- 与Postgres函数一起工作
-- 与Postgres的安全模型一起工作--包括行级安全、角色和授权。
+- 可以与Postgres视图一起使用
+- 可以与Postgres函数一起使用
+- 可以与Postgres的安全模型一起使用（包括行级安全、角色和授权）
+
+Supabase的REST API将所有请求解析为单个SQL语句，从而实现快速的响应时间和高吞吐量。
 
 <div className="video-container">
   <iframe
@@ -45,339 +53,48 @@ Supabase使用[PostgREST](https://postgrest.org/)提供了一个RESTful API。�
   ></iframe>
 </div>
 
-## GraphQL API {#graphql-api-overview}
+参考:
 
-<Admonition type='note'>
+- [相关文档](https://postgrest.org/)
+- [开源代码](https://github.com/PostgREST/postgrest)
 
-GraphQL处于Beta阶段，可能会有突破性的变化。它只适用于自我托管的设置和2022年3月28日之后创建的Supabase项目。
+## GraphQL API [#graphql-api-overview]
 
-</Admonition>
+Supabase使用 [pg_graphql](https://supabase.github.io/pg_graphql/) 来在 `https://<project_ref>.supabase.co/graphql/v1/` 上公开GraphQL API端点。
+您可以在控制台中自动检索和查询现有 Supabase项目的 GraphQL API，或手动导航到 `API 文档 > GraphQL > GraphiQL`。
 
-Supabase中的GraphQL通过[pg_graphql](https://supabase.com/blog/pg-graphql)工作，这是一个开源的PostgreSQL的GraphQL扩展。
+Supabase的GraphQL接口会自动根据你的数据库模式进行反射，并提供以下功能支持：
 
-## 实时API {#realtime-api-overview}
+- 基本的CRUD操作（创建/读取/更新/删除）
+- 支持表、视图、材料化视图和外部表
+- 表/视图之间任意深度的关联关系
+- 用户定义的计算字段
+- Postgres安全模型（包括行级安全、角色和授权）
 
-Supabase使用[Realtime](https://github.com/supabase/realtime)提供一个实时API。你可以使用它来通过websockets监听数据库的变化。
-Realtime利用了PostgreSQL的内置逻辑复制。你可以通过管理Postgres发布来管理你的Realtime API。
+GraphQL API在单个往返中解析所有请求，因此响应时间快且吞吐量高。
 
+参考:
+- [相关文档](https://supabase.github.io/pg_graphql/)
+- [开源代码](https://github.com/supabase/pg_graphql)
 
-## 开始使用
+## Realtime API
 
-所有的API都是由数据库表自动创建的。在你向数据库添加了表或函数后，你可以使用所提供的API。
+Supabase使用 [Realtime](https://github.com/supabase/realtime) 提供一个实时API。你可以使用它来通过websockets监听数据库的变化。
+Realtime 利用了 PostgreSQL 的内置逻辑复制功能。你可以通过管理 Postgres 发布功能来管理你的 Realtime API 。
 
-### 创建API路由
+>在PostgreSQL数据库中，"发布"（Publication）是一种功能，用于将数据库的更改事件传播给订阅者。它允许你定义一组要发布的表，以及发布的细节和规则。
 
-当你创建Postgres表、视图或函数时，会自动创建API路由。
+## API URL 和 密钥
+您可以在控制台找到API URL 和 密钥 [Dashboard](https://supabase.com/dashboard/project/_/settings/api).
 
-让我们通过创建一个叫做`todos`的表来存储任务，来创建我们的第一个API路由。
-这将创建一个相应的路由`todos`，它可以接受`GET`、`POST`、`PATCH`和`DELETE`请求。
-
-<Tabs
-  scrollable
-  size="small"
-  type="underlined"
-  defaultActiveId="dashboard"
->
-<TabPanel id="dashboard" label="Dashboard">
-
-1. 进入仪表板中的表编辑器页面。
-1. 点击**新表**，创建一个名为`todos`的表。
-1. 单击**保存**。
-1. 点击**新列**，创建一个名为`task`的列，类型为`text`。
-1. 单击**保存**。
-
-<video width="99%" muted playsInline controls="true">
-  <source src={'/docs/videos/api/api-create-table-sm.mp4'} type="video/mp4" muted playsInline />
-</video>
-
-</TabPanel>
-<TabPanel id="sql" label="SQL">
-
-```sql
--- Create a table called "todos" with a column to store tasks.
-
-create table todos (
-  id bigint generated by default as identity primary key,
-  task text check (char_length(task) > 3)
-);
-
-```
-
-</TabPanel>
-</Tabs>
-
-### API URL和密钥
-
-每个Supabase项目都有一个独特的API URL。您的 API 在 API 网关后面是安全的，每次请求都需要一个 API 密钥。
-
-1. 转到仪表板中的设置页面。
-2. 单击侧栏中的 **API**。
-3. 在这个页面上找到你的API`URL`、`anon`和`service_role`键。
-
-<video width="99%" muted playsInline controls="true">
-  <source src={'/docs/videos/api/api-url-and-key.mp4'} type="video/mp4" muted playsInline />
-</video>
-
-REST API和GraphQL API都可以通过这个URL访问:
-
-- REST: `https://<project_ref>.supabase.co/rest/v1`
-- GraphQL: `https://<project_ref>.supabase.co/graphql/v1`
-
-这两重路由都需要通过`apikey`标头来传递`anon`密钥。
-
-#### API密钥
-
-您将获得两个密钥：
-
-- 一个`anon` 密钥, 在浏览器环境下使用是安全的。
-
-- 一个`service_role`密钥，只能在服务器上使用。这个密钥可以绕过行级安全。千万不要在浏览器中使用这个密钥。
-
-### 访问仪表板中的文档
-
-#### REST API {#rest-api-dashboard-docs}
-
-MemFire Cloud在[Dashboard](https://cloud.memfiredb.com/)中生成文档，当你对数据库进行修改时，该文档会更新。
-让我们查看在数据库中创建的`countries`表的文档。
-
-1. 转到仪表板中的API页面。
-2. 在侧边栏的表和视图下找到 `countries`表。
-3. 使用标签在JavaScript和cURL文档之间切换。
-
-<video width="99%" muted playsInline controls="true">
-  <source src={'/docs/videos/api/api-docs.mp4'} type="video/mp4" muted playsInline />
-</video>
-
-#### GraphQL
-
-我们提供的GraphQL端点（`https://<project_ref>.supabase.co/graphql/v1`）与任何能够传递`apikey`头的GraphiQL实现兼容。
-
-一些建议的应用:
-
-- [paw.cloud](https://paw.cloud)
-- [insomnia.rest](https://insomnia.rest)
-- [postman.com/graphql](https://www.postman.com/graphql/)
-- 自我托管的GraphiQL: GraphiQL可以通过一个简单的HTML文件提供服务。更多细节请参见[讨论](https://github.com/supabase/supabase/discussions/6144).
-
-## 使用API
-
-### REST API
-
-你可以直接通过HTTP请求与你的API交互，或者可以使用我们提供的客户端库。
-
-让我们看看如何向在第一步创建的`todos`表提出请求。
-使用提供的API URL（`SUPABASE_URL`）和Key（`SUPABASE_ANON_KEY`）。
-
-<Tabs
-  scrollable
-  size="small"
-  type="underlined"
-  defaultActiveId="javascript"
->
-<TabPanel id="javascript" label="Javascript">
-
-```javascript
-// Initialize the JS client
-import { createClient } from '@supabase/supabase-js'
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-// Make a request
-const { data: todos, error } = await supabase.from('todos').select('*')
-```
-
-</TabPanel>
-<TabPanel id="curl" label="cURL">
-
-```bash
-# Append /rest/v1/ to your URL, and then use the table name as the route
-curl '<SUPABASE_URL>/rest/v1/todos' \
--H "apikey: <SUPABASE_ANON_KEY>" \
--H "Authorization: Bearer <SUPABASE_ANON_KEY>"
-```
-
-</TabPanel>
-</Tabs>
-
-JS 参考: [select()](../reference/javascript/select),
-[insert()](../reference/javascript/insert),
-[update()](../reference/javascript/update),
-[upsert()](../reference/javascript/upsert),
-[delete()](../reference/javascript/delete),
-[rpc()](../reference/javascript/rpc) (调用Postgres函数)).
-
-### GraphQL API
-
-你可以在任何GraphQL客户端调用Supabase GraphQL API。对于我们的GraphQL例子，我们将使用[urql](https://formidable.com/open-source/urql/docs/)。
-
-<Tabs
-  scrollable
-  size="small"
-  type="underlined"
-  defaultActiveId="javascript"
->
-<TabPanel id="javascript" label="Javascript">
-
-```javascript
-import { createClient, useQuery } from 'urql'
-
-// Prepare API key and Authorization header
-const headers = {
-  apikey: <SUPABASE_ANON_KEY>,
-  authorization: `Bearer ${<SUPABASE_ANON_KEY}`>
-}
-
-// Create GraphQL client
-// See: https://formidable.com/open-source/urql/docs/basics/react-preact/#setting-up-the-client
-const client = createClient({
-  url: '<SUPABASE_URL>/graphql/v1',
-  fetchOptions: function createFetchOptions() {
-    return { headers }
-  },
-})
-
-// Prepare our GraphQL query
-const TodosQuery = `
-  query {
-    todosCollection {
-      edges {
-        node {
-          id
-          title
-        }
-      }
-    }
-  }
-`
-
-// Query for the data (React)
-const [result, reexecuteQuery] = useQuery({
-  query: TodosQuery,
-})
-
-// Read the result
-const { data, fetching, error } = result
-```
-
-</TabPanel>
-<TabPanel id="curl" label="cURL">
-
-```bash
-# Append /graphql/v1/ to your URL, and then use the table name as the route
-curl --request POST '<SUPABASE_URL>/graphql/v1' \
--H 'apikey: <SUPABASE_ANON_KEY>' \
--H 'Authorization: Bearer <SUPABASE_ANON_KEY>' \
--d '{ "query":"{ todos(first: 3) { edges { node { id } } } }" }'
-```
-
-</TabPanel>
-</Tabs>
-
-### 实时API
-
-默认情况下，Realtime在你的数据库中是禁用的。让我们为`todos`表打开Realtime。
-
-<Tabs
-  scrollable
-  size="small"
-  type="underlined"
-  defaultActiveId="dashboard"
->
-<TabPanel id="dashboard" label="Dashboard">
-
-1. 进入仪表板中的[数据库](https://app.supabase.com/project/_/database/tables)页面。
-2. 点击侧边栏中的**复制**。
-3. 通过切换**插入**、**更新**和**删除**来控制哪些数据库事件被发送。
-4. 通过选择**Source**和切换每个表来控制哪些表被发送变化。
-
-<video width="99%" muted playsInline controls="true">
-  <source src={'/docs/videos/api/api-realtime.mp4'} type="video/mp4" muted playsInline />
-</video>
-
-</TabPanel>
-<TabPanel id="sql" label="SQL">
-
-```sql
-alter publication supabase_realtime add table todos;
-```
-
-</TabPanel>
-</Tabs>
-
-从客户端，我们可以监听插入`todos'表的任何新数据：
-
-```javascript
-// Initialize the JS client
-import { createClient } from '@supabase/supabase-js'
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-// Create a function to handle inserts
-const handleInserts = (payload) => {
-  console.log('Change received!', payload)
-}
-
-// Listen to inserts
-const { data: todos, error } = await supabase.from('todos').on('INSERT', handleInserts).subscribe()
-```
-使用[subscribe()](/docs/reference/javascript/subscribe)来监听数据库变化。
-实时API通过PostgreSQL的复制功能工作。Postgres将数据库变化发送到一个叫做`supabase_realtime`的[发布](/docs/guides/database/replication#publications)，通过管理这个发布，你可以控制哪些数据被广播。
-
-## API安全
-
-### 保护你的路由安全
-
-你的API被设计成与Postgres行级安全（RLS）一起工作。如果你使用Supabase [Auth](/docs/guides/auth)，你可以根据登录的用户来限制数据。
-为了控制对数据的访问，你可以使用[Policy](/docs/guides/auth#policies)。
-当你在Postgres中创建一个表时，默认情况下，行级安全是被禁用的。要启用RLS：
-
-<Tabs
-  scrollable
-  size="small"
-  type="underlined"
-  defaultActiveId="dashboard"
->
-<TabPanel id="dashboard" label="Dashboard">
-
-1. 进入仪表板中的认证页面。
-2. 单击侧边栏中的*政策*。
-3. 选择**启用RLS**来启用行级安全。
-
-</TabPanel>
-<TabPanel id="sql" label="SQL">
-
-```sql
-alter table todos enable row level security;
-```
-
-</TabPanel>
-</Tabs>
-
-### `service_role`密钥
-
-不要在浏览器或用户可以看到的任何地方暴露 `service_role` 密钥。这个密钥是为了绕过行级安全而设计的 - 所以它只应该在私人服务器上使用。
-
-`service_role`密钥的一个常见用例是在后端运行数据分析工作。为了支持用户ID的连接，授予服务角色对`auth.users`表的读取权限通常是有用的。
-
-```sql
-grant select on table auth.users to service_role;
-```
-我们已经[与GitHub合作](https://github.blog/changelog/2022-03-28-supabase-is-now-a-github-secret-scanning-partner/)，扫描推送到公共存储库的Supabase `service_role`密钥。
-如果他们检测到任何具有service_role权限的密钥被推送到GitHub，他们将把API密钥转发给我们，这样我们就可以自动撤销检测到的秘密并通知你，保护你的数据免受恶意行为的影响。
-
-### 对意外删除和更新的保障措施
-
-对于所有项目，默认情况下，Postgres扩展[safeupdate](https://github.com/eradman/pg-safeupdate)对所有来自API的查询都是启用的。
-这可以确保任何 `delete()`或  `update()`在没有附带过滤器的情况下会失败。
-为了确认通过你的项目的API进行的查询是否启用了safeupdate，可以运行以下查询：
-
-```sql
-select usename,useconfig from pg_shadow where usename = 'authenticator' ;
-```
-
-`useconfig`的预期值应该是：
-
-```sql
-['session_preload_libraries=supautils, safeupdate']
-```
+<div className="video-container">
+  <iframe
+    src="https://xguihxuzqibwxjnimxev.supabase.co/storage/v1/object/public/videos/docs/api/api-url-and-key.mp4"
+    frameBorder="1"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowFullScreen
+  ></iframe>
+</div>
 
 export const Page = ({ children }) => <Layout meta={meta} children={children} />
 
