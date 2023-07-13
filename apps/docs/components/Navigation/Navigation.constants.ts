@@ -180,17 +180,9 @@ export const menuItems: NavMenu = {
         // { name: '数据库Webhooks', url: '/guides/database/webhooks', items: [] },
         { name: '全文检索', url: '/guides/database/full-text-search', items: [] },
         { name: '关联查询', url: '/guides/database/associated-query', items: [] },
+        { name: 'Webhooks', url: '/guides/database/webhooks', items: [] },
         // { name: '数据库测试', url: '/guides/database/testing', items: [] },
-        {
-          name: '无服务器API',
-          url: undefined,
-          items: [
-            { name: '概述', url: '/guides/api', items: [] },
-            { name: '生成类型', url: '/guides/api/generating-types', items: [] },
-            { name: 'Postman访问数据', url: '/guides/api/postman', items: [] },
-            { name: 'Curl访问数据', url: '/guides/api/curl', items: [] },
-          ],
-        },
+
         {
           name: '扩展',
           url: undefined,
@@ -232,6 +224,20 @@ export const menuItems: NavMenu = {
         },
       ],
     },
+
+    {
+      label: '无服务器API',
+      items: [
+        { name: '概述', url: '/guides/api', items: [] },
+        { name: '创建API路由', url: '/guides/api/creating-routes', items: [] },
+        { name: '生成类型', url: '/guides/api/generating-types', items: [] },
+        { name: 'GraphiQL 文档', url: '/guides/api/graphiql', items: [] },
+        { name: 'Postman访问数据', url: '/guides/api/postman', items: [] },
+        { name: 'cURL访问数据', url: '/guides/api/curl', items: [] },
+      ],
+    },
+
+
     // {
     //   label: '边缘函数',
     //   items: [
