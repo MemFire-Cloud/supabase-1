@@ -34,18 +34,18 @@ Postgres是我们一切工作的核心，Auth系统也遵循这一原则。我�
 
 - 电子邮件和密码。
 - Magic links（一键登录）。
-- 社交提供者。
+- 社交媒体登录认证服务商。
 - 电话登录。
 
-### 供应商
+### 服务商
 
-我们提供了一套Providers和登录方法，以及[Auth helpers](/docs/guides/auth/auth-helpers/)。
+我们提供了多种认证方式和登录方式，以及认证工具集合。[认证帮助程序](/docs/guides/auth/auth-helpers/)。
 
 <div className="container" style={{ padding: 0 }}>
   <AuthProviders />
 </div>
 
-### 配置第三方供应商
+### 配置第三方服务商
 
 你可以通过点击一个按钮来启用第三方提供商，方法是浏览认证 > 设置 > Auth Providers，并为每个提供商输入你的 `客户端ID`和 `密匙`。
 
@@ -53,9 +53,9 @@ Postgres是我们一切工作的核心，Auth系统也遵循这一原则。我�
 
 ### 重定向URLs和通配符
 
-当使用第三方提供商时，[Supabase客户端库](/docs/reference/javascript/auth-signinwithoauth#sign-in-using-a-third-party-provider-with-redirect)将用户重定向到提供商。当第三方供应商成功认证用户时，供应商将用户重定向到Supabase Auth回调URL，在那里他们将被进一步重定向到`redirectTo`参数中指定的URL。这个参数默认为[`SITE_URL`](/docs/reference/auth/config#site_url)。你可以修改`SITE_URL`或添加额外的重定向URL。
+当使用第三方提供商时，[Supabase客户端库](/docs/reference/javascript/auth-signinwithoauth#sign-in-using-a-third-party-provider-with-redirect)将用户重定向到提供商。当第三方服务商成功认证用户时，服务商将用户重定向到Supabase Auth回调URL，在那里他们将被进一步重定向到`redirectTo`参数中指定的URL。这个参数默认为[`SITE_URL`](/docs/reference/auth/config#site_url)。你可以修改`SITE_URL`或添加额外的重定向URL。
 
-你可以使用通配符匹配模式来支持Netlify和Vercel等供应商的预览URL。见[支持模式的完整列表](https://pkg.go.dev/github.com/gobwas/glob#Compile)。
+你可以使用通配符匹配模式来支持Netlify和Vercel等服务商的预览URL。见[支持模式的完整列表](https://pkg.go.dev/github.com/gobwas/glob#Compile)。
 
 #### Netlify预览URLs
 
@@ -84,9 +84,9 @@ const { data, error } = await supabase.auth.signInWithOAuth({
 }
 ```
 
-#### 移动深层链接URI
+#### 移动端深层链接 URI
 
-对于移动应用程序，你可以使用深度链接URI。例如，对于你的 `SITE_URL`，你可以指定像 `com.supabase://login-callback/`这样的内容，如果需要，还可以指定像 `com.supabase.staging://login-callback/`这样的附加重定向URL。
+对于移动应用程序，您可以使用深度链接URI。例如，对于您的`SITE_URL`，您可以指定类似于`com.supabase://login-callback/`的内容，如果需要额外的重定向URL，则可以使用类似于`com.supabase.staging://login-callback/`的内容。
 
 ## 授权
 
@@ -98,7 +98,7 @@ const { data, error } = await supabase.auth.signInWithOAuth({
 
 ### 行级安全
 
-认证只能让你走到这里。当你需要细化的授权规则时，没有什么比PostgreSQL的[行级安全(RLS)](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)更好的了。Supabase使得打开和关闭RLS变得很简单。
+认证只解决了用户身份验证的问题，但并没有涉及用户在系统中的权限和访问级别。为了解决这个问题，您需要使用到PostgreSQL的[行级安全性（RLS）](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)的特性。该特性通过打开和关闭RLS选项，使得授权变得非常简单。
 
 <video width="99%" muted playsInline controls="true">
   <source src="/docs/videos/rls-zoom2.mp4" type="video/mp4" muted playsInline />
@@ -112,7 +112,7 @@ const { data, error } = await supabase.auth.signInWithOAuth({
   <source src="/docs/videos/policies-zoom2.mp4" type="video/mp4" muted playsInline />
 </video>
 
-有了策略，你的数据库就成了规则引擎。而不是重复地过滤你的查询，像这样...
+如果设置了策略(Policy)，你的数据库就成了规则引擎。就不需要编写如下复杂的查询语句：
 
 ```js
 const loggedInUserId = 'd0714948'
@@ -125,7 +125,7 @@ let { data, error } = await supabase
 // => { id: 'd0714948', name: 'Jane' }
 ```
 
-...你可以简单地在你的数据库表上定义一个规则，`auth.uid() = user_id`，你的请求将返回通过该规则的行，即使你从中间件中删除过滤器。
+你可以很方便的在数据库表上定义一个策略（policy），`auth.uid() = user_id`，策略生效后，你对数据库的所有请求仅返回将通过该策略的行记录，即：只能查询到当前登录用户的数据,简化代码如下：
 
 ```js
 let { data, error } = await supabase.from('users').select('user_id, name')
@@ -135,14 +135,15 @@ let { data, error } = await supabase.from('users').select('user_id, name')
 ```
 
 ### 它是如何工作的
+1. 用户注册后。MemFireCloud在`auth.users`表中创建一个新用户。
+2. MemFireCloud返回一个包含用户`UUID`的新JWT。
+3. 每个对数据库的请求都会发送JWT。
+4. Postgres检查JWT以确定发起请求的用户。
+5. 用户的UID可以在策略中用于限制对行的访问。
+ 
+MemFireCloud 在 Postgres 中提供了一个特殊函数 `auth.uid()` 。可以从JWT中提取用户的UID，在创建策略时特别有用。
 
-1. 一个用户注册了。Supabase在`auth.users`表中创建一个新用户。
-2. Supabase 返回一个新的 JWT，其中包含用户的 `UID`。
-3. 对你的数据库的每个请求也会发送JWT。
-4. Postgres检查JWT以确定提出请求的用户。
-5. 用户的UID可以在策略中使用，以限制对行的访问。
 
-Supabase在Postgres中提供了一个特殊的函数，`auth.uid()`，它可以从JWT中提取用户的UID。这在创建策略时特别有用。
 
 ## 用户管理
 

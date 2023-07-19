@@ -78,9 +78,9 @@ select cron.schedule (
 );
 ```
 
-### 每天运行真空吸尘器
+### 每天运行一次VACUUM
 
-每天凌晨3:00（GMT）吸尘
+每天凌晨3:00（GMT）运行VACUUM
 
 ```sql
 SELECT cron.schedule('nightly-vacuum', '0 3 * * *', 'VACUUM');

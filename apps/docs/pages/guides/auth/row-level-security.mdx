@@ -6,9 +6,10 @@ export const meta = {
   description: '使用Postgres行级安全保护您的数据。',
 }
 
-当您需要细粒度的授权规则时，没有什么比PostgreSQL的[Row Level Security（RLS）](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)更好的了.
+当您需要更精细的授权规则时，PostgreSQL的[行级安全（RLS）](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)是很好的选择。
 
-[策略](https://www.postgresql.org/docs/current/sql-createpolicy.html)是PostgreSQL的规则引擎。它们非常强大和灵活，允许您编写符合您独特业务需求的复杂SQL规则。
+
+[策略](https://www.postgresql.org/docs/current/sql-createpolicy.html)是PostgreSQL的规则引擎。它们非常强大和灵活，允许你编写复杂的SQL规则，以满足你独特的业务需求。
 
 <div className="video-container">
   <iframe
@@ -21,8 +22,7 @@ export const meta = {
 
 ## 策略
 
-一旦掌握了策略的窍门，就很容易理解。每个策略都附加到一个表，并执行该策略 每次访问表时。
-您可以将它们看作是向每个查询添加一个`WHERE`子句。例如，这样的策略。。。
+每个数据库表可以添加一个或多个策略（policy），每当表被访问（增，删，改、查等操作）时，都会执行（校验）设置的策略，就好比为每个sql语句添加了一个where的查询条件。以下是一个策略的例子：
 
 ```sql
 create policy "Individuals can view their own todos."
@@ -30,7 +30,7 @@ create policy "Individuals can view their own todos."
     using ( auth.uid() = user_id );
 ```
 
-.. 每当用户试图从todos表中进行选择时，都会转换为:
+上面的策略在执行sql查询时被转化成以下语句(每当用户查询todos这张表时，只会查询包含自己ID的记录)：
 
 ```sql
 select *
@@ -38,17 +38,17 @@ from todos
 where auth.uid() = todos.user_id; -- Policy is implicitly added.
 ```
 
-## Helper函数
+## 辅助函数
 
 Supabase为您提供了一些简单的功能，您可以在策略中使用这些功能。
 
 ### `auth.uid()`
 
-返回发出请求的用户的ID。
+返回当前前端请求的用户id值。
 
 ### `auth.jwt()`
 
-返回发出请求的用户的JWT。
+返回当前前端请求的用户jwt值。
 
 ## 示例
 
@@ -74,9 +74,9 @@ create policy "Public profiles are viewable by everyone."
   );
 ```
 
-1. 在公共架构（默认架构）中创建名为`profiles`的表。
-2. 启用行级别安全性。
-3. 创建允许运行所有`select`查询的策略。
+1. 在pulic模式（Postgre默认模式）中创建名为`profiles`的表。
+2. 为该表开启行级别安全。
+3. 创建一个策略，允许所有用户查询(select)该表的数据。
 
 ### 限制更新
 
@@ -98,11 +98,11 @@ create policy "Users can update their own profiles."
   );
 ```
 
-1. 在公共架构（默认架构）中创建名为`profiles`的表。
-2. 启用RLS。
-3. 创建允许登录用户更新自己数据的策略。
+1. 在pulic模式（Postgre默认模式）中创建名为`profiles`的表。
+2. 为该表开启行级别安全。
+3. 创建一个策略，仅允许当前登录用户更新(update)自己的数据。
 
-### 仅匿名或经过身份验证的访问
+### 仅限匿名或已认证的有权访问
 
 您可以添加Postgres角色
 
@@ -115,7 +115,7 @@ using (
 );
 ```
 
-### 具有联接的策略
+### 连接相关的策略
 
 策略甚至可以包括表联接。此示例显示了如何查询`外部`表以构建更高级的规则。
 
@@ -147,9 +147,9 @@ create policy "Team members can update team details if they belong to the team."
 ```
 **注意：**如果还为_members_启用了RLS，则用户还必须具有对_members_1的读取（_select_）权限。否则，连接的查询将不会产生任何结果。
 
-### 具有安全定义器功能的策略
+### 具有安全定义功能的策略
 
-策略还可以使用`安全定义函数`。这在您希望限制对链接表的访问的多对多关系中非常有用。在上面的 `teams`和`members`示例之后，本示例显示了如何将安全定义器函数与策略结合使用，以控制对 `member`表的访问。
+策略还可以使用`安全定义功能`。这在您希望限制对链接表的访问的多对多关系中非常有用。在上面的 `teams`和`members`示例之后，本示例显示了如何将安全定义功能与策略结合使用，以控制对 `member`表的访问。
 
 ```sql
 -- 1. Follow example for 'Policies with joins' above
@@ -205,10 +205,14 @@ create policy "Only Blizzard staff can update leaderboard"
   );
 ```
 
-### 行的生存时间
+### 记录的有效期
 
 策略也可以用于实现TTL或实时功能，您可以在Instagram故事或Snapchat中看到。
 在下面的示例中，只有在过去24小时内创建了`stories`表的行时，这些行才可用。
+
+策略可以用于实现资源有效期限制TTL(time to live)功能，在微信中也有类似的功能，例如朋友圈仅三天可见
+
+以下实例实现了此功能，表`stories`中只可以查询到过去24小时内的记录，超过24小时的记录将查看不到。
 
 ```sql
 -- 1. Create table
@@ -232,10 +236,8 @@ create policy "Stories are live for a day"
 
 ### 高级策略
 
-使用SQL的全部功能来构建极其高级的规则。
-
-在本例中，我们将创建一个`posts`和`comments`表，然后创建一个依赖于另一个策略的策略。
-（在这种情况下，评论策略取决于帖子策略。）
+Supabase 的高级策略功能允许您使用 SQL 的全部功能来创建复杂的规则。
+在上述例子中，我们使用了两个表，即帖子表和评论表（`posts`和`comments`）。并且我们创建了一个评论策略，这个策略依赖于帖子策略。这意味着在执行评论策略之前，系统会检查帖子策略是否允许进行评论操作。这种依赖关系可以帮助您构建更复杂、更灵活的数据访问控制规则。
 
 ```sql
 create table posts (
@@ -282,7 +284,7 @@ using (
 
 ## 提示
 
-### 为数据库表启用实时
+### 为数据库表启用Realtime功能
 
 实时服务器根据行级别安全（RLS）策略向授权用户广播数据库更改。
 建议您对添加到发布中的表启用行级别安全性并设置行安全策略。
@@ -313,16 +315,30 @@ alter publication supabase_realtime add table posts;
 
 您还可以将授权规则放在中间件中，类似于使用任何其他`后端<->中间件<->前端`架构创建安全规则的方式。
 
-政策是一种工具。在“serverless/Jamstack”设置的情况下，它们特别有效，因为您根本不必部署任何中间件。
+策略是一种工具。在“serverless/Jamstack”设置的情况下，它们特别有效，因为您根本不必部署任何中间件。
 
 然而，如果您想为应用程序使用另一种授权方法，这也可以。Supabase`只是Postgres`，所以如果您的应用程序 与Postgres一起工作，然后它也与Supabase一起工作。
 
 提示：确保为所有表启用RLS，这样您的表就不可访问了。然后使用我们提供的“服务”，该服务旨在绕过RLS。
 
+```sql
+create table profiles (
+  id serial primary key,
+  email text
+);
+
+alter table profiles enable row level security;
+```
+
+
 ### 切勿在客户端上使用服务密钥
 
 Suabase提供特殊的“服务”键，可用于绕过所有RLS。
 这些内容不应在浏览器中使用或向客户公开，但它们对于管理任务非常有用。
+
+<Admonition type="caution">
+如果设置了用户令牌使用服务密钥初始化客户端，不会覆盖行级安全（RLS）。如果用户使用客户端登录，MemFireCloud将遵循该用户的行级安全策略。
+</Admonition>
 
 ## 不推荐的功能
 
@@ -332,7 +348,7 @@ Suabase提供特殊的“服务”键，可用于绕过所有RLS。
 
 <Admonition type="caution">
 
-已弃用：`auth.role()”函数已被弃用，转而使用Postgres中本机支持的“TO”字段。
+已弃用：`auth.role()`函数已被弃用，转而使用Postgres中本机支持的“TO”字段。
 
 </Admonition>
 
