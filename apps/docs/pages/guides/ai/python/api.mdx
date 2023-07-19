@@ -1,0 +1,232 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: 'python-api',
+  title: 'API',
+  description: 'Learn about embeddings within AI and vector applications.',
+  sidebar_label: 'Concepts',
+}
+
+`vecs` 是一个用于管理和查询 PostgreSQL 中的向量存储的 Python 客户端，提供 [pgvector 扩展](https://github.com/pgvector/pgvector)。本指南将帮助你开始使用 vecs。
+
+如果你的Postgres数据库还没有安装pgvector扩展，可查看[托管服务](https://supabase.github.io/vecs/hosting/)获取简便的安装方式。
+
+
+## 安装
+
+要求：
+
+- Python 3.7+
+
+使用pip安装vecs：
+
+
+```python 
+pip install vecs
+
+```
+
+## 使用方法
+
+## 连接
+
+在与vecs交互之前，需要创建客户端与Postgres进行通信。如果你尚未启动Postgres实例，可以查看[托管服务](https://supabase.github.io/vecs/hosting/)相关信息。
+
+```python 
+import vecs
+
+DB_CONNECTION = "postgresql://<user>:<password>@<host>:<port>/<db_name>"
+
+# create vector store client
+vx = vecs.create_client(DB_CONNECTION)
+
+```
+
+## 获取或创建集合
+你可以获取一个集合（或创建一个集合）来存储向量，需要指定集合的名称以及存储向量的维度数量。
+
+```python 
+docs = vx.get_or_create_collection(name="docs", dimension=3)
+```
+
+## 插入或更新向量
+
+`vecs` 将"insert"和"update"的概念结合成"upsert"。如果 `id` 不存在，upsert操作会将记录添加到集合中，如果`id`存在，则更新现有的记录。
+
+```python 
+# add records to the collection
+docs.upsert(
+    records=[
+        (
+         "vec0",           # the vector's identifier
+         [0.1, 0.2, 0.3],  # the vector. list or np.array
+         {"year": 1973}    # associated  metadata
+        ),
+        (
+         "vec1",
+         [0.7, 0.8, 0.9],
+         {"year": 2012}
+        )
+    ]
+)
+```
+
+## 创建一个索引
+创建完集合后，可以立即进行查询。
+
+然而，为了获得良好的性能，应在记录被upsert后，对集合进行索引。
+
+索引应在集合填充记录后创建。在空集合上建立索引会导致召回率显著降低。索引创建完成后，你仍然可以向集合中upsert新的文档，但如果集合的大小增加了一倍以上，就需要重建索引。
+
+每个集合只能存在一个索引。默认情况下，新建索引将替换任何现有的索引。
+
+创建索引：
+```python 
+##
+# INSERT RECORDS HERE
+##
+
+# index the collection to be queried by cosine distance
+docs.create_index(measure=vecs.IndexMeasure.cosine_distance)
+```
+
+可用的查询选项 `measure` 包括：
+- `vecs.IndexMeasure.cosine_distance`
+- `vecs.IndexMeasure.l2_distance`
+- `vecs.IndexMeasure.max_inner_product`
+
+这些方法对应于将查询向量与数据库中向量进行比较的不同方法。
+如果你不确定要使用哪个，可以通过省略参数来保持默认值（cosine_distance）。
+
+```python 
+docs.create_index()
+```
+
+<Admonition type="note">
+创建索引所需的时间随记录数量和向量大小而增加。对于几千条记录，可以在不到一分钟的时间内获得响应。对于较大的集合，可能需要几分钟的时间。
+</Admonition>
+
+
+## 查询
+
+指定一个包含多条记录的集合`docs`：
+
+### 基本
+最简单的搜索形式是提供一个查询向量。
+<Admonition type="note">
+索引对于良好的性能至关重要。更多信息请查看创建索引。
+如果你不创建索引，每个查询都会返回一个警告
+```python
+query does not have a covering index for cosine_similarity. See Collection.create_index
+```
+其中包含你应该索引的 `IndexMeasure`。
+</Admonition>
+
+```python
+docs.query(
+    data=[0.4,0.5,0.6],          # required
+    limit=5,                     # number of records to return
+    filters={},                  # metadata filters
+    measure="cosine_distance",   # distance measure to use
+    include_value=False,         # should distance measure values be returned?
+    include_metadata=False,      # should record metadata be returned?
+)
+```
+返回一个向量记录列表 `ids`。
+
+### 元数据过滤
+与每条记录关联的元数据也可以在查询过程中进行过滤。
+
+例如，`{"year": {"$eq": 2005}}`将筛选出一个`year`元数据键等于2005的结果。
+
+结合上下文：
+```python
+docs.query(
+    data=[0.4,0.5,0.6],
+    filters={"year": {"$eq": 2012}}, # metadata filters
+)
+```
+要查看完整参考，请参阅[元数据](/docs/guides/ai/python/metadata)指南。
+
+### 断开连接
+当你完成对一个集合的操作后，请确保将客户端与数据库断开连接。
+```python
+vx.disconnect()
+```
+或者，将客户端用作为上下文管理器使用，它会在退出时自动关闭连接。
+
+```python
+import vecs
+
+DB_CONNECTION = "postgresql://<user>:<password>@<host>:<port>/<db_name>"
+
+# create vector store client
+with vecs.create_client(DB_CONNECTION) as vx:
+    # do some work here
+    pass
+
+# connections are now closed
+```
+
+## 适配器
+适配器(adapter)是一项可选功能，可在将数据添加到集合或从集合查询数据之前进行转换。适配器可以通过仅使用项目的本地数据类型（例如原始文本）与集合进行交互，而无需手动处理向量。
+
+有关可用适配器的完整列表，请参阅内置适配器。
+
+作为示例，我们将创建一个带有适配器的集合，适配器会将文本分成段落，并使用`all-Mini-LM6-v2`模型将每个段落转换为嵌入向量。
+
+首先，安装具有文本嵌入可选依赖的 `vecs`（向量化工具）： 
+
+```python
+pip install "vecs[text_embedding]"
+```
+然后，使用适配器创建一个集合，将文本分块成段落，并使用 `all-Mini-LM6-v2` 384维文本嵌入模型嵌入每个段落。
+```python
+import vecs
+from vecs.adapter import Adapter, ParagraphChunker, TextEmbedding
+
+# create vector store client
+vx = vecs.Client("postgresql://<user>:<password>@<host>:<port>/<db_name>")
+
+# create a collection with an adapter
+docs = vx.get_or_create_collection(
+    name="docs",
+    adapter=Adapter(
+        [
+            ParagraphChunker(skip_during_query=True),
+            TextEmbedding(model='all-Mini-LM6-v2'),
+        ]
+    )
+)
+```
+通过将适配器添加到集合中，我们可以通过传递文本向集合中插入或更新记录，而无需传递向量。
+
+```python
+# add records to the collection using text as the media type
+docs.upsert(
+    records=[
+        (
+         "vec0",
+         "four score and ....", # <- note that we can now pass text here
+         {"year": 1973}
+        ),
+        (
+         "vec1",
+         "hello, world!",
+         {"year": "2012"}
+        )
+    ]
+)
+```
+同样，可以使用文本来查询集合。
+```python
+
+# search by text
+docs.query(data="foo bar")
+
+```
+
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page

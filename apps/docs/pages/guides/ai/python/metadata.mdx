@@ -1,0 +1,85 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: 'python-collections',
+  title: '元数据',
+  description: 'Learn about embeddings within AI and vector applications.',
+  sidebar_label: 'Concepts',
+}
+
+
+vecs允许你将元数据的键值对与集合中的索引和ID关联起来。
+然后，你可以为引用元数据的查询添加过滤器。
+
+## 类型
+
+元数据以二进制JSON的形式存储。因此，允许的元数据类型取自JSON的原始类型。
+- Boolean--布尔
+- String--字符串
+- Number--数字
+
+与向量相关联的元数据字段的技术限制为1GB。
+
+在实际操作中，为了最大限度地提高性能，你应该尽可能的减小元数据字段的大小。
+
+
+## 元数据查询语言
+元数据查询语言主要基于[mongodb的选择器](https://www.mongodb.com/docs/manual/reference/operator/query/)。
+
+`vecs` 目前仅支持其中的一部分运算符。
+
+### 比较运算符
+比较运算符（Comparison Operators）将提供的值与向量存储的元数据字段中存储的值进行比较。
+
+| Operator  | Description |
+| --- | ---------------- |
+|$eq     |等于        |
+|$ne     |不等于      |
+|$gt     |大于        |
+|$gte    |大于等于    |
+|$lt     |小于        |
+|$lte    |小于等于    |
+
+
+### 逻辑运算符
+逻辑运算符（Logical Operators）由其他操作符组成，并且可以嵌套使用。
+
+| Operator  | Description |
+| --- | ---------------- |
+|$and     |连接查询子句使用逻辑AND，返回符合两个子句条件的所有文档。|
+|$or     |连接查询子句使用逻辑OR，返回符合任一子句条件的所有文档。  |
+
+### 性能 
+为了获得最佳性能，请使用标量键值对作为元数据，并尽可能优先使用`$eq`、 `$and` 和 `$or` 过滤器。
+
+这些变量能够更稳定地使用索引。
+
+### 示例
+`year` 等于 2020
+```JSON
+{"year": {"$eq": 2020}}
+```
+`year` 等于 2020 或 gross 大于或等于 5000.0
+
+```JSON
+{
+    "$or": [
+        {"year": {"$eq": 2020}},
+        {"gross": {"$gte": 5000.0}}
+    ]
+}
+```
+`last_nam`e` 小于 "Brown"， `is_priority_customer` 是正确的
+```JSON
+{
+    "$and": [
+        {"last_name": {"$lt": "Brown"}},
+        {"is_priority_customer": {"$gte": 5000.00}}
+    ]
+}
+```
+
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page

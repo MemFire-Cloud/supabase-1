@@ -1,0 +1,67 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: 'ai-concepts',
+  title: '概念',
+  description: 'Learn about embeddings within AI and vector applications.',
+  sidebar_label: 'Concepts',
+}
+
+嵌入（Embedding）是在构建人工智能和向量应用时的核心概念。
+
+## 什么是嵌入（Embeddings）?
+
+Embedding可以捕捉文本、图像、视频或其他类型信息的“相关性”。这种相关性最常用于以下用途：
+
+- **搜索:** 搜索词与一篇文本的相似度有多高？
+- **推荐:** 两种对象有多相似？
+- **分类:** 如何对一篇文本进行分类？
+- **聚类:** 如何识别趋势？
+
+让我们来探讨一个文本嵌入的示例。假设我们有三个英文例句：
+
+1. "The cat chases the mouse"
+2. "The kitten hunts rodents"
+3. "I like ham sandwiches"
+
+你的任务是将有着相似含义的句子进行分组。这应该很显然，第1和第2个句子几乎完全相同，而第3个句子则具有完全不同的含义。
+
+尽管第1和第2个句子相似，但除了 “the” 字之外，它们没有其他共同的词汇。虽然它们的意义几乎相同。我们如何教会计算机这两个是同义句的呢？
+
+## 人类语言
+
+人类使用词语和符号来交流语言。但是单独的词汇大多数都是无意义的 - 我们需要从共享的知识和经验中汲取才能理解它们。“你应该百度一下”这句话只有在你知道百度是一个搜索引擎，并且人们一直在使用百度，并将该词作为动词时才有意义。
+
+同样，我们需要训练一个神经网络模型来理解人类语言。一个有效的模型应该在数百万个不同的例子上进行训练，以理解每个单词、短语、句子或段落在不同语境中可能的含义。
+
+那么，这与Embeddings有什么关系呢？
+
+## Embeddings是如何工作的？
+
+嵌入（Embeddings）将离散信息（单词和符号）压缩成分布式连续值数据（向量）。如果我们将之前的短语绘制在图表上，它可能看起来像这样：
+
+<img src="/docs/img/ai/vector-similarity.png" alt="Vector similarity" width="640" height="640" />
+
+短语1和2会被绘制在彼此附近，因为它们的含义相似。我们预期短语3会出现在较远的地方，因为它与前两者无关。如果我们有第4个短语 “Sally ate Swiss cheese” ，它可能存在于短语3（cheese can go on sandwiches）和短语1（mice like Swiss cheese）之间的某个地方。
+
+在这个例子中，我们只有2个维度：X和Y轴。实际上，我们需要更多的维度来有效地捕捉人类语言的复杂性。
+
+## 使用 Embeddings
+
+与上面的二维示例相比，大多数嵌入模型会输出更多维度。例如，OpenAI的 `text-embedding-ada-002` 模型输出的是1536个维度。
+
+为什么这很有用？一旦我们在多个文本上生成了嵌入向量，使用向量数学运算（如余弦距离）计算它们的相似程度就非常简单。这在搜索中是一个常见的应用场景。你的过程可能如下所示：
+
+1. 预处理你的知识库，并为每个页面生成嵌入
+2. 存储嵌入以便日后引用
+3. 构建一个搜索页面，提示用户输入
+4. 获取用户的输入，生成一次性嵌入，然后对你预处理的嵌入执行相似性搜索
+5. 将最相似的页面返回给用户
+
+## 另请参阅
+
+- [结构化和非结构化嵌入](/docs/guides/ai/structured-unstructured)
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page

@@ -1,0 +1,44 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: 'python-collections',
+  title: '集合',
+  description: 'Learn about embeddings within AI and vector applications.',
+  sidebar_label: 'Concepts',
+}
+
+一个集合是一组向量记录。
+
+记录可以添加或更新到一个集合中。
+
+集合可以随时进行查询，但为了可扩展的查询性能，应对其进行索引。
+
+单个向量记录的格式如下：
+```python
+Record (
+    id: String
+    vec: Numeric[]
+    metadata: JSON
+)
+```
+例如：
+```python
+("vec1", [0.1, 0.2, 0.3], {"year": 1990})
+```
+
+在每个 `vecs` 集合下面都是一个 Postgres 表。
+```python
+create table <collection_name> (
+    id string primary key,
+    vec vector(<dimension>),
+    metadata jsonb
+)
+```
+表中的行与vecs向量记录一一对应。
+
+从vecs客户端外部选择集合表是安全的，但不建议执行DDL。
+
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page

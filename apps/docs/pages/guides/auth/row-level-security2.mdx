@@ -12,7 +12,7 @@ export const meta = {
 
 ## 什么是RLS ？
 
-全称：Row level security，行级安全，允许系统管理员为数据库表创建访问策略（policy），以**约束数据的可见性**。创建策略语法详见：[语法说明](https://g8nb5c2xl3.feishu.cn/docx/F1psdHNkjorWS5xAlnYcF1vCndg#part-HK98dFGMooqYGExxu3RctdiNn9d)。当为一个表创建了policy后，相当于为该表增加了一个高优先级的过滤器。当用户访问该表时，如果policy生效，则会根据policy中定义的过滤条件来决定用户可操作的数据集合。
+全称：Row level security，行级安全，允许系统管理员为数据库表创建访问策略（policy），以**约束数据的可见性**。当为一个表创建了policy后，相当于为该表增加了一个高优先级的过滤器。当用户访问该表时，如果policy生效，则会根据policy中定义的过滤条件来决定用户可操作的数据集合。
 
 ## 如何添加RLS
 
