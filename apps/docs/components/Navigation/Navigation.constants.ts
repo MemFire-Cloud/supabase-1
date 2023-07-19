@@ -52,7 +52,7 @@ export const menuItems: NavMenu = {
       label: '概述',
       items: [
         { name: '简介', url: '/', items: [] },
-        { name: '特性', url: '/features', items: [] },
+        { name: '功能', url: '/features', items: [] },
         { name: '架构', url: '/architecture', items: [] },
         { name: '联系我们', url: '/contactus', items: [] },
       ],
@@ -188,20 +188,22 @@ export const menuItems: NavMenu = {
           url: undefined,
           items: [
             { name: '概述', url: '/guides/database/extensions', items: [] },
-            { name: 'http：RESTful客户端', url: '/guides/database/extensions/http', items: [] },
+            { name: 'http:RESTful客户端', url: '/guides/database/extensions/http', items: [] },
             {
-              name: 'pg_cron: 工作调度',
+              name: 'pg_cron:工作调度',
               url: '/guides/database/extensions/pgcron',
               items: [],
             },
+            { name: 'pg_graphql:支持GraphQL', url: '/guides/database/extensions/pg_graphql', items: [] },
+            { name: 'pgvector:嵌入和向量相似性', url: '/guides/database/extensions/pgvector', items: [] },
             {
-              name: 'pg_net: 异步联网',
+              name: 'pg_net:异步联网',
               url: '/guides/database/extensions/pgnet',
               items: [],
             },
-            { name: 'pgTAP: 单元测试', url: '/guides/database/extensions/pgtap', items: [] },
+            { name: 'pgTAP:单元测试', url: '/guides/database/extensions/pgtap', items: [] },
             {
-              name: 'plv8: Javascript语言',
+              name: 'plv8:Javascript语言',
               url: '/guides/database/extensions/plv8',
               items: [],
             },
@@ -231,7 +233,7 @@ export const menuItems: NavMenu = {
         { name: '概述', url: '/guides/api', items: [] },
         { name: '创建API路由', url: '/guides/api/creating-routes', items: [] },
         { name: '生成类型', url: '/guides/api/generating-types', items: [] },
-        { name: 'GraphiQL 文档', url: '/guides/api/graphiql', items: [] },
+        { name: 'GraphQL', url: '/guides/api/graphiql', items: [] },
         { name: 'Postman访问数据', url: '/guides/api/postman', items: [] },
         { name: 'cURL访问数据', url: '/guides/api/curl', items: [] },
       ],
@@ -279,7 +281,39 @@ export const menuItems: NavMenu = {
       label: '云存储',
       items: [
         { name: '概述', url: '/guides/storage', items: [] },
+
         // { name: 'CDN', url: '/guides/storage-cdn', items: [] },
+      ],
+    },
+    {
+      label: 'AI和Vectors',
+      items: [
+        { name: '总览', url: '/guides/ai', items: [] },
+        //{ name: '概念', url: '/guides/ai/concepts', items: [] },
+
+        //{ name: '结构化和非结构化', url: '/guides/ai/structured-unstructured', items: [] },
+
+
+        {
+          name: 'Python 客户端',
+          url: undefined,
+          items: [
+            { name: 'API', url: '/guides/ai/python/api', items: [] },
+            { name: '集合', url: '/guides/ai/python/collections', items: [] },
+            { name: '索引', url: '/guides/ai/python/indexes', items: [] },
+            { name: '元数据', url: '/guides/ai/python/metadata', items: [] },
+          ],
+        },
+
+        // {
+        //   name: '第三方工具',
+        //   url: undefined,
+        //   items: [
+        //     { name: 'LangChain', url: '/guides/ai/langchain', items: [] },
+        //   ],
+        // },
+
+        
       ],
     },
     {

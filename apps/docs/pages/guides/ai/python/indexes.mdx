@@ -1,0 +1,35 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: 'python-collections',
+  title: '索引',
+  description: 'Learn about embeddings within AI and vector applications.',
+  sidebar_label: 'Concepts',
+}
+
+
+索引是优化[集合](https://supabase.com/docs/guides/ai/python/collections)查询性能的工具。
+
+集合可以在没有索引的情况下进行[查询](https://supabase.com/docs/guides/ai/python/api)，但这将会产生一个python警告，因此在生产环境中绝对不可以这样做。
+
+```python
+query does not have a covering index for cosine_similarity. See Collection.create_index
+```
+
+因为每个查询向量都必须与集合中的每条记录进行比较。当维度数和/或记录数变大时，这变得非常缓慢和计算昂贵。
+
+索引是一种启发式数据结构，预先计算向量空间中关键点之间的距离。它比整个集合更小，遍历速度更快，从而实现更高效的搜索。
+
+每个集合只能存在一个索引。索引根据选择的距离度量对集合进行优化以进行搜索。
+
+可用的距离测量选项有：
+- 余弦距离（cosine distance）
+- L2 距离（l2 distance）
+- 最大内积（max inner product）
+
+如果你不确定要使用哪个，请在创建索引和查询时省略参数，使用默认值余弦距离 (cosine_distance) 。
+
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page

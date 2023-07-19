@@ -38,12 +38,11 @@ create extension pgtap with schema extensions;
 drop extension pgtap;
 ```
 
-Even though the SQL code is `create extension`, this is the equivalent of "enabling the extension".
-To disable an extension call `drop extension`.
+尽管SQL代码是 `create extension`，但它相当于"启用该扩展"。要禁用一个扩展，请调用 `drop extension`。
 
 <Admonition type="caution">
 
-Enabling some extensions with `create extension <extension-name> with schema extensions` may lead to permission issues (e.g., `dblink`, `http`, `pg_cron`).
+使用 `create extension <extension-name> with schema extensions` 启用某些扩展功能可能会导致权限问题（例如：`dblink`，`http`，`pg_cron`）。
 
 </Admonition>
 
