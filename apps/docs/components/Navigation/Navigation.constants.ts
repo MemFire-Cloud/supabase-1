@@ -234,6 +234,7 @@ export const menuItems: NavMenu = {
         { name: '创建API路由', url: '/guides/api/creating-routes', items: [] },
         { name: '生成类型', url: '/guides/api/generating-types', items: [] },
         { name: 'GraphQL', url: '/guides/api/graphiql', items: [] },
+
         { name: 'Postman访问数据', url: '/guides/api/postman', items: [] },
         { name: 'cURL访问数据', url: '/guides/api/curl', items: [] },
       ],
