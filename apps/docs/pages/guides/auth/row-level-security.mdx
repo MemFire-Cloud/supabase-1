@@ -394,6 +394,11 @@ begin
 end;
 $$;
 ```
+要切换到指定用户（通过电子邮件），使用 `call auth.login_as_user('my@email.com')`;。您也可以切换到匿名角色，使用 `call auth.login_as_anon()`;。
+完成后，使用 `call auth.logout()`; 将自己切换回 `postgres` 角色。
+
+这些过程也可以用于编写针对策略的 pgTAP 单元测试。
+
 
 ## 不推荐的功能
 
