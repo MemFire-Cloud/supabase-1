@@ -5,36 +5,23 @@ slug: /removeallchannels
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-取消订阅并从Realtime客户端删除所有Realtime频道。
 
-```js
+removeAllChannels()用于取消订阅并从实时客户端移除所有实时通道。
+
+移除频道是维护项目的实时服务性能以及在监听Postgres更改时维护数据库性能的好方法。
+在客户端断开连接后，MemFire Cloud会自动在30秒后进行清理，但是未使用的频道可能会导致性能下降，特别是当有更多客户端同时订阅时。
+
+## 案例教程
+
+### 案例1 
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 supabase.removeAllChannels()
-```
+  ```
 
-
-
-
-
-
-## 注意事项
-
-- 如果你在监听Postgres的变化，移除通道是保持你项目的实时服务以及数据库性能的一个好方法。Supabase会在客户端断开连接后的30秒内自动处理清理工作，但是当更多的客户端同时订阅时，未使用的通道可能导致性能下降。
-
-
-
-
-
-
-
-
-
-
-## 例子
-
-### 移除所有通道
-
-
-
-```js
-supabase.removeAllChannels()
-```
+</TabPanel>
+</Tabs>

@@ -1,47 +1,60 @@
 ---
 id: delete
-title: "删除数据: delete()"
+title: "Delete 数据"
 slug: /delete
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_dart_v1.yml
 ---
 
-对表进行DELETE操作。
+delete()用于在表（table）或视图（view）执行 DELETE 操作。
 
+* `delete()` 应始终与[过滤器（filter）](/docs/reference/dart/using-filters)结合使用，以便定位要删除的项。
+* 如果你在使用 `delete()` 时带有过滤器，并且启用了RLS（行级安全性），则只会删除通过  `SELECT` 策略可见的行。请注意，默认情况下没有行可见，因此你需要至少有一个 `SELECT`/`ALL` 策略来使行可见。
+
+
+
+
+## 案例教程
+### 案例1 (删除记录)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
-final data = await supabase
+                                                                              
+await supabase
   .from('cities')
   .delete()
   .match({ 'id': 666 });
 ```
+</TabPanel>
 
+</Tabs>
 
+### 案例2 (找回已删除的记录)
 
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
 
-
-
-## Notes
-
-- `delete()`应该总是与[Filters](/docs/reference/dart/using-filters)结合起来，以锁定你想删除的项目。
-
-
-
-
-
-
-
-
-
-
-## Examples
-
-### 删除记录
-
-
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
-final data = await supabase
+                                                                              
+final List<Map<String,dynamic>> data = await supabase
   .from('cities')
   .delete()
-  .match({ 'id': 666 });
+  .match({ 'id': 666 })
+  .select();
 ```
+</TabPanel>
+
+</Tabs>

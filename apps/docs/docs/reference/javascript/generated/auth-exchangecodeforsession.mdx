@@ -1,0 +1,55 @@
+---
+id: auth-exchangecodeforsession
+title: "exchangecodeforsession()"
+slug: /auth-exchangecodeforsession
+custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
+---
+
+exchangecodeforsession()用于将授权码（Auth Code）交换为会话（session），通过在 PKCE 流程中使用授权码（Auth Code）来登录现有用户。
+
+* 在客户端选项中将 `flowType` 设置为 `pkce` 时使用。
+
+
+
+
+
+## 案例教程
+
+### 案例1 （交换授权码）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase.auth.exchangeCodeForSession('34e770dd-9ff9-416c-87fa-43b31d7ef225')
+  ```
+
+</TabPanel>
+
+</Tabs>
+
+
+
+
+## 参数说明
+
+
+<ul className="method-list-group">
+  
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      authCode
+    </span>
+    <span className="method-list-item-label-badge required">
+      [必要参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>string类型</code> 
+    </span>
+  </h4>
+
+</li>
+
+</ul>

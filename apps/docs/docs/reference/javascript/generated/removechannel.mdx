@@ -5,14 +5,39 @@ slug: /removechannel
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-取消订阅并从Realtime客户端删除Realtime频道。
 
-```js
+
+removeChannel()用于取消订阅并从实时（realtime）客户端移除实时（realtime）频道。
+
+移除频道是维护项目的实时服务性能以及在监听Postgres更改时维护数据库性能的好方法。
+在客户端断开连接后，MemFire Cloud会自动在30秒后进行清理，但是未使用的频道可能会导致性能下降，特别是当有更多客户端同时订阅时。
+
+
+
+## 案例教程
+
+### 案例1 
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 supabase.removeChannel(myChannel)
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+
+
+
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -20,10 +45,10 @@ supabase.removeChannel(myChannel)
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      channel
+      频道（channel）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
       <code>default</code>
@@ -31,7 +56,7 @@ supabase.removeChannel(myChannel)
   </h4>
   <div class="method-list-item-description">
 
-实时通道的名称。
+实时（realtime）通道的名称。如果没有显式指定通道名称，系统将使用"default"作为默认值。
 
   </div>
   
@@ -39,26 +64,3 @@ supabase.removeChannel(myChannel)
 
 </ul>
 
-
-## 注意事项
-
-- 如果你在监听Postgres的变化，移除一个通道是保持你项目的Realtime服务以及数据库性能的一个好方法。Supabase会在客户端断开连接后的30秒内自动处理清理工作，但未使用的通道可能会因为同时订阅了更多的客户端而导致性能下降。
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 移除一个频道
-
-
-
-```js
-supabase.removeChannel(myChannel)
-```

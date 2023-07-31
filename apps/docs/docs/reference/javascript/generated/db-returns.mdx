@@ -1,0 +1,38 @@
+---
+id: db-returns
+title: "returns()"
+slug: /db-returns
+custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
+---
+
+
+覆盖返回`数据（data）`的类型。
+
+## 案例教程
+### 案例1  (覆盖成功响应的类型)
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data } = await supabase
+  .from('countries')
+  .select()
+  .returns<MyType>()
+  ```
+
+</TabPanel>
+
+
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+let x: typeof data // MyType | null
+  ```
+
+</TabPanel>
+
+
+</Tabs>

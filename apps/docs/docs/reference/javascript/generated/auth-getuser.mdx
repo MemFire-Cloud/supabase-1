@@ -5,14 +5,49 @@ slug: /auth-getuser
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-如果有一个现有的会话，获取当前用户的详细信息。
 
-```js
+getUser()用于获取用户信息，当存在有效会话时，该方法获取当前用户的详细信息。
+
+* 与从本地会话获取信息不同，该方法从数据库中获取用户对象的信息。
+* 这个方法非常有用，因为它能够验证用户的访问令牌（JWT）在服务器端是否有效，从而用于检查用户是否已被授权。
+* 建议仅在需要最新的用户数据时使用此方法。对于更快的结果，推荐使用 `getSession().session.user`。这是因为 `getSession().session.user` 直接从本地会话获取数据速度较快。而 `Retrieve a user` 方法需要从数据库中获取数据会稍慢一些。
+
+
+
+## 案例教程
+### 案例1 （通过当前现有的会话获取已登录的用户信息）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 const { data: { user } } = await supabase.auth.getUser()
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+### 案例2 （使用自定义访问令牌 jwt 获取已登录的用户信息）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data: { user } } = await supabase.auth.getUser(jwt)
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -23,10 +58,10 @@ const { data: { user } } = await supabase.auth.getUser()
       jwt
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -38,36 +73,3 @@ const { data: { user } } = await supabase.auth.getUser()
 </li>
 
 </ul>
-
-
-## 注释
-
-- 该方法从当前会话中获取用户对象。
-- 从数据库而不是本地会话中获取用户对象。
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 获取当前已有会话的登录用户
-
-
-
-```js
-const { data: { user } } = await supabase.auth.getUser()
-```
-
-### 获得带有自定义访问令牌的登录用户jwt。
-
-
-
-```js
-const { data: { user } } = await supabase.auth.getUser(jwt)
-```

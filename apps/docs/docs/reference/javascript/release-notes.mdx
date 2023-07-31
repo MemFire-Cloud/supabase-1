@@ -3,13 +3,15 @@ id: release-notes
 title: 版本说明
 ---
 
-Supabase.js v2发布说明。
+Supabase.js是Supabase数据库服务的官方JavaScript客户端库，用于与Supabase API进行交互。
+最新版本Supabase.js v2带来了一系列令人振奋的新特性、更新和改进，使开发者在构建现代Web应用程序时拥有更加强大和灵活的工具。
 
-## 2.0.0
+让我们深入了解这些新功能，并看看它们如何改进您的Supabase体验！接下来，我们将逐步探索Supabase.js v2的亮点和特性，帮助您更好地了解这个新版本。
 
-用`npm install @supabase/supabase-js`安装最新版本。
 
-### 明确的构造器选项
+首先需要用`npm install @supabase/supabase-js`安装最新版本。
+
+## 明确的构造器选项
 
 构造函数中的所有客户端特定选项都是键入库的。[PR](https://github.com/supabase/supabase-js/pull/458):
 
@@ -35,7 +37,7 @@ const supabase = createClient(apiURL, apiKey, {
 })
 ```
 
-### 支持typescript
+## 支持typescript
 
 这些库现在支持typescript。
 
@@ -56,7 +58,7 @@ supabase start
 supabase gen types typescript --local > DatabaseDefinitions.ts
 ```
 
-### 数据操作返回最小值
+## 数据操作返回最小值
 
 `.insert()` / `.upsert()` / `.update()` / `.delete()` 默认情况下不返回行:[PR](https://github.com/supabase/postgrest-js/pull/276).
 
@@ -70,13 +72,13 @@ const { data, error } = await supabase
     .select()
 ```
 
-### 新的排序默认值
+## 新的排序默认值
 
 `.order()`现在默认为Postgres的默认值：[PR](https://github.com/supabase/postgrest-js/pull/283)。
 
 以前`nullsFirst`默认为`false`，这意味着`null`是最后排序的。这对性能是不利的，例如，如果该列使用`NULLS FIRST`的索引（这是索引的默认方向）。
 
-### Cookies和localstorage命名空间
+## Cookies和localstorage命名空间
 
 Auth库中的存储密钥名称已经改变，包括项目参考，这意味着现有的网站如果将其JWT到期时间设置为较长的时间，可能会发现他们的用户在这次升级中被注销。
 
@@ -84,7 +86,7 @@ Auth库中的存储密钥名称已经改变，包括项目参考，这意味着�
 const defaultStorageKey = `sb-${new URL(this.authUrl).hostname.split('.')[0]}-auth-token`
 ```
 
-### 新的授权类型
+## 新的授权类型
 
 类型化已经被重新设计。`Session`接口现在保证它总是有`access_token`, `refresh_token`和`user`
 
@@ -100,7 +102,7 @@ interface Session {
 }
 ```
 
-### 新的认证方法
+## 新的认证方法
 
 我们将删除`signIn()`方法，改用更明确的函数签名。
 `signInWithPassword()`, `signInWithOtp()`, 和 `signInWithOtp()`.
@@ -118,7 +120,7 @@ const { data } = await supabase.auth.signIn({
 })
 ```
 
-### 新的实时方法
+## 新的实时方法
 
 在Realtime库中有一个新的`channel()`方法，它将被用于我们的多人游戏更新。
 
@@ -148,18 +150,18 @@ supabase
 
 我们将废弃以前用于监听postgres变化的`.from().on().subscribe()'方法。
 
-### 废弃的setAuth()
+## 废弃的setAuth()
 
 废弃并删除了`setAuth()`。要设置一个自定义的`access_token` jwt，请将自定义的头信息传入提供的`createClient()`方法：([PR](https://github.com/supabase/gotrue-js/pull/340))
 
-### 所有变化
+## 所有变化
 
 - `supabase-js`
   - `shouldThrowOnError`已被删除，直到所有客户端库都支持该选项（[PR](https://github.com/supabase/supabase-js/pull/490)）。
 - `postgrest-js`
   - TypeScript的类型已被重新设计 [PR](https://github.com/supabase/postgrest-js/pull/279)
-  - 对函数参数、类型等使用`undefined`而不是`null`(https://github.com/supabase/postgrest-js/pull/278)
-  - 一些功能现在已经过时了：(https://github.com/supabase/postgrest-js/pull/275)
+  - 对函数参数、类型等使用`undefined`而不是[`null`](https://github.com/supabase/postgrest-js/pull/278)
+  - 一些[功能](https://github.com/supabase/postgrest-js/pull/275)现在已经过时了：
     - 过滤器缩写（例如：`cs`与`contains`）。
     - 响应中的 "body"（相对于 "data"）。
     - 通过".insert() "方法进行 "上载"。

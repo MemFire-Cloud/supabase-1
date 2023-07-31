@@ -7,12 +7,19 @@ custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_
 
 应用使用MemFire Cloud的云函数功能时，需要结合@supabase/supabase-js与memfire-cloud-functions-js 这两个SDK进行云函数的调用。
 
+- 需要一个授权标头。
+- 调用参数通常符合[Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)规范。
+- 当你向函数传递一个body时，我们会自动附加 `Blob`、`ArrayBuffer`、`File`、`FormData`和 `String`的Content-Type标头。如果它不符合这些类型，会默认为`json`，将其序列化并附加`Content-Type'头为`application/json`。用户还可以自定义 `Content-Type`。
+- 响应会自动解析为`json`、`blob`或`form-data`，取决于你的函数发送的`Content-Type`头。默认情况下，响应被解析为`text`。
+
+
+
+
 ## 使用方法
 
 在根目录下执行命令，安装依赖
 
 ```js
-
 npm install memfire-cloud-functions-js
 npm install @supabase/supabase-js
 
@@ -21,7 +28,6 @@ npm install @supabase/supabase-js
 添加一个js/ts文件与数据库建立连接，添加以下代码，并且将应用的URL和anon_key填写进去。
 
 ```js
-
 import { createClient } from '@supabase/supabase-js'
 import { FunctionsClient } from 'memfire-cloud-functions-js '
 
@@ -41,8 +47,87 @@ export const functions =  new FunctionsClient(supabase)
     );
 ```
 
+## 案例教程
 
-## 参数
+### 案例1 （基本调用）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase.functions.invoke('hello', {
+  body: { foo: 'bar' }
+})
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+### 案例2 （错误处理）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+import { FunctionsHttpError, FunctionsRelayError, FunctionsFetchError } from "@supabase/supabase-js";
+
+const { data, error } = await supabase.functions.invoke('hello', {
+  headers: {
+    "my-custom-header": 'my-custom-header-value'
+  },
+  body: { foo: 'bar' }
+})
+
+if (error instanceof FunctionsHttpError) {
+  const errorMessage = await error.context.json()
+  console.log('Function returned an error', errorMessage)
+} else if (error instanceof FunctionsRelayError) {
+  console.log('Relay error:', error.message)
+} else if (error instanceof FunctionsFetchError) {
+  console.log('Fetch error:', error.message)
+}
+  ```
+
+</TabPanel>
+<TabPanel id="demo4" label="注意事项">
+
+如果您的函数出现错误，将返回一个 `FunctionsHttpError` 错误。
+如果 `Supabase Relay` 在处理您的函数时出现错误，则会返回 `FunctionsRelayError`。如果调用您的函数时出现网络错误，则会返回 `FunctionsFetchError`。
+
+</TabPanel>
+
+</Tabs>
+
+
+### 案例3 （传递自定义标头）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase.functions.invoke('hello', {
+  headers: {
+    "my-custom-header": 'my-custom-header-value'
+  },
+  body: { foo: 'bar' }
+})
+  ```
+
+</TabPanel>
+<TabPanel id="demo4" label="注意事项">
+
+你可以向你的函数传递自定义标头。注意：supabase-js 会自动传递带有已登录用户的 JWT 的授权标头(Authorization header)。
+
+</TabPanel>
+
+</Tabs>
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -50,13 +135,13 @@ export const functions =  new FunctionsClient(supabase)
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      functionName
+      函数名（functionName）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -71,18 +156,18 @@ export const functions =  new FunctionsClient(supabase)
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      invokeOptions
+      选项（option）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>FunctionInvokeOptions</code>
+      <code>FunctionInvokeOptions类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-未提供说明。
+调用函数的选项
 
   </div>
   
@@ -90,73 +175,3 @@ export const functions =  new FunctionsClient(supabase)
 
 </ul>
 
-
-## 注释
-
-- 需要一个授权标头。
-- 调用参数通常符合[Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)规范。
-- 当你向函数传递一个body时，我们会自动附加 `Blob`、`ArrayBuffer`、`File`、`FormData`和 `String`的Content-Type标头。如果它不符合这些类型，会默认为`json`，将其序列化并附加`Content-Type'头为`application/json`。用户还可以自定义 `Content-Type`。
-- 响应会自动解析为`json`、`blob`或`form-data`，取决于你的函数发送的`Content-Type`头。默认情况下，响应被解析为`text`。
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 基本调用
-
-
-```js
-  const { data, error } = await functions.invoke(
-      '访问地址',{method:'访问方法'}
-    );
-```
-
-### 错误处理
-
-如果你的函数抛出一个错误，将返回`FunctionsHttpError`；如果Supabase Relay在处理你的函数时出现错误，将返回`FunctionsRelayError`；如果调用你的函数时出现网络错误，将返回`FunctionsFetchError`。
-
-
-```js
-import { FunctionsHttpError, FunctionsRelayError, FunctionsFetchError } from "@supabase/supabase-js";
-import { FunctionsClient } from 'memfire-cloud-functions-js '
-
-const { data, error } = await functions.invoke('访问地址', {
-  headers: {
-    "my-custom-header": 'my-custom-header-value'
-  },
-  body: { foo: 'bar' },
-  
-})
-
-if (error instanceof FunctionsHttpError) {
-  console.log('Function returned an error', error.message)
-} else if (error instanceof FunctionsRelayError) {
-  console.log('Relay error:', error.message)
-} else if (error instanceof FunctionsFetchError) {
-  console.log('Fetch error:', error.message)
-}
-```
-
-### 传递自定义标头和传递queries参数。
-
-你可以向你的函数传递自定义标头信息。注意：supabase-js会自动将`授权`头与登录用户的JWT一起传递。
-
-如果想通过queries方式传递参数，建议在访问地址后面追加query参数。如下所示：
-
-
-```js
-const { data, error } = await functions.invoke('https://functions1.memfiredb.com/xxxxxxxxx/functionName?action=pay', {
-  headers: {
-    "my-custom-header": 'my-custom-header-value'
-  },
-  body: { foo: 'bar' },
-  method:'访问方法'
-},)
-```

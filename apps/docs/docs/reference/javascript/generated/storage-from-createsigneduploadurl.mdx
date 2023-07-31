@@ -1,0 +1,71 @@
+---
+id: storage-from-createsigneduploadurl 
+title: "from.createSignedUploadUrl()"
+slug: /storage-from-createsigneduploadurl
+custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
+---
+
+from.createSignedUploadUrl()用于创建一个带有签名的上传URL。
+
+带有签名的上传URL可用于在不需要额外认证的情况下将文件上传到存储桶中，这些URL的有效期为2小时。
+
+
+需要RLS策略权限:
+  - `buckets`表的权限: 无
+  - `objects`表的权限：`insert`
+
+请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
+
+
+## 案例教程
+
+### 案例1 （创建一个带有签名的上传URL）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                   
+const { data, error } = await supabase
+  .storage
+  .from('avatars')
+  .createSignedUploadUrl('folder/cat.jpg')
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+
+
+
+
+
+
+
+
+## 参数说明
+
+<ul className="method-list-group">
+  
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      路径（path）
+    </span>
+    <span className="method-list-item-label-badge required">
+      [必要参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>string类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+文件路径，包括当前文件名。例如 folder/image.png。
+
+  </div>
+  
+</li>
+</ul>

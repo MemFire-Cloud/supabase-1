@@ -5,17 +5,79 @@ slug: /rangegt
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-只与范围列有关。只匹配行中的每个元素`column`中的每个元素都大于`range`中的任何元素。
 
-```ts
+仅适用于范围（range）列
+
+仅匹配`列`中的每个元素都大于`范围(range)`中的任何元素的行。
+
+
+## 案例教程
+
+### 案例1 (使用select)
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+                                                                                
+create table
+  reservations (
+    id int8 primary key,
+    room_name text,
+    during tsrange
+  );
+
+insert into
+  reservations (id, room_name, during)
+values
+  (1, 'Emerald', '[2000-01-01 13:00, 2000-01-01 15:00)'),
+  (2, 'Topaz', '[2000-01-02 09:00, 2000-01-02 10:00)');
+
+  ```
+
+</TabPanel>
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                  
 const { data, error } = await supabase
   .from('reservations')
   .select()
   .rangeGt('during', '[2000-01-02 08:00, 2000-01-02 09:00)')
-```
+  ```
+
+</TabPanel>
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+                                                                                  
+  {
+    "data": [
+      {
+        "id": 2,
+        "room_name": "Topaz",
+        "during": "[\"2000-01-02 09:00:00\",\"2000-01-02 10:00:00\")"
+      }
+    ],
+    "status": 200,
+    "statusText": "OK"
+  }
+
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+Postgres 支持多种[范围类型](https://www.postgresql.org/docs/current/rangetypes.html)。您可以使用范围值的字符串表示来过滤范围列。
+
+</TabPanel>
 
 
-## 参数
+</Tabs>
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -23,13 +85,13 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      列
+      列（column）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>ColumnName</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -47,10 +109,10 @@ const { data, error } = await supabase
       range
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -62,70 +124,3 @@ const { data, error } = await supabase
 </li>
 
 </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 举例
-
-### 用 `select()`
-
-Postgres支持一系列的[范围类型](https://www.postgresql.org/docs/current/rangetypes.html)。你可以可以使用范围值的字符串表示对范围列进行过滤值。
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    reservations (
-      id int8 primary key,
-      room_name text,
-      during tsrange
-    );
-
-  insert into
-    reservations (id, room_name, during)
-  values
-    (1, 'Emerald', '[2000-01-01 13:00, 2000-01-01 15:00)'),
-    (2, 'Topaz', '[2000-01-02 09:00, 2000-01-02 10:00)');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('reservations')
-    .select()
-    .rangeGt('during', '[2000-01-02 08:00, 2000-01-02 09:00)')
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "id": 2,
-        "room_name": "Topaz",
-        "during": "[\"2000-01-02 09:00:00\",\"2000-01-02 10:00:00\")"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>

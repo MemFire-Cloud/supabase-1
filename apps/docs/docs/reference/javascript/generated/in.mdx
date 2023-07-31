@@ -5,31 +5,81 @@ slug: /in
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-只匹配`column`包含在`values`数组中的行。
+in_()用于查找所有在指定`列（column）`上数值存在于指定值`列表（arry）`中的记录
 
-```ts
+
+
+## 案例教程
+
+### 案例1 (使用select)
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'Afghanistan'),
+  (2, 'Albania'),
+  (3, 'Algeria');
+  ```
+
+</TabPanel>
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 const { data, error } = await supabase
   .from('countries')
   .select()
   .in('name', ['Albania', 'Algeria'])
-```
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo3" label="返回结果">
+
+  ```ts
+{
+  "data": [
+    {
+      "id": 2,
+      "name": "Albania"
+    },
+    {
+      "id": 3,
+      "name": "Algeria"
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+  ```
+
+</TabPanel>
+
+</Tabs>
+
+
 
 
 ## 参数
-
 
 <ul className="method-list-group">
   
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      列
+      列（column）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>ColumnName</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -44,86 +94,21 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      值
+      值（value）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>任意类型数组</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-用来过滤的值数组
+用来过滤的值
 
   </div>
   
 </li>
 
 </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 举例
-
-### 用 `select()`
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'Afghanistan'),
-    (2, 'Albania'),
-    (3, 'Algeria');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .select()
-    .in('name', ['Albania', 'Algeria'])
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "id": 2,
-        "name": "Albania"
-      },
-      {
-        "id": 3,
-        "name": "Algeria"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>

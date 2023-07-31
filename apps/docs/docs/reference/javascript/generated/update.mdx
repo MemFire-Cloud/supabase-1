@@ -1,24 +1,173 @@
 ---
 id: update
-title: "Modify data: update()"
+title: "Update 数据"
 slug: /update
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-对表或视图进行UPDATE操作。
+在表或视图执行 UPDATE 操作。
 
-默认情况下，更新的行不会被返回。要返回它，请在过滤器后用`.select()`连锁调用
-与`.select()`在过滤器之后的调用。
+* `update()` 应该始终与筛选器 (Filters) 结合使用，以便定位您希望更新的项目。
 
-```ts
+
+## 案例教程
+
+### 案例1 （更新数据）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'Taiwan');
+
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 const { error } = await supabase
   .from('countries')
   .update({ name: 'Australia' })
   .eq('id', 1)
-```
+  ```
+
+</TabPanel>
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+{
+  "status": 204,
+  "statusText": "No Content"
+}
+  ```
+</TabPanel>
+</Tabs>
 
 
-## 参数
+
+### 案例2 （更新一个记录并返回）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'Singapore');
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase
+  .from('countries')
+  .update({ name: 'Australia' })
+  .eq('id', 1)
+  .select()
+  ```
+
+</TabPanel>
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Australia"
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+  ```
+</TabPanel>
+</Tabs>
+
+
+### 案例3 （更新JSON数据）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+create table
+  users (
+    id int8 primary key,
+    name text,
+    address jsonb
+  );
+
+insert into
+  users (id, name, address)
+values
+  (1, 'Michael', '{ "postcode": 90210 }');
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase
+  .from('users')
+  .update({
+    address: {
+      street: 'Melrose Place',
+      postcode: 90210
+    }
+  })
+  .eq('address->postcode', 90210)
+  .select()
+  ```
+
+</TabPanel>
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Michael",
+      "address": {
+        "street": "Melrose Place",
+        "postcode": 90210
+      }
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+Postgres 提供了一些用于处理 JSON 数据的操作符。目前，只有更新整个 JSON 文档的功能。
+  
+</TabPanel>
+</Tabs>
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -26,13 +175,13 @@ const { error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      values
+      值（value）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>行</code>
+      <code>行类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -47,13 +196,13 @@ const { error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      options
+      选项（option）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -71,7 +220,7 @@ const { error } = await supabase
       count
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
       <code>exact</code> | <code>planned</code> | <code>estimated</code>
@@ -81,14 +230,12 @@ const { error } = await supabase
 
 用来计算更新行的计数算法。
 
-`"exact"`: 准确但缓慢的计数算法。执行 "COUNT(*)"。
-引擎盖。
+exact:可以精确计算行数，但执行速度较慢。执行 "COUNT(*)"操作。
 
-`"planned"`: 近似但快速的计数算法。使用了Postgres
-的统计数据。
+planned:可以快速计算行数，但是结果可能略有偏差。使用了Postgres的统计数据。
 
-`"estimated"`: 低数字使用精确计数，高数字使用计划计数。
-数。
+estimated:对于较小的数值使用精确计数，对于较大的数值使用计划计数。根据行数的大小决定使用精确计数或计划计数的算法。
+
 
   </div>
   
@@ -100,191 +247,3 @@ const { error } = await supabase
 
 </ul>
 
-
-## 注意
-
-- `update()`应该总是与[Filters](/docs/reference/javascript/using-filters)结合起来，以确定你希望更新的项目。
-
-
-
-
-
-
-
-
-
-
-## 实例
-
-### 更新你的数据
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'Singapore');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { error } = await supabase
-    .from('countries')
-    .update({ name: 'Australia' })
-    .eq('id', 1)
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "status": 204,
-    "statusText": "No Content"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="js">
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .select()
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "id": 1,
-        "name": "Australia"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-### 更新一条记录并返回
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'Singapore');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .update({ name: 'Australia' })
-    .eq('id', 1)
-    .select()
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "id": 1,
-        "name": "Australia"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-### 更新JSON数据
-
-Postgres提供了一些[操作符](/docs/guides/database/json#query-thejsonb-data)来处理JSON数据。
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    users (
-      id int8 primary key,
-      name text,
-      address jsonb
-    );
-
-  insert into
-    users (id, name, address)
-  values
-    (1, 'Michael', '{ "postcode": 90210 }');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('users')
-    .update({
-      address: {
-        street: 'Melrose Place',
-        postcode: 90210
-      }
-    })
-    .eq('address->postcode', 90210)
-    .select()
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "id": 1,
-        "name": "Michael",
-        "address": {
-          "street": "Melrose Place",
-          "postcode": 90210
-        }
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-目前，只可能更新整个JSON文档。

@@ -1,53 +1,99 @@
 ---
 id: using-filters
-title: "Using Filters"
+title: "使用过滤器"
 slug: /using-filters
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_dart_v1.yml
 ---
 
 过滤器允许你只返回符合某些条件的记录。
 
-过滤器可以用于`选择()`、`更新()`和`删除()`查询。
+过滤器可以用于`select()`、`update()`和`delete()`查询。
 
 如果一个数据库函数返回一个表的响应，你也可以应用过滤器。
 
-### 应用过滤器
 
-过滤器必须在任何`select()`, `update()`, `upsert()`,
-`删除()`和`rpc()`之后，并在
-[修改器](/docs/reference/dart/using-modifiers)。
 
+## 案例教程
+### 案例1 (使用过滤器)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
+                                                                              
 final data = await supabase
   .from('cities')
   .select('name, country_id')
-  .eq('name', 'The Shire');    // Correct
+  .eq('name', 'The Shire');  // Correct
 
 final data = await supabase
   .from('cities')
-  .eq('name', 'The Shire')    // Incorrect
+  .eq('name', 'The Shire')  // Incorrect
   .select('name, country_id');
 ```
+</TabPanel>
 
-### 链式
+<TabPanel id="demo4" label="注意事项">
 
-过滤器可以串联起来，产生高级查询。例如。
-来查询人口在1,000和10,000之间的城市。
+过滤器必须在`select()`, `update()`、`upsert()`、`delete()`和`rpc()`之后，并在[修改器](/docs/reference/dart/using-modifiers)之前应用。
+
+</TabPanel>
+
+</Tabs>
+
+
+
+
+### 案例2 (链式过滤)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
+                                                                              
 final data = await supabase
   .from('cities')
   .select('name, country_id')
   .gte('population', 1000)
-  .lt('population', 10000);
+  .lt('population', 10000)
 ```
+</TabPanel>
 
-### 条件链
+<TabPanel id="demo4" label="注意事项">
 
-过滤器可以一步步建立起来，然后执行。比如说。
+过滤器必须在`select()`, `update()`、`upsert()`、`delete()`和`rpc()`之后，并在[修改器](/docs/reference/dart/using-modifiers)之前应用。
+
+</TabPanel>
+
+</Tabs>
+
+
+
+### 案例3 (条件链式)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
+                                                                              
 final filterByName = null;
 final filterPopLow = 1000;
 final filterPopHigh = 10000;
@@ -62,123 +108,136 @@ if (filterPopHigh != null) { query = query.lt('population', filterPopHigh); }
 
 final data = await query;
 ```
+</TabPanel>
 
-### 按JSON列中的值过滤
+<TabPanel id="demo4" label="注意事项">
 
-<Tabs>
-<TabItem value="schema" label="Schema">
+过滤器可以一步步建立起来，然后执行。这个例子就可以很好地说明。
 
-  ```sql
-  create table
-    users (
-      id int8 primary key,
-      name text,
-      address jsonb
-    );
+</TabPanel>
 
-  insert into
-    users (id, name, address)
-  values
-    (1, 'Michael', '{ "postcode": 90210 }'),
-    (2, 'Jane', null);
-  ```
-
-</TabItem>
-<TabItem default value="dart" label="Flutter">
-
-  ```dart
-  final data = await supabase
-    .from('users')
-    .select()
-    .eq('address->postcode', 90210);
-  ```
-
-</TabItem>
-<TabItem value="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "id": 1,
-        "name": "Michael",
-        "address": {
-          "postcode": 90210
-        }
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabItem>
 </Tabs>
 
-### 过滤外来表
 
-你可以在你的 `select()`查询中使用点来过滤外域表。
-符号。
+### 案例4 (按JSON列中的值过滤)
 
-<Tabs>
-<TabItem value="schema" label="Schema">
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+<TabPanel id="demo1" label="建表">
 
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-  create table
-    cities (
-      id int8 primary key,
-      country_id int8 not null references countries,
-      name text
-    );
+```sql
+                                                                              
+create table
+  users (
+    id int8 primary key,
+    name text,
+    address jsonb
+  );
 
-  insert into
-    countries (id, name)
-  values
-    (1, 'Germany'),
-    (2, 'Indonesia');
-  insert into
-    cities (id, country_id, name)
-  values
-    (1, 2, 'Bali'),
-    (2, 1, 'Munich');
-  ```
+insert into
+  users (id, name, address)
+values
+  (1, 'Michael', '{ "postcode": 90210 }'),
+  (2, 'Jane', null);
 
-</TabItem>
-<TabItem default value="dart" label="Flutter">
+```
+</TabPanel>
 
-  ```dart
-  final data = await supabase
-    .from('countries')
-    .select('''
-      name,
-      cities!inner (
-        name
-      )
-    ''')
-    .eq('cities.name', 'Bali');
-  ```
 
-</TabItem>
-<TabItem value="result" label="Result">
+<TabPanel id="demo2" label="使用方法">
 
-  ```json
-  {
-    "data": [
-      {
-        "name": "Indonesia",
-        "cities": [
-          {
-            "name": "Bali"
-          }
-        ]
+```dart
+                                                                              
+final data = await supabase
+  .from('users')
+  .select()
+  .eq('address->postcode', 90210);
+```
+</TabPanel>
+
+
+<TabPanel id="demo3" label="返回结果">
+
+```json
+                                                                              
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Michael",
+      "address": {
+        "postcode": 90210
       }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
 
-</TabItem>
+```
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+过滤器可以一步步建立起来，然后执行。这个例子就可以很好地说明。
+
+</TabPanel>
+
+</Tabs>
+
+### 案例5 (过滤外键表)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+<TabPanel id="demo1" label="建表">
+
+```sql
+                                                                              
+create table
+  countries (id int8 primary key, name text);
+create table
+  cities (
+    id int8 primary key,
+    country_id int8 not null references countries,
+    name text
+  );
+
+insert into
+  countries (id, name)
+values
+  (1, 'Germany'),
+  (2, 'Indonesia');
+insert into
+  cities (id, country_id, name)
+values
+  (1, 2, 'Bali'),
+  (2, 1, 'Munich');
+```
+</TabPanel>
+
+
+<TabPanel id="demo2" label="使用方法">
+
+```dart
+                                                                              
+final data = await supabase
+  .from('countries')
+  .select('''
+    name,
+    cities!inner (
+      name
+    )
+  ''')
+  .eq('cities.name', 'Bali');
+```
+</TabPanel>
+
 </Tabs>

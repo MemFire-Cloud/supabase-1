@@ -5,18 +5,96 @@ slug: /storage-from-getpublicurl
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-检索公共水桶中的资产的URL。
-这个函数并不验证桶是否是公共的。如果为一个不公开的bucket创建一个公开的URL，你将无法下载资源。
+from.getPublicUrl()是用于获取公开存储桶中资源URL的函数。如果你不想使用这个函数，也可以通过将存储桶URL与资源路径拼接在一起来构建公开（public）URL。
 
-```js
+
+这个函数不会验证存储桶是否为公开（public）。如果为非公开的存储桶创建了公开（public）URL，你将无法下载资源。
+
+需要将存储桶设置为公开（public）状态，可以通过 [updateBucket()](/docs/reference/javascript/storage-updatebucket) 方法或者在 [MemFireCloud应用控制台](https://cloud.memfiredb.com/project)的`存储`页面中，选择你需要操作的存储桶，点击该存储桶的扩展按钮。选择`编辑存储桶`，然后选择`公开存储桶`按钮即可完成。
+
+
+需要RLS策略权限:
+  - `buckets`表的权限: 无
+  - `objects`表的权限：无
+
+请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
+
+
+## 案例教程
+
+### 案例1 （返回公开存储桶中资源的URL）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                   
 const { data } = supabase
   .storage
   .from('public-bucket')
   .getPublicUrl('folder/avatar1.png')
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+
+### 案例2 （返回公开存储桶中带有转换的资源的URL）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                   
+const { data } = supabase
+  .storage
+  .from('public-bucket')
+  .getPublicUrl('folder/avatar1.png', {
+    transform: {
+      width: 100,
+      height: 100,
+    }
+  })
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+### 案例3 （返回触发公开存储桶中资源下载的URL）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                   
+const { data } = supabase
+  .storage
+  .from('public-bucket')
+  .getPublicUrl('folder/avatar1.png', {
+    download: true,
+  })
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+
+
+
+
+
+
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -24,44 +102,42 @@ const { data } = supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      path
+      路径（path）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-要生成公共URL的文件的路径和名称。例如`folder/image.png`。
+文件路径，包括当前文件名。例如 folder/image.png。
 
   </div>
   
 </li>
 
 
+
+
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      options
+      选项（option）
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
   
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
+
 
 <li className="method-list-item">
   <h4 className="method-list-item-label">
@@ -69,7 +145,7 @@ const { data } = supabase
       download
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
       <code>string</code> | <code>boolean</code>
@@ -81,24 +157,46 @@ const { data } = supabase
 
   </div>
   
+</li>
+
+
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      transform
+    </span>
+    <span className="method-list-item-label-badge required">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>TransformOptions类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+将资源提供给客户端之前对其进行转换。
+
+  </div>
+  
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
 
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      string
+      format
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>"origin"</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-未提供说明。
+指定所请求图像的格式。当使用 'origin' 时，我们强制格式与原始图像相同。当未传入此选项时，图像将被优化为现代图像格式，如 Webp。
 
   </div>
   
@@ -108,23 +206,86 @@ const { data } = supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      boolean
+      height
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>数字类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-未提供说明。
+图像的高度（以像素为单位）。
 
   </div>
   
 </li>
 
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      quality
+    </span>
+    <span className="method-list-item-label-badge required">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>数字类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+设置返回图像的质量。取值范围为 20 到 100，其中 100 表示最高质量。默认为 80。
+
+  </div>
+  
+</li>
+
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      resize
+    </span>
+    <span className="method-list-item-label-badge required">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>"cover" | "contain" | "fill"</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+调整大小模式可以是 cover、contain 或 fill。默认为 cover。Cover 模式会根据原始图像的宽高比来调整图像的大小，并填充整个宽度和高度。
+Contain 模式会根据原始图像的宽高比来调整图像的大小，并使整个图像适应指定的宽度和高度。Fill 模式会调整图像的大小以填充整个宽度和高度。如果对象的宽高比与指定的宽度和高度不匹配，图像将被拉伸以适应。
+
+  </div>
+  
+</li>
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      width
+    </span>
+    <span className="method-list-item-label-badge required">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>数字类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+图像的宽度（以像素为单位）。
+
+  </div>
+  
+</li>
+
+
 </ul>
 
 </li>
@@ -134,34 +295,3 @@ const { data } = supabase
 </li>
 
 </ul>
-
-
-## 注意事项
-
-- 水箱需要被设置为公开，可以通过[updateBucket()](/docs/reference/javascript/storag-updatebucket)或者通过进入[app.supabase.com](https://app.supabase.com)的存储，点击水箱上的溢出菜单并选择 "Make public"
-- 需要RLS策略权限。
-  - `buckets`表权限：无
-  - `objects`表的权限：无
-- 请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方法
-
-
-
-
-
-
-
-
-
-
-## 实例
-
-### 返回公共桶中的资源的URL
-
-
-
-```js
-const { data } = supabase
-  .storage
-  .from('public-bucket')
-  .getPublicUrl('folder/avatar1.png')
-```

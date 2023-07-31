@@ -5,7 +5,42 @@ slug: /match
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-只匹配那些在`query`键中的每一列都等于其相关值的行。相关的值是多个`.eq()`的简写。
+
+仅匹配每个`查询(query)`键中的列与其关联值相等的行。相当于多个 `.eq()` 的简写。
+
+
+
+
+
+## 案例教程 
+
+### 案例1 
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="建表">
+
+```sql
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'Afghanistan'),
+  (2, 'Albania'),
+  (3, 'Algeria');
+
+```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```ts
 const { data, error } = await supabase
@@ -13,91 +48,49 @@ const { data, error } = await supabase
   .select('name')
   .match({ id: 2, name: 'Albania' })
 ```
+</TabPanel>
+
+<TabPanel id="demo3" label="返回结果">
+
+```json
+{
+  "data": [
+    {
+      "name": "Albania"
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+
+```
+</TabPanel>
+</Tabs>
 
 
-## 参数
 
+## 参数说明
 
 <ul className="method-list-group">
   
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      query
+      查询（query）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>Record</code>
+      <code>Record类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-要过滤的对象，列名作为键被映射到到它们的过滤值
+用于筛选的对象，其中列名作为键映射到它们的筛选值。
 
   </div>
   
 </li>
 
 </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 参数
-
-### 用 `select()`
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'Afghanistan'),
-    (2, 'Albania'),
-    (3, 'Algeria');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .select('name')
-    .match({ id: 2, name: 'Albania' })
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "name": "Albania"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>

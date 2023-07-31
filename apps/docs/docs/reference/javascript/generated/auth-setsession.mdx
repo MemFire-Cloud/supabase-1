@@ -5,16 +5,61 @@ slug: /auth-setsession
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-设置当前会话的会话数据。如果当前会话已经过期，setSession将负责刷新它以获得一个新的会话。
-如果当前会话中的刷新令牌无效，并且当前会话已经过期，将产生一个错误。
-如果当前会话不包含expires_at字段，setSession将使用访问令牌中定义的exp claim。
-
-```js
-  const { data, error } = supabase.auth.setSession({refresh_token, access_token})
-```
 
 
-## 参数
+`setSession()`函数的主要目的，是用于设置当前会话的会话数据。
+当用户登录或进行其他需要会话数据的操作时，可以使用`setSession()`函数来更新或设置相关的会话信息。
+
+* 如果当前会话已过期，`setSession()`将负责刷新它以获取新的会话
+* 如果当前会话中的刷新令牌或访问令牌无效，将会抛出错误
+
+`setSession()`函数需要一个刷新令牌作为参数，然后利用这个刷新令牌来获取一个新的会话。刷新令牌是用于更新会话数据的重要凭证。
+
+刷新令牌是单次使用的，一旦被用来获取新的会话后，就会失效。
+
+为了保护系统免受重放攻击，所有项目默认启用[刷新令牌轮换功能](/docs/reference/auth/config#refresh_token_rotation_enabled)。重放攻击是指攻击者通过重复使用先前获取的令牌来模拟合法用户的行为，从而进行未经授权的操作。
+
+为了灵活性，MemFire Cloud允许你配置`REFRESH_TOKEN_REUSE_INTERVAL`，这是一个时间窗口，在这个窗口内，相同的刷新令牌可以在并发或离线问题的情况下多次使用。
+
+
+
+
+## 案例教程
+
+### 案例1 （刷新对话）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+  const { data, error } = supabase.auth.setSession({
+    access_token,
+    refresh_token
+  })
+  ```
+
+</TabPanel>
+
+
+<TabPanel id="demo4" label="注意事项">
+
+使用 refresh_token 设置会话数据，并返回当前会话状态；若 refresh_token 无效，则返回错误信息。
+
+</TabPanel>
+
+</Tabs>
+
+
+
+
+
+
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -22,13 +67,13 @@ custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      currentSession
+      当前会话（currentSession）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -43,20 +88,15 @@ custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      refresh_token
+      刷新令牌（refresh_token）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
   
 </li>
 
@@ -64,20 +104,15 @@ custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      access_token
+      访问令牌（access_token）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
   
 </li>
 
@@ -86,31 +121,3 @@ custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_
 </li>
 
 </ul>
-
-
-##注意
-
-- `setSession()`需要一个刷新令牌和访问令牌来获得一个新的会话。
-- 刷新令牌只能使用一次，以获得一个新的会话。
-- [刷新令牌](/docs/reference/auth/config#refresh_token_rotation_enabled)在所有项目中默认启用，以防止重放攻击。
-- 你可以配置[`REFRESH_TOKEN_REUSE_INTERVAL`](https://supabase.com/docs/reference/auth/config#refresh_token_reuse_interval)，它提供了一个短暂的窗口，在发生并发或离线问题时，同一个刷新令牌可以被多次使用。
-- 如果你使用React Native，你需要通过[rn-nodeify](https://github.com/tradle/rn-nodeify)等库安装一个Buffer polyfill，以正确使用该库。
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 设置会话
-
-从`refresh_token`和`access_token`中设置会话数据，并返回当前会话，如果令牌无效则返回错误。
-
-```js
-  const { data, error } = supabase.auth.setSession({refresh_token, access_token})
-```

@@ -5,9 +5,28 @@ slug: /storage-from-list
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-列出桶内的所有文件。
+from.list()用于列出存储桶内的所有文件。
 
-```js
+
+需要RLS策略权限:
+  - `buckets`表的权限: 无
+  - `objects`表的权限：`select`权限
+
+请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
+
+
+
+
+## 案例教程
+
+### 案例1 （在存储桶中列出文件）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                   
 const { data, error } = await supabase
   .storage
   .from('avatars')
@@ -16,10 +35,43 @@ const { data, error } = await supabase
     offset: 0,
     sortBy: { column: 'name', order: 'asc' },
   })
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+### 案例2 （在存储桶中搜索文件）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                   
+const { data, error } = await supabase
+  .storage
+  .from('avatars')
+  .list('folder', {
+    limit: 100,
+    offset: 0,
+    sortBy: { column: 'name', order: 'asc' },
+    search: 'jon'
+  })
+                                                                              
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+
+
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -27,13 +79,13 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      path
+      路径（path）
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -48,20 +100,16 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      SearchOptions
+      选项（option）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>SearchOptions类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
 
-未提供说明。
-
-  </div>
   
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
@@ -72,10 +120,10 @@ const { data, error } = await supabase
       limit
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>number</code>
+      <code>数字类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -93,10 +141,10 @@ const { data, error } = await supabase
       offset
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>number</code>
+      <code>数字类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -114,15 +162,15 @@ const { data, error } = await supabase
       search
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-用来过滤文件的搜索字符串。
+按照搜索字符串筛选文件的条件。
 
   </div>
   
@@ -135,10 +183,10 @@ const { data, error } = await supabase
       sortBy
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>SortBy</code>
+      <code>SortBy类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -146,6 +194,51 @@ const { data, error } = await supabase
 要排序的列。可以是FileObject中的任何列。
 
   </div>
+
+
+
+
+<ul className="method-list-group">
+  <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      列（column）
+    </span>
+    <span className="method-list-item-label-badge false">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>string类型</code>
+    </span>
+  </h4>
+
+  
+</li>
+
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      order
+    </span>
+    <span className="method-list-item-label-badge false">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>string类型</code>
+    </span>
+  </h4>
+
+  
+</li>
+
+
+</ul>
+
+
+
   
 </li>
 
@@ -157,20 +250,15 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      FetchParameters
+      parameters
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>FetchParameters类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
   
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
@@ -181,10 +269,10 @@ const { data, error } = await supabase
       signal
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>AbortSignal</code>
+      <code>AbortSignal类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -202,51 +290,8 @@ const { data, error } = await supabase
 </ul>
 
 
-## 注意事项
-
-- 需要RLS策略权限:
-  - `buckets`表的权限: 无
-  - `objects`表的权限: `select`.
-- 请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
 
 
 
 
 
-
-
-
-
-
-## 示例
-
-### 在一个桶中列出文件
-
-
-
-```js
-const { data, error } = await supabase
-  .storage
-  .from('avatars')
-  .list('folder', {
-    limit: 100,
-    offset: 0,
-    sortBy: { column: 'name', order: 'asc' },
-  })
-```
-
-### 在一个桶中搜索文件
-
-
-
-```js
-const { data, error } = await supabase
-  .storage
-  .from('avatars')
-  .list('folder', {
-    limit: 100,
-    offset: 0,
-    sortBy: { column: 'name', order: 'asc' },
-    search: 'jon'
-  })
-```

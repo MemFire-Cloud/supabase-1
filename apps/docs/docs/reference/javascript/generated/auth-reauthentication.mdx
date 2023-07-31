@@ -1,0 +1,42 @@
+---
+id: auth-reauthentication
+title: "reauthenticate()"
+slug: /auth-reauthentication
+custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
+---
+
+
+reauthenticate()用于实现密码重新认证。方法是向用户的电子邮件或电话号码发送重新认证一次性密码（OTP），
+要求是用户已登录。
+
+* 方法通常与`updateUser()`方法一起使用，用于更新用户密码。
+* 此方法将向用户的电子邮件发送一个随机码。如果用户没有已确认的电子邮件地址，则该方法将发送随机码至用户已确认的电话号码。
+
+
+
+
+
+## 案例教程
+### 案例1 （发送重新认证随机码）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase.auth.reauthenticate()
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+向用户的电子邮件或电话号码发送重新认证随机码。
+
+</TabPanel>
+
+</Tabs>
+
+
+
+

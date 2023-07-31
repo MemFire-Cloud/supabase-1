@@ -1,0 +1,139 @@
+---
+id: auth-resend
+title: "resend()"
+slug: /auth-resend
+custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
+---
+
+resend()用于重新发送验证码
+重新发送已存在的注册确认邮件、更改邮箱邮件、短信验证码或更改手机号验证码。
+
+* 将注册确认邮件、更改邮箱或更改手机号的邮件重新发送给用户。
+* 无密码登录可以通过再次调用 `signInWithOtp()` 方法进行重新发送。
+* 密码找回邮件可以通过再次调用 `resetPassswordForEmail()` 方法进行重新发送。
+* 仅当最初进行过注册、更改邮箱或更改手机号的请求时，此方法才会向用户重新发送邮件或短信验证码。
+
+
+
+
+
+## 案例教程
+
+### 案例1 （重新发送电子邮件注册确认）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase.auth.resend({
+  type: 'signup',
+  email: 'email@example.com'
+})
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+向用户重新发送电子邮件注册确认。
+
+</TabPanel>
+
+</Tabs>
+
+
+### 案例2 （重新发送电话注册确认）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase.auth.resend({
+  type: 'sms',
+  phone: '1234567890'
+})
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+向用户重新发送手机注册确认电子邮件。
+
+</TabPanel>
+
+</Tabs>
+
+
+### 案例3（重新发送电子邮件更改确认邮件）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase.auth.resend({
+  type: 'email_change',
+  email: 'email@example.com'
+})
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+向用户重新发送电子邮件变更确认邮件
+
+</TabPanel>
+
+</Tabs>
+
+
+### 案例4（重新发送电话更改验证码）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase.auth.resend({
+  type: 'phone_change',
+  phone: '1234567890'
+})
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+向用户重新发送手机变更OTP（一次性密码）
+
+</TabPanel>
+
+</Tabs>
+
+
+
+## 参数说明
+
+
+<ul className="method-list-group">
+  
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      credentials
+    </span>
+    <span className="method-list-item-label-badge required">
+      [必要参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>ResendParams类型</code> 
+    </span>
+  </h4>
+
+</li>
+
+</ul>

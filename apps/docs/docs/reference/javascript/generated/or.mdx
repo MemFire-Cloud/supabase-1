@@ -5,11 +5,45 @@ slug: /or
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-只匹配满足至少一个过滤器的记录。
+仅匹配满足至少一个过滤条件的行。
 
-与大多数过滤器不同，`filters`是按原样使用的，需要遵循[PostgREST语法](https://postgrest.org/en/stable/api.html#operators)。你还需要你还需要确保它被正确地消毒。
+or() 期望您使用原始的 [PostgREST语法](https://postgrest.org/en/stable/api.html#operators) 来指定过滤器的名称和值。
 
-目前不可能在多个表中做一个`.or()`过滤器。
+
+
+```ts
+.or('id.in.(5,6,7), arraycol.cs.{"a","b"}')  // Use `()` for `in` filter, `{}` for array values and `cs` for `contains()`.
+.or('id.in.(5,6,7), arraycol.cd.{"a","b"}')  // Use `cd` for `containedBy()`
+```
+
+## 案例教程 
+
+### 案例1  （和select一起使用）
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="建表">
+
+```sql
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'Afghanistan'),
+  (2, 'Albania'),
+  (3, 'Algeria');
+```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```ts
 const { data, error } = await supabase
@@ -18,8 +52,141 @@ const { data, error } = await supabase
   .or('id.eq.2,name.eq.Algeria')
 ```
 
+</TabPanel>
 
-## 参数
+<TabPanel id="demo3" label="返回结果">
+
+```json
+{
+  "data": [
+    {
+      "name": "Albania"
+    },
+    {
+      "name": "Algeria"
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+```
+</TabPanel>
+</Tabs>
+
+
+### 案例2  （与and一起使用or）
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="建表">
+
+```sql
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'Afghanistan'),
+  (2, 'Albania'),
+  (3, 'Algeria');
+```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
+
+```ts
+const { data, error } = await supabase
+  .from('countries')
+  .select('name')
+  .or('id.gt.3,and(id.eq.1,name.eq.Afghanistan)')
+```
+
+</TabPanel>
+</Tabs>
+
+
+### 案例3  （在外部表上使用or）
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="建表">
+
+```sql
+create table
+  countries (id int8 primary key, name text);
+create table
+  cities (
+    id int8 primary key,
+    country_id int8 not null references countries,
+    name text
+  );
+
+insert into
+  countries (id, name)
+values
+  (1, 'Germany'),
+  (2, 'Indonesia');
+insert into
+  cities (id, country_id, name)
+values
+  (1, 2, 'Bali'),
+  (2, 1, 'Munich');
+
+```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
+
+```ts
+const { data, error } = await supabase
+  .from('countries')
+  .select(`
+    name,
+    cities!inner (
+      name
+    )
+  `)
+  .or('country_id.eq.1,name.eq.Beijing', { foreignTable: 'cities' })
+```
+
+</TabPanel>
+
+<TabPanel id="demo3" label="返回结果">
+
+```json
+{
+  "data": [
+    {
+      "name": "Germany",
+      "cities": [
+        {
+          "name": "Munich"
+        }
+      ]
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+```
+</TabPanel>
+</Tabs>
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -27,13 +194,13 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      filters
+      过滤器（filters）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -48,13 +215,13 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      foreignTable
+      外部表（foreignTable）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -69,20 +236,16 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      foreignTable
+      外部表（foreignTable）
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
 
-未提供说明。
-
-  </div>
   
 </li>
 
@@ -92,182 +255,3 @@ const { data, error } = await supabase
 
 </ul>
 
-
-## 注意
-
-or()希望你使用原始的PostgREST语法来表达过滤器的名称和值。
-
-```ts
-.or('id.in.(5,6,7), arraycol.cs.{"a","b"}')  // Use `()` for `in` filter, `{}` for array values and `cs` for `contains()`.
-.or('id.in.(5,6,7), arraycol.cd.{"a","b"}')  // Use `cd` for `containedBy()`
-```
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 使用 `select()`
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'Afghanistan'),
-    (2, 'Albania'),
-    (3, 'Algeria');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .select('name')
-    .or('id.eq.2,name.eq.Algeria')
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "name": "Albania"
-      },
-      {
-        "name": "Algeria"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-## 使用`or`与`and`
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'Afghanistan'),
-    (2, 'Albania'),
-    (3, 'Algeria');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .select('name')
-    .or('id.gt.3,and(id.eq.1,name.eq.Afghanistan)')
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-
-  ```json
-  {
-    "data": [
-      {
-        "name": "Afghanistan"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-### 在外域表中使用`or`
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-  create table
-    cities (
-      id int8 primary key,
-      country_id int8 not null references countries,
-      name text
-    );
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'Germany'),
-    (2, 'Indonesia');
-  insert into
-    cities (id, country_id, name)
-  values
-    (1, 2, 'Bali'),
-    (2, 1, 'Munich');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .select(`
-      name,
-      cities!inner (
-        name
-      )
-    `)
-    .or('country_id.eq.1,name.eq.Beijing', { foreignTable: 'cities' })
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "name": "Germany",
-        "cities": [
-          {
-            "name": "Munich"
-          }
-        ]
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>

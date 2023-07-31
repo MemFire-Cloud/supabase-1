@@ -1,57 +1,56 @@
 ---
 id: select
-title: "获取数据:select()"
+title: "Select 查询"
 slug: /select
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_dart_v1.yml
 ---
 
-用SELECT执行垂直过滤。
+select()用于对表格或视图执行SELECT查询。
 
+* 默认情况下，Supabase项目将返回最多1,000行。这个设置可以在项目API设置中更改。建议将其保持较低，以限制意外或恶意请求的有效负载大小。您可以使用range()查询来分页处理数据。
+* `select()`可以与过滤器[Filter](/docs/reference/dart/using-filters)组合使用
+* `select()`可以与修改器[Modifier](/docs/reference/dart/using-modifiers)组合使用
+* 如果您正在使用Supabase平台，`apikey`是一个保留关键字，[应避免将其作为列名](https://github.com/supabase/supabase/issues/5465)。
+
+
+
+
+## 案例教程
+### 案例1 (获取您的数据)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
+                                                                              
 final data = await supabase
   .from('cities')
   .select('name');
 ```
+</TabPanel>
+
+</Tabs>
 
 
+### 案例2 (选择特定的列)
 
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
 
-
-
-## Notes
-
-- 默认情况下，Supabase 项目将最多返回 1,000 行。这个设置可以在项目 API 设置中改变。建议你保持较低的设置，以限制意外或恶意请求的有效载荷大小。你可以使用`range()`查询来分页浏览你的数据。
-- `select()`可以与[Modifiers](/docs/reference/dart/using-modifiers)相结合。
-- `select()`可以与[过滤器](/docs/reference/dart/using-filters)结合使用。
-- 如果使用Supabase托管平台，`apikey`在技术上是一个保留关键词，因为API网关会把它拔出来进行认证。[应避免将其作为列名](https://github.com/supabase/supabase/issues/5465)。
-
-
-
-
-
-
-
-
-
-
-## Examples
-
-### 获取数据
-
-
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
-final data = await supabase
-  .from('cities')
-  .select('name');
-```
-
-### 选择特定列
-
-你可以从你的表中选择特定的字段。
-
-```dart
+                                                                              
 final data = await supabase
   .from('countries')
   .select('''
@@ -61,58 +60,124 @@ final data = await supabase
     )
   ''');
 ```
+</TabPanel>
 
-### 查询外域表
+<TabPanel id="demo4" label="注意事项">
 
-如果你的数据库有关系，你也可以查询相关的表。
+你可以从你的表中选择特定的字段。
+
+</TabPanel>
+
+</Tabs>
+
+
+### 案例3 (查询外键表)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
+                                                                              
 final data = await supabase
-  .from('products')
+  .from('countries')
   .select('''
-    id,
-    supplier:supplier_id ( name ),
-    purchaser:purchaser_id ( name )
+    name,
+    cities (
+      name
+    )
   ''');
 ```
+</TabPanel>
 
-### 多次查询同一个外域表
+<TabPanel id="demo4" label="注意事项">
 
-有时你需要查询同一个外域表两次。
-在这种情况下，你可以使用连接列的名称来识别 
-你打算使用哪个连接。为了方便起见，你也可以给每个列一个 
-的别名。例如，如果我们有一个产品的商店。
-我们想同时获得供应商和购买者的信息 
-(都在用户)表中。
+如果您的数据库有关联关系，您也可以查询相关的表。
 
+</TabPanel>
+
+</Tabs>
+
+
+### 案例4 (多次查询同一个外键表)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
+                                                                              
 final data = await supabase
   .from('messages')
   .select('*, users!inner(*)')
   .eq('users.username', 'Jane');
 ```
+</TabPanel>
 
-### 用内部连接进行过滤
+<TabPanel id="demo4" label="注意事项">
 
-如果你想根据一个子表的值来过滤一个表，你可以使用`!inner()`函数。例如，如果你想 
-在`message`表中选择所有属于`用户名`为 "Jane"的用户的记录。
 
+有时您需要对同一个外部表进行两次查询。在这种情况下，您可以使用连接列的名称来标识您打算使用的连接。
+为了方便起见，您还可以为每个列提供一个别名。例如，如果我们有一个产品商店，并且我们想同时获取供应商和购买者（都在 users 表中）的信息：
+
+</TabPanel>
+
+</Tabs>
+
+
+### 案例5 (使用内连接进行筛选)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
+                                                                              
 final data = await supabase
   .from('messages')
   .select('*, users!inner(*)')
   .eq('users.username', 'Jane');
 ```
+</TabPanel>
 
-### 使用计数选项进行查询
+<TabPanel id="demo4" label="注意事项">
 
-你可以通过使用count选项来获得行的数量。
-count选项的允许值是[exact](https://postgrest.org/en/stable/api.html#exact-count)，[planned](https://postgrest.org/en/stable/api.html#planned-count)和[estimated](https://postgrest.org/en/stable/api.html#estimated-count)。
+如果您想根据子表的值来筛选一个表，可以使用 `!inner()` 函数。例如，如果您想选择所有属于用户名为 "Jane" 的用户的消息表中的行：
 
+</TabPanel>
+
+</Tabs>
+
+
+
+### 案例6 (使用计数选项进行查询)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
+                                                                              
 final res = await supabase.from('cities').select(
       'name',
       const FetchOptions(
@@ -122,17 +187,33 @@ final res = await supabase.from('cities').select(
 
 final count = res.count;
 ```
+</TabPanel>
 
-### 查询JSON数据
+<TabPanel id="demo4" label="注意事项">
 
-如果你有一个JSONB列内的数据，你可以对数据值应用选择 
-和查询过滤器到数据值。Postgres提供了一个 
-[操作数](https://www.postgresql.org/docs/current/functions-json.html) 
-用于查询JSON数据。还可以看到 
-[PostgREST docs](http://postgrest.org/en/v7.0.0/api.html#json-columns) 了解更多细节。
+你可以通过使用count选项来获得行的数量。
+count选项的允许值是[exact](https://postgrest.org/en/stable/api.html#exact-count)，[planned](https://postgrest.org/en/stable/api.html#planned-count)和[estimated](https://postgrest.org/en/stable/api.html#estimated-count)。
 
+</TabPanel>
+
+</Tabs>
+
+
+
+
+### 案例7 (查询JSON数据)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
+                                                                              
 final data = await supabase
   .from('users')
   .select('''
@@ -141,15 +222,45 @@ final data = await supabase
   ''')
   .eq('address->postcode', 90210);
 ```
+</TabPanel>
 
-### 以CSV形式返回数据
+<TabPanel id="demo4" label="注意事项">
 
-默认情况下，数据以JSON格式返回，但你也可以要求以逗号分隔值的形式返回。
+如果你有一个JSONB列内的数据，你可以对数据值应用选择 
+和查询过滤器到数据值。Postgres提供了一个 
+[操作数](https://www.postgresql.org/docs/current/functions-json.html) 
+用于查询JSON数据。还可以看到 
+[PostgREST docs](http://postgrest.org/en/v7.0.0/api.html#json-columns) 了解更多细节。
 
+</TabPanel>
+
+</Tabs>
+
+
+### 案例8 (以CSV格式返回数据)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
+                                                                              
 final data = await supabase
   .from('users')
   .select()
   .csv();
 ```
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+默认情况下，数据以JSON格式返回，但你也可以要求以逗号分隔值的形式返回。
+
+</TabPanel>
+
+</Tabs>

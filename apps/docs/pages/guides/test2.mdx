@@ -1,0 +1,158 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: 'database',
+  title: '数据库',
+  description: 'Use Supabase to manage your data.',
+  sidebar_label: 'Overview',
+}
+
+
+每个 MemFireCloud 项目都附带一个完整的 [Postgres](https://www.postgresql.org/) 数据库，这是一个免费且开源的数据库，被认为是世界上最稳定和先进的数据库之一。
+
+
+## PostgreSQL的由来
+
+PostgreSQL 数据库源于 POSTGRES 项目，这是一个于1986年在加州大学伯克利分校编写的软件包。该软件包包含了一种查询语言称为 "PostQUEL"。
+
+1994年，Postgres95 在 POSTGRES 代码的基础上构建，将一个 SQL 语言解释器添加为 PostQUEL 的替代品。最终，Postgres95 被改名为 PostgreSQL，以反映其支持 SQL 查询的能力。
+
+此后，许多人将其简称为 Postgres，因为这样更不容易混淆。MemFireCloud 强调简单易用，因此我们也将其称为 Postgres。
+
+
+## 功能
+
+### 表格视图
+
+你不需要精通数据库就可以使用 MemFireCloud ，我们的可视化操作界面使得 Postgres 的使用变得简单。
+
+![Table View.](/docs/img/table-view.png)
+
+### 关系
+
+挖掘你的数据关系
+
+<video width="99%" loop="" muted="" playsInline="" controls="true">
+  <source src="/docs/videos/relational-drilldown-zoom.mp4" type="video/mp4" />
+</video>
+
+### 克隆表
+
+你可以复制你的表格，就像你在电子表格里面一样。
+
+<video width="99%" muted playsInline controls={true}>
+  <source src="/docs/videos/duplicate-tables.mp4" type="video/mp4" muted playsInline />
+</video>
+
+### SQL编辑器
+
+MemFireCloud 自带一个SQL编辑器。你还可以保存你最喜欢的查询，以便以后运行!
+
+<video width="99%" muted playsInline controls={true}>
+  <source src="/docs/videos/favorites.mp4" type="video/mp4" muted playsInline />
+</video>
+
+
+### 附加功能
+
+- MemFireCloud 使用的[Realtime Server](https://github.com/supabase/realtime)对Postgres进行实时功能的扩展。使得 Postgres 具备了实时数据处理的能力。
+- 每个 MemFireCloud 项目都是一个完整的 Postgres 数据库，具有 postgres 级别的访问权限。
+- 支持直接从 CSV 文件中导入数据。
+
+
+<Admonition type="note">
+
+在 MemFireCloud 中进行数据库备份时，并不会包含通过Storage API存储的实际对象（例如文件、图片、视频等等）。
+数据库备份仅包含关于这些对象的元数据或信息。因此，如果你恢复一个旧的数据库备份，那么已经在该备份后被删除的Storage API中的对象将不会被恢复。
+
+</Admonition>
+
+### 扩展
+
+为了增强你 Postgres 数据库的功能，你可以使用扩展插件。
+在 MemFireCloud 仪表盘中，你只需点击一个按钮就能启用 Postgres 扩展插件。
+
+<video width="99%" muted playsInline controls={true}>
+  <source src="/docs/videos/toggle-extensions.mp4" type="video/mp4" muted playsInline />
+</video>
+
+了解更多关于 MemFireCloud 上提供的所有[扩展](/docs/guides/database/extensions)。
+
+## 提示
+
+了解如何重置[数据库密码](/docs/guides/database/managing-passwords)以及如何更改服务器的[时区设置](/docs/guides/database/managing-timezones)。
+
+
+## 相关资料
+
+- [Postgres官方文档](https://www.postgresql.org/about/)
+
+
+***
+
+MemFireCloud 提供以下几种选项用于程序化连接到您的 Postgres 数据库：
+
+使用Postgres标准连接系统进行直接连接
+使用PgBouncer进行连接池管理
+使用Serverless API进行编程式访问
+
+## Serverless APIs
+
+MemFireCloud 提供自动更新的API。这是最简单的入门方式，如果您需要管理数据（获取、插入、更新），我们提供多种类型的 API 以适应您的偏好：
+
+* REST：通过REST接口与您的数据库进行交互。
+* GraphQL：通过GraphQL接口与您的数据库进行交互。
+* 实时：通过WebSocket监听数据库的变更。
+
+
+## 直接连接
+
+每个 MemFireCloud 项目都提供一个完整的Postgres数据库。您可以使用任何支持 Postgres 的工具连接到数据库。您可以在仪表板的“设置”部分找到连接字符串：
+
+* 进入“设置”部分。
+* 点击“数据库”。
+* 查找您的连接信息和连接字符串。直接连接的端口号是5432。
+
+<video width="99%" muted playsInline controls={true}>
+  <source
+    src="https://xguihxuzqibwxjnimxev.supabase.co/storage/v1/object/public/videos/docs/postgres-connection.mp4"
+    type="video/mp4"
+  />
+</video>
+
+## 连接池管理器
+
+每个Supabase项目都配备了PgBouncer用于连接池管理。连接池管理器对于管理大量临时连接非常有用。例如，如果您正在使用Prisma、Drizzle、Kysely或部署到Serverless环境（如AWS Lambdas或Edge Functions）的任何应用程序。
+您可以在仪表板的“设置”部分找到连接池配置：
+
+* 进入“设置”部分。
+* 点击“数据库”。
+* 查找您的连接信息和连接字符串。连接池管理器的端口号是6543。
+
+<video width="99%" muted playsInline controls={true}>
+  <source
+    src="https://xguihxuzqibwxjnimxev.supabase.co/storage/v1/object/public/videos/docs/connection-pool-config.mp4"
+    type="video/mp4"
+  />
+</video>
+
+
+## 选择连接方法
+
+1. Serverless API提供编程式访问并内置连接池管理。您可以将其用于所有浏览器和应用程序交互。我们建议尽可能使用这些API。
+
+2. "直接连接"是Postgres的原生连接系统。您应该将其用于始终处于活动状态的工具 - 通常安装在长期运行的服务器上，例如Node.js、Ruby、Python等。
+
+3. "连接池管理器"是一种保持连接"活跃"的工具。您应该将其用于无服务器函数和频繁断开与数据库连接的工具，例如Prisma、Drizzle、Kysely等。
+
+为什么要使用连接池？主要因为Postgres处理大量临时连接的方式不太适合可扩展性。您可以使用以下简单问题来确定使用哪种连接方法：
+
+* 您是连接到数据库并保持连接吗？如果是，请使用直接连接。
+* 您是连接到数据库然后立即断开连接（例如，无服务器环境）吗？如果是，请使用连接池。
+
+
+
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page

@@ -14,7 +14,16 @@ supabase start
 supabase gen types typescript --local > lib/database.types.ts
 ```
 
-这些类型是直接从你的数据库中生成的。给定一个表`public.movies`，该定义将提供以下数据。
+Supabase可以直接从您的数据库中生成数据类型，这样可以确保在与数据库交互时数据的正确性。
+
+在处理数据库的操作时，例如从数据库选择数据（selects）、向数据库插入数据（inserts）或更新数据库中的数据（updates），有时会为某些列设置默认值。
+如果某个列设置了默认值，那么在进行插入或更新操作时，即使这些列是必填字段，您也不需要在网络上传输数据，Supabase类型系统会自动处理这些默认值。
+
+总之，Supabase的类型系统非常灵活，可以直接与数据库交互，并在处理默认值时表现出色。这使得与数据库的交互变得更加高效和方便。
+
+
+
+给定一个表`public.movies`，该定义将提供以下数据。
 
 ```ts
 interface Database {
@@ -30,25 +39,38 @@ interface Database {
 }
 ```
 
-在 "选择"、"插入 "和 "更新 "之间是有区别的，因为通常你会在数据库中为特定的列设置默认值。
-有了默认值，你就不需要通过网络发送任何数据，即使该列是一个 "必填 "字段。我们的类型系统是精细的
-足以处理这些情况。
-
 ## 注入类型定义
 
-你可以用你用Supabase生成的类型来充实supabase客户端。
+你可以用你用Supabase生成的类型来增强supabase客户端功能。
 
 ```ts
 import { createClient } from '@supabase/supabase-js'
 import { Database } from 'lib/database.types'
 
-const supabase = createClient<Database>(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+const supabase = createClient<Database>(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+)
 ```
+<Admonition type="note">
 
-##类型提示
+在给定的代码示例中，`createClient` 函数使用了 TypeScript 的泛型语法 `<Database>`，来将类型定义 `Database` 注入到 Supabase 客户端 `supabase` 中。
+通过这样的注入，Supabase 客户端就能够获得与数据库结构相匹配的类型信息，从而在使用相关功能时，可以进行类型检查和类型推断，提供更强大的类型支持和编码安全性。
+这样一来，你可以在代码中更自信地使用 Supabase 客户端的各种功能，并且在编写代码时更容易发现潜在的类型错误。
 
-`supase-js`总是返回一个`data`对象（代表成功），和一个`error`响应（代表不成功的请求）。
-这提供了一个简单的接口来获取从任何函数返回的相关类型。
+</Admonition>
+
+
+
+
+## 类型提示
+
+在 `supabase-js` 中，所有的函数调用都会返回一个对象。
+如果返回的是`数据`对象（代表响应成功），如果返回错误响应`error`（代表响应失败）。
+
+
+为了便捷地获取从任何函数返回的相关类型信息，开发者可以使用类型提示的方式。
+例如，通过以下代码示例，我们定义了一个异步函数 `getMovies`，该函数返回一个 supabase 查询的结果对象：
 
 ```ts
 export async function getMovies() {
@@ -62,7 +84,10 @@ export type MoviesResponseError = MoviesResponse['error']
 
 ## 嵌套表
 
-对于像嵌套表这样的高级查询，你可能想构建自己的类型。
+对于高级查询，例如包含嵌套表的查询，您可能希望构建自己的类型。
+
+在给定的代码示例中，我们可以看到如何构建自定义类型来处理嵌套表查询：
+
 
 ```ts
 import supabase from '~/lib/supabase'

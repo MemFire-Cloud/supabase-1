@@ -1,78 +1,98 @@
 ---
 id: containedby
-title: ".containedBy()"
+title: "containedBy()"
 slug: /containedby
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_dart_v1.yml
 ---
 
 
 
+## 案例教程
+### 案例1 (使用select)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
+
 ```dart
+                                                                              
 final data = await supabase
   .from('countries')
   .select('name, id, main_exports')
   .containedBy('main_exports', ['cars', 'food', 'machine']);
 ```
+</TabPanel>
+</Tabs>
 
 
+### 案例2 (使用update)
 
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Examples
-
-### 使用 `select()`
-
-
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
-final data = await supabase
-  .from('countries')
-  .select('name, id, main_exports')
-  .containedBy('main_exports', ['cars', 'food', 'machine']);
-```
-
-### 使用 `update()`
-
-
-
-```dart
+                                                                              
 final data = await supabase
   .from('countries')
   .update({ 'name': 'Mordor' })
   .containedBy('main_exports', ['orks', 'surveillance', 'evil']);
 ```
+</TabPanel>
+</Tabs>
 
-### 使用 `delete()`
 
 
+
+### 案例3 (使用delete)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
+                                                                              
 final data = await supabase
   .from('countries')
   .delete()
   .containedBy('main_exports', ['cars', 'food', 'machine']);
 ```
+</TabPanel>
+</Tabs>
 
-### 使用 `rpc()`
 
+### 案例4 (使用rpc)
 
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
+                                                                              
 // Only valid if the Stored Procedure returns a table type.
 final data = await supabase
   .rpc('echo_all_countries')
   .containedBy('main_exports', ['cars', 'food', 'machine']);
 ```
+</TabPanel>
+</Tabs>
