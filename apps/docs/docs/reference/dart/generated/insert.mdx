@@ -1,55 +1,75 @@
 ---
 id: insert
-title: "创建数据: insert()"
+title: "Insert 数据"
 slug: /insert
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_dart_v1.yml
 ---
 
-对表进行INSERT操作。
+insert()用于在表(table)或视图(view)执行 INSERT 操作。
 
+## 案例教程
+### 案例1 (创建记录)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
-final data = await supabase
+                                                                                                                                                            
+await supabase
     .from('cities')
     .insert({'name': 'The Shire', 'country_id': 554});
 ```
+</TabPanel>
+
+</Tabs>
 
 
+### 案例2 (批量创建)
 
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Examples
-
-### 创建一个记录
-
-
+<TabPanel id="demo2" label="使用方法">
 
 ```dart
-final data = await supabase
-    .from('cities')
-    .insert({'name': 'The Shire', 'country_id': 554});
-```
-
-### 批量创建
-
-
-
-```dart
-final res = await supabase.from('cities').insert([
+                                                                              
+await supabase.from('cities').insert([
   {'name': 'The Shire', 'country_id': 554},
   {'name': 'Rohan', 'country_id': 555},
 ]);
 ```
+</TabPanel>
+</Tabs>
+
+
+### 案例3 (获取插入的记录)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo2"
+>
+
+<TabPanel id="demo2" label="使用方法">
+
+```dart
+                                                                              
+final List<Map<String, dynamic>> data =
+        await supabase.from('cities').insert([
+      {'name': 'The Shire', 'country_id': 554},
+      {'name': 'Rohan', 'country_id': 555},
+    ]).select();
+```
+</TabPanel>
+</Tabs>

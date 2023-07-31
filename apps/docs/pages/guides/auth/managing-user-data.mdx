@@ -8,13 +8,17 @@ export const meta = {
 
 出于安全目的，`auth`模式不会在自动生成的API上公开。
 
-尽管Suabase提供了`身份验证`。用户表，在`公共`模式中创建表以存储您希望通过API访问的用户数据可能会很有帮助。
+
+尽管MemFireCloud提供了一个`auth.users`表，用于存储用户身份验证信息，但是当你希望通过API访问用户数据时，创建在`public`模式中的其他表也是有帮助的。
+这意味着你可以在公共模式中创建自定义的表格，用于存储其他与用户相关的数据，以便通过API进行访问和操作。这样可以灵活地组织和管理你的用户数据，并与auth.users表中的用户身份验证信息结合使用。
+
 
 ## 创建用户表
 
-当您创建表来存储用户数据时，引用`auth.users`表。这确保了数据的完整性。
+当你创建用于存储用户数据的表时，参考`auth.users`表的主键可以确保数据完整性。
+在引用`auth.users`时，还要指定`on delete cascade`子句。省略此子句可能会在删除用户时导致问题。
 
-例如，`public.profiles` 表可能如下所示：
+例如，一个`public.profiles`表可能如下所示：
 
 ```sql
 create table public.profiles (
@@ -27,6 +31,12 @@ create table public.profiles (
 
 alter table public.profiles enable row level security;
 ```
+
+<Admonition type="caution">
+
+如果设置了用户令牌使用服务密钥初始化客户端，不会覆盖行级安全（RLS）。如果用户使用客户端登录，MemFireCloud将遵循该用户的行级安全策略。
+
+</Admonition>
 
 ## 公共通道
 

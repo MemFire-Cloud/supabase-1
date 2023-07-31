@@ -311,15 +311,16 @@ alter publication supabase_realtime add table products;
 alter publication supabase_realtime add table posts;
 ```
 
-### 您不必使用策略
+### 你并不一定要使用策略
 
-您还可以将授权规则放在中间件中，类似于使用任何其他`后端<->中间件<->前端`架构创建安全规则的方式。
+您也可以将授权规则放在中间件中，类似于使用任何其他`后端<->中间件<->前端`架构，在此架构中创建安全规则的方式。
 
 策略是一种工具。在“serverless/Jamstack”设置的情况下，它们特别有效，因为您根本不必部署任何中间件。
 
-然而，如果您想为应用程序使用另一种授权方法，这也可以。Supabase`只是Postgres`，所以如果您的应用程序 与Postgres一起工作，然后它也与Supabase一起工作。
+然而，如果您想为应用程序使用另一种授权方法，这也可以。MemFireCloud只是“普通的Postgres”，所以如果您的应用程序 与Postgres一起工作，那么它也可以与MemFireCloud一起工作。
 
-提示：确保为所有表启用RLS，这样您的表就不可访问了。然后使用我们提供的“服务”，该服务旨在绕过RLS。
+如果你打算使用这种方法，请确保为你的表启用RLS（行级安全性）。然后使用service_role密钥（对于我们的客户端库）或postgres角色 - 这两者都可以绕过RLS。
+使用这种方法，你无需创建任何策略，仅启用RLS就足够了："
 
 ```sql
 create table profiles (
@@ -332,13 +333,12 @@ alter table profiles enable row level security;
 
 ### 切勿在客户端上使用服务密钥
 
-
-MemFireCloud提供特殊的“服务”键，可用于绕过所有RLS。
-这些内容不应在浏览器中使用或向客户公开，但它们对于管理任务非常有用。
-
+MemFireCloud提供特殊的服务密钥（service_key），它可以绕过所有RLS。 而这个服务密钥不应在浏览器中使用或向客户公开，但它们对于管理任务非常有用。
 
 <Admonition type="caution">
+
 如果设置了用户令牌使用服务密钥初始化客户端，不会覆盖行级安全（RLS）。如果用户使用客户端登录，MemFireCloud将遵循该用户的行级安全策略。
+
 </Admonition>
 
 
@@ -400,15 +400,78 @@ $$;
 这些过程也可以用于编写针对策略的 pgTAP 单元测试。
 
 
-## 不推荐的功能
+查看psql使用此功能的交互示例。
+
+该示例表明，在教程示例中，`public.profiles` 表确实可以由`postgres`角色和行的所有者进行更新，但无法通过`匿名`连接进行更新。
+
+```sql
+
+postgres=> select id, email from auth.users;
+                  id                  |       email
+--------------------------------------+-------------------
+ d4f0aa86-e6f6-41d1-bd32-391f077cf1b9 | user1@example.com
+ 15d6811a-16ee-4fa2-9b18-b63085688be4 | user2@example.com
+ 4e1010bb-eb37-4a4d-a05a-b0ee315c9d56 | user3@example.com
+(3 rows)
+
+postgres=> table public.profiles;
+                  id                  | updated_at | username | full_name | avatar_url | website
+--------------------------------------+------------+----------+-----------+------------+---------
+ d4f0aa86-e6f6-41d1-bd32-391f077cf1b9 |            | user1    | User 1    |            |
+ 15d6811a-16ee-4fa2-9b18-b63085688be4 |            | user2    | User 2    |            |
+ 4e1010bb-eb37-4a4d-a05a-b0ee315c9d56 |            | user3    | User 3    |            |
+(3 rows)
+
+postgres=> call auth.login_as_anon();
+CALL
+postgres=> update public.profiles set updated_at=now();
+UPDATE 0 -- anon users cannot update any profile but see all of them
+postgres=> table public.profiles;
+                  id                  | updated_at | username | full_name | avatar_url | website
+--------------------------------------+------------+----------+-----------+------------+---------
+ d4f0aa86-e6f6-41d1-bd32-391f077cf1b9 |            | user1    | User 1    |            |
+ 15d6811a-16ee-4fa2-9b18-b63085688be4 |            | user2    | User 2    |            |
+ 4e1010bb-eb37-4a4d-a05a-b0ee315c9d56 |            | user3    | User 3    |            |
+(3 rows)
+
+postgres=> call auth.logout();
+CALL
+postgres=> call auth.login_as_user('user1@example.com');
+NOTICE:  set role authenticated; -- logging in as 'd4f0aa86-e6f6-41d1-bd32-391f077cf1b9' ('user1@example.com')
+CALL
+postgres=> update public.profiles set updated_at=now();
+UPDATE 1 -- authenticated users can update their own profile and see all of them
+postgres=> table public.profiles;
+                  id                  |          updated_at           | username | full_name | avatar_url | website
+--------------------------------------+-------------------------------+----------+-----------+------------+---------
+ 15d6811a-16ee-4fa2-9b18-b63085688be4 |                               | user1    | User 1    |            |
+ 4e1010bb-eb37-4a4d-a05a-b0ee315c9d56 |                               | user2    | User 2    |            |
+ d4f0aa86-e6f6-41d1-bd32-391f077cf1b9 | 2023-02-18 21:39:16.204612+00 | user3    | User 3    |            |
+(3 rows)
+
+postgres=> call auth.logout();
+CALL
+postgres=> update public.profiles set updated_at=now();
+UPDATE 3 -- the 'postgres' role can update and see all profiles
+postgres=> table public.profiles;
+                  id                  |          updated_at           | username | full_name | avatar_url | website
+--------------------------------------+-------------------------------+----------+-----------+------------+---------
+ 15d6811a-16ee-4fa2-9b18-b63085688be4 | 2023-02-18 21:40:08.216324+00 | user1    | User 1    |            |
+ 4e1010bb-eb37-4a4d-a05a-b0ee315c9d56 | 2023-02-18 21:40:08.216324+00 | user2    | User 2    |            |
+ d4f0aa86-e6f6-41d1-bd32-391f077cf1b9 | 2023-02-18 21:40:08.216324+00 | user3    | User 3    |            |
+(3 rows)
+
+```
+
+## 已经弃用的功能
 
 我们已经弃用了一些功能，以确保RLS策略具有更好的性能和可扩展性。
 
-### `auth.role()`
+`auth.role()`
 
 <Admonition type="caution">
 
-已弃用：`auth.role()`函数已被弃用，转而使用Postgres中本机支持的“TO”字段。
+`auth.role()` 函数已被弃用，推荐使用 Postgres 中原生支持的 `TO` 字段。
 
 </Admonition>
 
@@ -428,7 +491,12 @@ using (
 );
 ```
 
-### `auth.email()`
+`auth.email()`
+<Admonition type="caution">
+
+`auth.email()` 函数已被弃用，转而使用 `auth.jwt() ->> 'email'`。
+
+</Admonition>
 
 返回提出请求的用户的电子邮件。
 

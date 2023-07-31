@@ -1,6 +1,6 @@
 ---
 id: initializing
-title: "初始化"
+title: "初始化客户端"
 slug: /initializing
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
@@ -10,9 +10,170 @@ custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_
 Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Supabase 生态系统中提供的所有功能进行交互的最简单方法。
 
 
+## 案例教程
+
+### 案例1  （createClient()）
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="使用方法">
+
+```javascript
+import { createClient } from '@supabase/supabase-js'
+
+// Create a single supabase client for interacting with your database
+const supabase = createClient('https://xyzcompany.supabase.co', 'public-anon-key')
+```
+
+使用自定义域名：
+
+```javascript
+import { createClient } from '@supabase/supabase-js'
+
+// Use a custom domain as the supabase URL
+const supabase = createClient('https://my-custom-domain.com', 'public-anon-key')
+```
+
+</TabPanel>
+
+</Tabs>
+
+### 案例2 （带附加参数的情况）
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="使用方法">
+
+```javascript
+import { createClient } from '@supabase/supabase-js'
+
+const options = {
+  db: {
+    schema: 'public',
+  },
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  global: {
+    headers: { 'x-my-custom-header': 'my-app-name' },
+  },
+}
+const supabase = createClient("https://xyzcompany.supabase.co", "public-anon-key", options)
+```
+
+</TabPanel>
+
+</Tabs>
+
+### 案例3  （API模式）
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="使用方法">
+
+```javascript
+import { createClient } from '@supabase/supabase-js'
+
+// Provide a custom schema. Defaults to "public".
+const supabase = createClient('https://xyzcompany.supabase.co', 'public-anon-key', {
+  db: { schema: 'other_schema' }
+})
+```
+</TabPanel>
+
+<TabPanel id="demo2" label="注意事项">
+
+默认情况下，API服务器指向public模式。您可以在控制台中启用其他数据库模式。
+前往 `“设置”>“API”>“public模式”`，然后添加您想要暴露给API的模式。
+
+注意：每个客户端连接只能访问一个模式，因此上述代码可以访问`other_schema`模式，但无法访问`public`模式。
+
+</TabPanel>
+
+</Tabs>
+
+### 案例4  （自定义fetch实现）
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="使用方法">
+
+```javascript
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient('https://xyzcompany.supabase.co', 'public-anon-key', {
+  global: { fetch: fetch.bind(globalThis) }
+})
+```
+</TabPanel>
+
+<TabPanel id="demo2" label="注意事项">
+
+`supabase-js`使用`cross-fetch`库进行HTTP请求，但是可以作为选项提供替代的`fetch`实现。
+这在`cross-fetch`不兼容的环境中特别有用（例如Cloudflare Workers）。
+
+</TabPanel>
+
+</Tabs>
+
+### 案例5  （React Native选项）
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="使用方法">
+
+```javascript
+import { createClient } from '@supabase/supabase-js'
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const supabase = createClient("https://xyzcompany.supabase.co", "public-anon-key", {
+  auth: {
+    storage: AsyncStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+});
+```
+</TabPanel>
+
+<TabPanel id="demo2" label="注意事项">
+
+对于React Native，我们推荐使用`AsyncStorage`作为Supabase Auth的存储实现。
+
+</TabPanel>
+
+</Tabs>
 
 
-## 参数
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -23,16 +184,17 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       supabaseUrl
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-唯一的Supabase URL，当你在项目仪表板上创建一个新项目时提供。
+唯一的Supabase URL，当你在项目控制台上创建一个新项目时提供。
 
+点击控制台左侧菜单栏的“应用设置”，然后找到“API”，此时的页面可以找到应用的URL。
   </div>
   
 </li>
@@ -44,15 +206,17 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       supabaseKey
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-唯一的Supabase密钥，当你在你的项目仪表板上创建一个新项目时提供。
+唯一的Supabase密钥，当你在你的项目控制台上创建一个新项目时提供。
+
+点击控制台左侧菜单栏的“应用设置”，然后找到“API”，此时的页面可以找到应用的API密钥。
 
   </div>
   
@@ -65,18 +229,13 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       SupabaseClientOptions
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
 
-未提供说明。
-
-  </div>
-  
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
 
@@ -86,17 +245,13 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       auth
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
 
-未提供说明。
-
-  </div>
   
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
@@ -107,10 +262,10 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       autoRefreshToken
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>boolean</code>
+      <code>boolean类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -128,10 +283,10 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       detectSessionInUrl
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>boolean</code>
+      <code>boolean类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -143,25 +298,51 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
 </li>
 
 
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      flowType
+    </span>
+    <span className="method-list-item-label-badge false">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>object类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+要使用的OAuth流程 - 默认为隐式流程。推荐在移动端和服务器端应用中使用PKCE流程。
+
+  </div>
+</li>
+
+
+
+
+
+
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
       persistSession
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>boolean</code>
+      <code>boolean类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
 是否将登录的会话持久化到存储中。
-
   </div>
-  
 </li>
+
+
+
 
 
 <li className="method-list-item">
@@ -170,10 +351,10 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       storage
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -191,10 +372,10 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       storageKey
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -204,6 +385,8 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
   </div>
   
 </li>
+
+
 
 </ul>
 
@@ -216,10 +399,10 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       db
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -237,17 +420,12 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       schema
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>SchemaName</code>
+      <code>SchemaName类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
   
 </li>
 
@@ -262,17 +440,13 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       global
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
 
-未提供说明。
-
-  </div>
   
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
@@ -283,15 +457,15 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       fetch
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>Fetch</code>
+      <code>Fetch类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-一个自定义的 `fetch`实现。
+一个自定义的 fetch 实现。
 
   </div>
   
@@ -304,10 +478,10 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       headers
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>Record</code>
+      <code>Record类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -329,10 +503,10 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
       realtime
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>RealtimeClientOptions</code>
+      <code>RealtimeClientOptions类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -349,105 +523,3 @@ Supabase 客户端是你访问 Supabase 其他功能的入口是与我们在 Sup
 
 </ul>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 举例
-
-### createClient()
-
-
-
-```js
-import { createClient } from '@supabase/supabase-js'
-
-// Create a single supabase client for interacting with your database
-const supabase = createClient('https://xyzcompany.supabase.co', 'public-anon-key')
-```
-
-### 有附加参数
-
-
-
-```js
-import { createClient } from '@supabase/supabase-js'
-
-const options = {
-  db: {
-    schema: 'public',
-  },
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  },
-  global: {
-    headers: { 'x-my-custom-header': 'my-app-name' },
-  },
-}
-const supabase = createClient("https://xyzcompany.supabase.co", "public-anon-key", options)
-```
-
-### API schemas
-
-
-
-```js
-import { createClient } from '@supabase/supabase-js'
-
-// Provide a custom schema. Defaults to "public".
-const supabase = createClient('https://xyzcompany.supabase.co', 'public-anon-key', {
-  db: { schema: 'other_schema' }
-})
-```
-
-默认情况下，API服务器指向`public`模式。你可以在仪表板上启用其他数据库模式。
-进入 `设置 > API > 模式`，添加你想暴露给API的模式。
-
-注意：每个客户端连接只能访问一个模式，所以上面的代码可以访问`other_schema`模式，但不能访问`public`模式。
-
-### 自定义 `fetch` 的实现
-
-
-
-```js
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient('https://xyzcompany.supabase.co', 'public-anon-key', {
-  global: { fetch: fetch.bind(globalThis) }
-})
-```
-
-`supabase-js`使用[`cross-fetch`](https://www.npmjs.com/package/cross-fetch) 库来进行HTTP请求。
-但可以提供一个替代的`fetch`实现作为选项。
-这在`cross-fetch`不兼容的环境中最有用（例如Cloudflare Workers）。
-
-### React Native选项
-
-
-
-```js
-import { createClient } from '@supabase/supabase-js'
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const supabase = createClient("https://xyzcompany.supabase.co", "public-anon-key", {
-  auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
-```
-
-对于React Native，我们建议使用`AsyncStorage`作为Supabase Auth的存储实现。

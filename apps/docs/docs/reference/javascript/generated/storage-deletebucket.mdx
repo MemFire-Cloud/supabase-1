@@ -5,17 +5,39 @@ slug: /storage-deletebucket
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-删除一个现有的桶。一个水桶不能在其内部存在对象的情况下被删除。你必须首先`empty()`该桶。
+deleteBucket()用于删除现有的存储桶。
 
-```js
+如果存储桶内存在对象，则无法删除存储桶。您必须首先`清空empty()`存储桶。
+
+需要RLS策略权限:
+  - `buckets`表的权限: `select`和`delete`
+  - `objects`表的权限：无
+
+请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
+
+
+
+## 案例教程
+
+### 案例1 （删除一个存储桶）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 const { data, error } = await supabase
   .storage
   .deleteBucket('avatars')
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
 
+
+## 参数说明
 
 <ul className="method-list-group">
   
@@ -25,47 +47,18 @@ const { data, error } = await supabase
       id
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-您想删除的桶的唯一标识符。
+这是你创建存储桶的唯一标识符。
 
   </div>
   
 </li>
 
 </ul>
-
-
-## 注意事项
-
-- 需要RLS策略权限:
-  - `buckets`表的权限: `选择'和`删除'.
-  - `objects`表的权限：无
-- 请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
-
-
-
-
-
-
-
-
-
-
-## 实例
-
-### 删除桶
-
-
-
-```js
-const { data, error } = await supabase
-  .storage
-  .deleteBucket('avatars')
-```

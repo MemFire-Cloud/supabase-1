@@ -8,30 +8,74 @@ custom_edit_url: https://github.com/supabase/supabase/edit/master/web/spec/supab
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 
-所有的JavaScript库都是由Supabase团队直接建立的。
+所有的 JavaScript 库都是由 Supabase 团队直接建立的。其他语言由社区构建，并由 Supabase 支持。
 
-其他语言由社区构建，并由Supabase支持。
 
-## JavaScript
+## 通过终端安装
 
-Via NPM
+你可以通过在终端中执行相应的安装命令来完成`@supabase/supabase-js`库的安装。
 
-```bash
+为你提供两种终端安装的方式（NPM 和 Yarn）：
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+<TabPanel id="demo1" label="NPM">
+
+```shell
 npm install @supabase/supabase-js
 ```
 
-Via Yarn
 
-```bash
+</TabPanel>
+<TabPanel id="demo2" label="Yarn">
+
+```shell
 yarn add @supabase/supabase-js
 ```
 
-在[GitHub]上查找源代码(https://github.com/supabase/supabase-js).
+</TabPanel>
+</Tabs>
 
-Or via CDN
 
-```js
+## 通过CDN安装
+
+您可以通过 CDN 链接安装 `@supabase/supabase-js`。
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+<TabPanel id="demo1" label="CDN">
+
+```javascript
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 //or
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 ```
+
+</TabPanel>
+
+</Tabs>
+
+
+<Admonition type="note">
+
+CDN是内容分发网络（Content Delivery Network）的缩写。它是一种用于加速网络资源传输的系统，通过将数据和文件分布在全球各地的多个服务器节点上，使用户可以从离自己地理位置较近的服务器获取所需的内容，从而提高网页加载速度和响应时间。
+
+Supabase提供了一个通过CDN链接安装 `@supabase/supabase-js` 的选项。这意味着你可以通过在你的HTML文件中引入相关的CDN链接，来直接使用Supabase的JavaScript客户端库，而无需通过npm或其他包管理工具进行安装。这样做的好处是，当用户访问你的网页时，他们可以从离他们最近的CDN服务器加载Supabase的库，从而更快地获得响应。
+
+</Admonition>
+
+
+## 相关链接
+
+
+在[GitHub](https://github.com/supabase/supabase-js)上查找源代码。
+
+

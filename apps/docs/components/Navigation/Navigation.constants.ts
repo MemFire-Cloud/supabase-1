@@ -128,7 +128,7 @@ export const menuItems: NavMenu = {
           items: [
             { name: '行级安全性', url: '/guides/auth/row-level-security', items: [] },
             { name: 'RLS使用教程', url: '/guides/auth/row-level-security2', items: [] },
-            { name: '管理用户信息', url: '/guides/auth/managing-user-data', items: [] },
+            { name: '管理用户数据', url: '/guides/auth/managing-user-data', items: [] },
             { name: '启用验证码保护', url: '/guides/auth/auth-captcha', items: [] },
             { name: '服务器端渲染', url: '/guides/auth/server-side-rendering', items: [] },
             { name: '多因素认证', url: '/guides/auth/auth-mfa', items: [] },

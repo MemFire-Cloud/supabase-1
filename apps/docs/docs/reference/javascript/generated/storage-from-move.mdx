@@ -5,17 +5,37 @@ slug: /storage-from-move
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-将一个现有的文件移动到同一桶中的新路径。
+from.move()用于将一个现有的文件移动到同一桶中的新路径。
 
-```js
+需要RLS策略权限:
+  - `buckets`表的权限: 无
+  - `objects`表的权限：`update`和`select`权限
+
+请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
+
+
+## 案例教程
+
+### 案例1 （移动文件）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                   
 const { data, error } = await supabase
   .storage
   .from('avatars')
   .move('public/avatar1.png', 'private/avatar2.png')
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -26,15 +46,15 @@ const { data, error } = await supabase
       fromPath
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-原始文件路径，包括当前文件名。例如`folder/image.png`。
+文件路径，包括文件名。应该采用folder/subfolder/filename.png的格式。在尝试上传之前，必须确保存储桶已经存在。
 
   </div>
   
@@ -47,10 +67,10 @@ const { data, error } = await supabase
       toPath
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -62,33 +82,3 @@ const { data, error } = await supabase
 </li>
 
 </ul>
-
-
-## 注意事项
-
-- 需要RLS策略权限:
-  - `buckets`表的权限: 无
-  - `objects`表的权限: `更新`和`选择`.
-- 请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
-
-
-
-
-
-
-
-
-
-
-## 实例
-
-## 移动文件
-
-
-
-```js
-const { data, error } = await supabase
-  .storage
-  .from('avatars')
-  .move('public/avatar1.png', 'private/avatar2.png')
-```

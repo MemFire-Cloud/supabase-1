@@ -5,7 +5,9 @@ slug: /is
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-只匹配`column`是`value`的行。
+仅匹配`列`值与`指定值`相等的行。
+
+
 
 对于非boolean型列，这只与检查`column`的值是否为NULL有关。
 `column`的值是NULL，通过设置`value`为`null`。
@@ -13,29 +15,82 @@ custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_
 对于boolean型列，你也可以将`value`设置为`true`或`false`，它的行为与
 它的行为与`.eq()`相同。
 
-```ts
+
+## 案例教程
+
+### 案例1  (检查是否为 null)
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+                                                                              
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'null'),
+  (2, null);
+  ```
+
+</TabPanel>
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 const { data, error } = await supabase
   .from('countries')
   .select()
   .is('name', null)
-```
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo3" label="返回结果">
+
+  ```ts
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "null"
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+
+  ```
+
+</TabPanel>
 
 
-## 参数
+<TabPanel id="demo4" label="注意事项">
 
+使用`eq()`筛选器在过滤`null`时不起作用。相反，您需要使用`is()`。
+
+</TabPanel>
+
+</Tabs>
+
+
+
+
+## 参数说明
 
 <ul className="method-list-group">
   
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      列
+      列（column）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>ColumnName</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -50,13 +105,13 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      值
+      值（value）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>null或者boolean类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -68,96 +123,3 @@ const { data, error } = await supabase
 </li>
 
 </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 举例
-
-### 检查无效性
-
-当过滤 `null`时，使用`eq()`过滤器不起作用。
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'null'),
-    (2, null);
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .select()
-    .eq('name', null)
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "id": 1,
-        "name": "null"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-相反，你需要使用`is()`：
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="js">
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .select()
-    .is('name', null)
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "id": 2,
-        "name": null
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>

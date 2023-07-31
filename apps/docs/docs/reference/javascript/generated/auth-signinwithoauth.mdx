@@ -5,16 +5,111 @@ slug: /auth-signinwithoauth
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-通过第三方供应商登录一个现有的用户。
+通过第三方服务商登录现有的用户。
 
-```js
+* 该方法用于使用第三方服务商进行登录。
+
+* MemFire Cloud支持许多不同的[第三方服务商](/docs/guides/auth)。
+
+
+
+## 案例教程
+
+### 案例1 （借助第三方服务商登陆）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 const { data, error } = await supabase.auth.signInWithOAuth({
   provider: 'github'
 })
-```
+  ```
+
+</TabPanel>
+
+</Tabs>
 
 
-## 参数
+### 案例2 （使用带有重定向的第三方服务商登录）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase.auth.signInWithOAuth({
+  provider: 'github',
+  options: {
+    redirectTo: 'https://example.com/welcome'
+  }
+})
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+当第三方服务商成功验证用户后，服务商将用户重定向到`redirectTo`参数指定的URL。默认情况下，该参数为`SITE_URL`。调用此方法后不会立即重定向用户。
+
+请查看[重定向URL和通配符](/docs/guides/auth)以向您的项目添加其他重定向URL。
+
+</TabPanel>
+</Tabs>
+
+
+### 案例3 （带有作用域(scopes)的登录）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase.auth.signInWithOAuth({
+  provider: 'github',
+  options: {
+    scopes: 'repo gist notifications'
+  }
+})
+const oAuthToken = data.session.provider_token // use to access provider API
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+如果你需要从OAuth服务商获取附加数据，你可以在请求中包含一个以空格分隔的作用域（scopes）列表，以获得OAuth服务商令牌。
+
+根据服务商的不同，你可能还需要在服务商的OAuth应用程序设置中指定这些作用域。作用域的列表将由你正在使用的第三方服务商记录，并且指定作用域将使你能够使用OAuth服务商令牌调用第三方服务商支持的其他API，以获取更多信息。
+
+</TabPanel>
+</Tabs>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -22,20 +117,15 @@ const { data, error } = await supabase.auth.signInWithOAuth({
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      SignInWithOAuthCredentials
+      credentials
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>SignInWithOAuthCredentials</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
   
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
@@ -43,13 +133,13 @@ const { data, error } = await supabase.auth.signInWithOAuth({
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      提供者
+      提供者（provider）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>提供者</code>
+      <code>Provider类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -64,20 +154,16 @@ GoTrue支持的供应商之一。
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      options
+      选项（option）
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
 
-未提供说明。
-
-  </div>
   
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
@@ -85,13 +171,13 @@ GoTrue支持的供应商之一。
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      查询参数
+      queryParams
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -109,10 +195,10 @@ GoTrue支持的供应商之一。
       redirectTo
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -130,10 +216,10 @@ GoTrue支持的供应商之一。
       scopes
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -144,6 +230,28 @@ GoTrue支持的供应商之一。
   
 </li>
 
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      skipBrowserRedirect
+    </span>
+    <span className="method-list-item-label-badge false">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>boolean类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+如果设置为true，不会立即重定向当前浏览器上下文以访问提供商的OAuth授权页面。
+
+  </div>
+  
+</li>
+
+
 </ul>
 
 </li>
@@ -153,61 +261,3 @@ GoTrue支持的供应商之一。
 </li>
 
 </ul>
-
-
-## 注意事项
-
-- 此方法用于使用第三方提供商进行登录。
-- Supabase支持许多不同的[第三方提供商](https://supabase.com/docs/guides/auth#providers)。
-
-
-
-
-
-
-
-
-
-
-## 例子
-
-### 使用第三方供应商登录
-
-
-
-```js
-const { data, error } = await supabase.auth.signInWithOAuth({
-  provider: 'github'
-})
-```
-
-### 使用带有重定向的第三方提供商进行登录
-
-当第三方提供商成功认证用户时，提供商会将用户重定向到 Supabase Auth 回调 URL，在那里他们会被进一步重定向到 `redirectTo` 参数中指定的 URL。这个参数默认为[`SITE_URL`](/docs/reference/auth/config#site_url)。
-你可以修改`SITE_URL`或添加额外的重定向URL。你可以使用[通配符匹配模式](/docs/guides/auth#redirect-urls-and-wildcards)来支持Netlify和Vercel等供应商的预览URL。
-
-
-```js
-const { data, error } = await supabase.auth.signInWithOAuth({
-  provider: 'github'
-  options: {
-    redirectTo: 'https://example.com/welcome'
-  }
-}
-```
-
-### 用范围登录
-
-如果你需要从OAuth提供商那里获得额外的数据，你可以在请求中包括一个空格分隔的范围列表，以获得OAuth提供商的令牌。
-你可能还需要在提供者的OAuth应用程序设置中指定范围，这取决于提供者。你所使用的第三方提供商将记录范围列表，指定范围将使你能够使用OAuth提供商令牌来调用第三方提供商支持的额外API，以获得更多信息。
-
-
-```js
-const { data, error } = await supabase.auth.signInWithOAuth({
-  provider: 'github'
-  options: {
-    scopes: 'repo gist notifications'
-  }
-})
-const oAuthToken = data.session.provider_token // use to access provider API
-```

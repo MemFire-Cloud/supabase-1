@@ -5,201 +5,97 @@ slug: /auth-admin-generatelink
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-生成电子邮件链接和OTP，通过自定义的电子邮件供应商发送。
+generateLink() 函数用于生成电子邮件链接和一次性密码（OTP），这些链接和密码将通过自定义的电子邮件服务商发送。
 
-```js
+* generateLink() 函数可以接受以下类型的参数：signup、magiclink、invite、recovery、email_change_current、email_change_new、phone_change。
+根据传入的类型不同，生成的链接和密码可能有所不同，用于不同的场景，比如用户注册、魔术链接登录、邀请用户、找回密码等。
+*  对于 email_change_email 类型的参数，generateLink() 函数只会生成电子邮件链接，前提是在你的 Supabase 项目的 "Email" 提供商中启用了 "Secure email change" 设置。这个功能用于确保用户更改电子邮件地址时的安全性。
+* generateLink() 函数处理了注册、邀请和魔术链接场景下的用户创建。这意味着在这些场景中，函数会在生成链接和密码的同时，也会创建用户账号，使得用户可以使用相应的链接和密码进行注册、登录或邀请操作。
+
+
+## 案例教程
+
+### 案例1 （生成注册链接）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
 const { data, error } = await supabase.auth.admin.generateLink({
   type: 'signup',
   email: 'email@example.com',
-  options: {
-    'password': 'secret'
-  }
+  password: 'secret'
 })
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+### 案例2 （生成邀请链接）
 
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
 
-<ul className="method-list-group">
-  
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      GenerateLinkParams
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>GenerateSignupLinkParams</code> | <code>GenerateInviteOrMagiclinkParams</code> | <code>GenerateRecoveryLinkParams</code> | <code>GenerateEmailChangeLinkParams</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
+<TabPanel id="demo2" label="使用方法">
 
-未提供说明。 
-
-  </div>
-  
-<ul className="method-list-group">
-  <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      GenerateSignupLinkParams
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。 
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      GenerateRecoveryLinkParams
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。 
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      GenerateInviteOrMagiclinkParams
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。 
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      GenerateEmailChangeLinkParams
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。 
-
-  </div>
-  
-</li>
-
-</ul>
-
-</li>
-
-</ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 生成一个注册链接
-
-
-
-```js
-const { data, error } = await supabase.auth.admin.generateLink({
-  type: 'signup',
-  email: 'email@example.com',
-  options: {
-    'password': 'secret'
-  }
-})
-```
-
-### 生成一个邀请链接
-
-
-
-```js
+  ```ts
+                                                                                
 const { data, error } = await supabase.auth.admin.generateLink({
   type: 'invite',
   email: 'email@example.com'
-})
-```
+})                                                                         
+  ```
 
-### 生成一个 magic link
+</TabPanel>
+</Tabs>
 
 
+### 案例3 （生成魔术链接）
 
-```js
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
 const { data, error } = await supabase.auth.admin.generateLink({
   type: 'magiclink',
   email: 'email@example.com'
 })
-```
+  ```
 
-### 生成一个恢复链接
+</TabPanel>
+</Tabs>
 
 
+### 案例4 （生成恢复链接）
 
-```js
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
 const { data, error } = await supabase.auth.admin.generateLink({
   type: 'recovery',
   email: 'email@example.com'
-})
-```
+})                                                                       
+  ```
 
-### 产生改变当前电子邮件地址的链接
+</TabPanel>
+</Tabs>
 
 
+### 案例5 （生成用于更改当前电子邮件地址的链接）
 
-```js
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
 // generate an email change link to be sent to the current email address
 const { data, error } = await supabase.auth.admin.generateLink({
   type: 'email_change_current',
@@ -213,4 +109,31 @@ const { data, error } = await supabase.auth.admin.generateLink({
   email: 'current.email@example.com',
   newEmail: 'new.email@example.com'
 })
-```
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+
+
+## 参数说明
+
+
+<ul className="method-list-group">
+  
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      params
+    </span>
+    <span className="method-list-item-label-badge required">
+      [必要参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>GenerateLinkParams</code> 
+    </span>
+  </h4>
+</li>
+
+</ul>

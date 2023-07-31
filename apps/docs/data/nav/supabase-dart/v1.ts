@@ -9,42 +9,14 @@ const Nav = [
     ],
   },
   {
-    label: '认证',
-    items: [
-      { name: 'signUp()', url: '/reference/dart/auth-signup', items: [] },
-      {
-        name: 'signInWithPassword()',
-        url: '/reference/dart/auth-signinwithpassword',
-        items: [],
-      },
-      { name: 'signInWithOtp()', url: '/reference/dart/auth-signinwithotp', items: [] },
-      { name: 'signInWithOAuth()', url: '/reference/dart/auth-signinwithoauth', items: [] },
-      { name: 'signOut()', url: '/reference/dart/auth-signout', items: [] },
-      { name: 'verifyOtp()', url: '/reference/dart/auth-verifyotp', items: [] },
-      { name: 'currentSession', url: '/reference/dart/auth-currentsession', items: [] },
-      { name: 'currentUser', url: '/reference/dart/auth-currentuser', items: [] },
-      { name: 'updateUser()', url: '/reference/dart/auth-updateuser', items: [] },
-      { name: 'onAuthStateChange()', url: '/reference/dart/auth-onauthstatechange', items: [] },
-      {
-        name: 'resetPasswordForEmail()',
-        url: '/reference/dart/auth-resetpasswordforemail',
-        items: [],
-      },
-    ],
-  },
-  {
-    label: '函数',
-    items: [{ name: 'invoke()', url: '/reference/dart/invoke', items: [] }],
-  },
-  {
     label: '数据库',
     items: [
-      { name: '获取数据: select()', url: '/reference/dart/select', items: [] },
-      { name: '创建数据: insert()', url: '/reference/dart/insert', items: [] },
-      { name: '修改数据: update()', url: '/reference/dart/update', items: [] },
-      { name: '上传数据: upsert()', url: '/reference/dart/upsert', items: [] },
-      { name: '删除数据: delete()', url: '/reference/dart/delete', items: [] },
-      { name: '存储程序: rpc()', url: '/reference/dart/rpc', items: [] },
+      { name: 'Select 查询', url: '/reference/dart/select', items: [] },
+      { name: 'Insert 数据', url: '/reference/dart/insert', items: [] },
+      { name: 'Update 数据', url: '/reference/dart/update', items: [] },
+      { name: 'Upsert 数据', url: '/reference/dart/upsert', items: [] },
+      { name: 'Delete 数据', url: '/reference/dart/delete', items: [] },
+      { name: '调用Postgres函数', url: '/reference/dart/rpc', items: [] },
       {
         name: '过滤器',
         url: undefined,
@@ -87,6 +59,34 @@ const Nav = [
         ],
       },
     ],
+  },
+  {
+    label: '认证',
+    items: [
+      { name: 'signUp()', url: '/reference/dart/auth-signup', items: [] },
+      {
+        name: 'signInWithPassword()',
+        url: '/reference/dart/auth-signinwithpassword',
+        items: [],
+      },
+      { name: 'signInWithOtp()', url: '/reference/dart/auth-signinwithotp', items: [] },
+      { name: 'signInWithOAuth()', url: '/reference/dart/auth-signinwithoauth', items: [] },
+      { name: 'signOut()', url: '/reference/dart/auth-signout', items: [] },
+      { name: 'verifyOtp()', url: '/reference/dart/auth-verifyotp', items: [] },
+      { name: 'currentSession', url: '/reference/dart/auth-currentsession', items: [] },
+      { name: 'currentUser', url: '/reference/dart/auth-currentuser', items: [] },
+      { name: 'updateUser()', url: '/reference/dart/auth-updateuser', items: [] },
+      { name: 'onAuthStateChange()', url: '/reference/dart/auth-onauthstatechange', items: [] },
+      {
+        name: 'resetPasswordForEmail()',
+        url: '/reference/dart/auth-resetpasswordforemail',
+        items: [],
+      },
+    ],
+  },
+  {
+    label: '函数',
+    items: [{ name: 'invoke()', url: '/reference/dart/invoke', items: [] }],
   },
   {
     label: 'Realtime',

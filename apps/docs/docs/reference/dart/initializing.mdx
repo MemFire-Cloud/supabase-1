@@ -7,35 +7,55 @@ slug: initializing
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 
-## Flutter
 
-对于 `supabase-flutter`，你将在 `Supabase`类上使用静态的 `initialize()`方法。
+在使用 Supabase 的功能之前，需要先对 Supabase 进行初始化。这可以通过调用 Supabase 类的静态方法 initialize() 来实现。这个方法可能需要提供一些配置参数，以便正确地连接到 Supabase 服务。
 
-### Flutter `initialize()`
+一旦完成初始化，Supabase 客户端就是您与 Supabase 服务进行交互的主要接口。通过客户端，您可以访问 Supabase 提供的各种功能和服务。这是与 Supabase 生态系统内的其他组件交互的最简单且主要的方式，使您能够轻松地使用 Supabase 提供的各种功能。
 
-```dart title=main.dart
+
+
+## 案例教程
+
+### 案例1 （Flutter项目）
+
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```dart
+                                                                              
 Future<void> main() async {
-  await Supabase.initialize(url: 'https://xyzcompany.supabase.co', anonKey: 'public-anon-key');
+  await Supabase.initialize(
+    url: 'https://xyzcompany.supabase.co',
+    anonKey: 'public-anon-key',
+  );
+
   runApp(MyApp());
 }
-```
 
-### 访问`SupabaseClient`实例
-
-一旦你在`main()`方法中初始化了Supabase，你就可以从你应用程序的任何地方访问`SupabaseClient`实例。
-
-```dart
+// Get a reference your Supabase client
 final supabase = Supabase.instance.client;
-```
+  ```
 
-## 其他Dart项目
+</TabPanel>
+</Tabs>
 
-你可以使用`SupabaseClient()`方法初始化一个新的Supabase客户端。
 
-Supabase客户端是你进入Supabase其他功能的入口是与我们在Supabase生态系统中提供的所有功能进行交互的最简单方式。
 
-### Dart `SupabaseClient()`
+### 案例2 （其他Dart项目）
 
-```dart
-final supabase = SupabaseClient('https://xyzcompany.supabase.co', 'public-anon-key');
-```
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```dart
+                                                                              
+final supabase = SupabaseClient(
+  'https://xyzcompany.supabase.co',
+  'public-anon-key',
+);
+  ```
+
+</TabPanel>
+</Tabs>

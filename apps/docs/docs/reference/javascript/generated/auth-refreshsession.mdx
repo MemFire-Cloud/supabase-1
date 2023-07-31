@@ -5,16 +5,49 @@ slug: /auth-refreshsession
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-返回一个新的会话，无论是否过期。
-接收一个可选的当前会话。如果没有传入，那么refreshSession()将试图从getSession()中获取它。
+
+refreshSession()用于获取新的会话，无论会话是否已过期，都将返回一个新的会话。该方法接受一个可选的当前会话作为参数。如果未传入当前会话，那么 refreshSession() 方法将尝试从 getSession() 方法中获取当前会话。
 如果当前会话的刷新令牌无效，将抛出一个错误。
 
-```js
+* 该方法将刷新并返回一个新的会话，无论当前会话是否已过期。
+
+
+
+## 案例教程
+### 案例1 （使用当前会话刷新会话）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 const { data: { user, session }, error } = await supabase.auth.refreshSession()
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+### 案例2 （使用传入的会话刷新会话）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data: { user, session }, error } = await supabase.auth.refreshSession({ refresh_token })
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -25,15 +58,15 @@ const { data: { user, session }, error } = await supabase.auth.refreshSession()
       currentSession
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-当前会话。如果传入，它必须包含一个刷新标记。
+当前会话的信息。如果传入了这个参数，则必须包含一个刷新令牌。
 
   </div>
   
@@ -43,20 +76,15 @@ const { data: { user, session }, error } = await supabase.auth.refreshSession()
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      refresh_token
+      刷新令牌（refresh_token）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
   
 </li>
 
@@ -65,36 +93,3 @@ const { data: { user, session }, error } = await supabase.auth.refreshSession()
 </li>
 
 </ul>
-
-
-## 注释
-
-- 这个方法将刷新会话，无论当前会话是否过期。
-- 这两个例子都是从`data'解构`user'和`session'。这不是必须的，所以`const { data, error } =`也是有效的。
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 使用当前会话刷新会话
-
-
-
-```js
-const { data: { user, session }, error } = await supabase.auth.refreshSession()
-```
-
-### 使用传入的会话刷新会话
-
-
-
-```js
-const { data: { user, session }, error } = await supabase.auth.refreshSession({ refresh_token })
-```

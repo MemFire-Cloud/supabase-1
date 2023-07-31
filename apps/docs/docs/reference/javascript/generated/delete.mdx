@@ -1,24 +1,62 @@
 ---
 id: delete
-title: "Delete data: delete()"
+title: "Delete 数据"
 slug: /delete
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-对表或视图执行DELETE操作。
+delete()用于在表（table）或视图（view）执行 DELETE 操作。
 
-默认情况下，删除的行不会被返回。要返回它，请在过滤器后用`.select()`连锁调用
-和`.select()`在过滤器之后。
+* `delete()` 应始终与[过滤器（filter）](/docs/reference/javascript/using-filters)结合使用，以便定位要删除的项。
+* 如果你在使用 `delete()` 时带有过滤器，并且启用了RLS（行级安全性），则只会删除通过  `SELECT` 策略可见的行。请注意，默认情况下没有行可见，因此你需要至少有一个 `SELECT`/`ALL` 策略来使行可见。
 
-```ts
+
+## 案例教程
+
+### 案例1 （删除记录）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'Spain');
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 const { error } = await supabase
   .from('countries')
   .delete()
   .eq('id', 1)
-```
+  ```
+
+</TabPanel>
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+{
+  "status": 204,
+  "statusText": "No Content"
+}
+  ```
+</TabPanel>
+</Tabs>
 
 
-## 参数
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -26,13 +64,13 @@ const { error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      options
+      选项（option）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -58,16 +96,13 @@ const { error } = await supabase
   </h4>
   <div class="method-list-item-description">
 
-用来计算删除行的计数算法。
+用来计算更新行的计数算法。
 
-`"exact"`: 准确但缓慢的计数算法。执行 "COUNT(*)"。
-引擎盖。
+exact:可以精确计算行数，但执行速度较慢。执行 "COUNT(*)"操作。
 
-`"planned"`: 近似但快速的计数算法。使用了Postgres
-的统计数据。
+planned:可以快速计算行数，但是结果可能略有偏差。使用了Postgres的统计数据。
 
-`"estimated"`: 低数字使用精确计数，高数字使用计划计数。
-数。
+estimated:对于较小的数值使用精确计数，对于较大的数值使用计划计数。根据行数的大小决定使用精确计数或计划计数的算法。
 
   </div>
   
@@ -78,85 +113,3 @@ const { error } = await supabase
 </li>
 
 </ul>
-
-
-## 注意
-
-- `delete()`应该总是和[filters](/docs/reference/javascript/using-filters)结合起来，以确定你想删除的项目。
-- 如果你使用`delete()`和过滤器，并且你有
-  [RLS](/docs/learn/auth-deep-dive/auth-row-level-security)已启用，则只有
-  通过`SELECT`策略可见的行被删除。注意，在默认情况下
-  没有行是可见的，所以你需要至少有一个`SELECT`/`ALL`策略来使行可见。
-  使得这些行可见。
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 删除记录
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'Spain');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { error } = await supabase
-    .from('countries')
-    .delete()
-    .eq('id', 1)
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "status": 204,
-    "statusText": "No Content"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="js">
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .select()
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>

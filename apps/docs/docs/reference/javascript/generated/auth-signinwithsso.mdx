@@ -1,0 +1,103 @@
+---
+id: auth-signinwithsso
+title: "signInWithSSO()"
+slug: /auth-signinwithsso
+custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
+---
+
+
+
+在MemFire Cloud中，SignInWithSSO指的是"Single Sign-On"（单点登录）的一种方法。单点登录是一种身份验证机制，允许用户只需通过一次登录，即可在多个相关应用程序或服务中访问和使用。
+
+尝试使用企业身份提供者进行单点登录 (SSO)。成功的 SSO 尝试将重定向当前页面到身份提供者的授权页面。重定向 URL 是与实现和 SSO 协议相关的。
+
+在调用此方法之前，您需要建立与身份提供者的连接。可以使用命令行工具 (CLI) 来完成这一步。
+
+如果您已将电子邮件域关联到身份提供者，您可以使用 `domain` 属性启动登录流程。
+
+如果您需要使用不同的方式来启动与身份提供者的认证流程，您可以使用   `providerId` 属性。例如：
+
+* 将特定用户电子邮件地址映射到身份提供者。
+* 使用不同的提示来识别用户要使用的身份提供者，比如公司特定页面、IP 地址或其他跟踪信息。
+
+
+
+
+
+
+## 案例教程
+
+### 案例1 （使用电子邮件域名登录）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+  // You can extract the user's email domain and use it to trigger the
+  // authentication flow with the correct identity provider.
+
+  const { data, error } = await supabase.auth.signInWithSSO({
+    domain: 'company.com'
+  })
+
+  if (data?.url) {
+    // redirect the user to the identity provider's authentication flow
+    window.location.href = data.url
+  }
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+
+### 案例2 （使用提供商 UUID 登录）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+  // Useful when you need to map a user's sign in request according
+  // to different rules that can't use email domains.
+
+  const { data, error } = await supabase.auth.signInWithSSO({
+    providerId: '21648a9d-8d5a-4555-a9d1-d6375dc14e92'
+  })
+
+  if (data?.url) {
+    // redirect the user to the identity provider's authentication flow
+    window.location.href = data.url
+  }
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+
+
+## 参数说明
+
+
+<ul className="method-list-group">
+  
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      params
+    </span>
+    <span className="method-list-item-label-badge required">
+      [必要参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>SignInWithSSO类型</code> 
+    </span>
+  </h4>
+
+</li>
+
+</ul>

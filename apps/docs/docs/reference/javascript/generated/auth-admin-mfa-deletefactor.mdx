@@ -1,0 +1,106 @@
+---
+id: auth-admin-mfa-deletefactor
+title: "mfa.deleteFactor()"
+slug: /auth-admin-mfa-deletefactor
+custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
+---
+
+mfa.deleteFactor()用于删除用户的验证因素。如果被删除的验证因素已经通过验证，则会导致用户从所有活动会话中注销。
+
+
+## 案例教程
+
+### 案例1 （为用户删除一个因素）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                   
+const { data, error } = await supabase.auth.admin.mfa.deleteFactor({
+  id: '34e770dd-9ff9-416c-87fa-43b31d7ef225',
+  userId: 'a89baba7-b1b7-440f-b4bb-91026967f66b',
+})
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+
+
+
+
+
+## 参数说明
+
+<ul className="method-list-group">
+  
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      params
+    </span>
+    <span className="method-list-item-label-badge required">
+      [必要参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>AuthMFAAdminDeleteFactorParams</code>
+    </span>
+  </h4>
+
+<ul className="method-list-group">
+  <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      userId
+    </span>
+    <span className="method-list-item-label-badge required">
+      [必要参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>string类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+正在删除因素的用户的 ID。
+
+  </div>
+  
+</li>
+
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      id
+    </span>
+    <span className="method-list-item-label-badge required">
+      [必要参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>string类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+要删除的 MFA 因素的 ID
+
+  </div>
+  
+</li>
+
+
+
+
+
+</ul>
+
+</li>
+
+</ul>

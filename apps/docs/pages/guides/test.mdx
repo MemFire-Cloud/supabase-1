@@ -1,0 +1,266 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: 'database',
+  title: 'Fetch 数据',
+  description: 'Use Supabase to manage your data.',
+  sidebar_label: 'Overview',
+}
+
+
+## 执行对表或视图的SELECT查询。
+
+* 默认情况下，Supabase项目返回最多1,000行数据。您可以在项目的API设置中更改此设置。建议您保持较低的设置，以限制意外或恶意请求的有效载荷大小。您可以使用range()查询来分页处理数据。
+* `select()`可以与Filters结合使用。
+* `select()`可以与Modifiers结合使用。
+* 如果您正在使用Supabase平台，`apikey`是一个保留关键字，应避免将其作为[列名](https://github.com/supabase/supabase/issues/5465)。
+
+
+## 案例教程
+### 案例1 (获取数据)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="建表">
+
+```sql
+
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'Afghanistan'),
+  (2, 'Albania'),
+  (3, 'Algeria');
+
+```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
+
+```javascript
+
+const { data, error } = await supabase
+  .from('countries')
+  .select()
+
+```
+</TabPanel>
+
+<TabPanel id="demo3" label="返回结果">
+
+```json
+
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Afghanistan"
+    },
+    {
+      "id": 2,
+      "name": "Albania"
+    },
+    {
+      "id": 3,
+      "name": "Algeria"
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+
+```
+</TabPanel>
+
+</Tabs>
+
+
+### 案例2 (选择特定列)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="建表">
+
+```sql
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'Afghanistan'),
+  (2, 'Albania'),
+  (3, 'Algeria');
+
+```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
+
+```javascript
+const { data, error } = await supabase
+  .from('countries')
+  .select('name')
+```
+</TabPanel>
+
+<TabPanel id="demo3" label="返回结果">
+
+```json
+{
+  "data": [
+    {
+      "name": "Afghanistan"
+    },
+    {
+      "name": "Albania"
+    },
+    {
+      "name": "Algeria"
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+```
+</TabPanel>
+
+</Tabs>
+
+### 案例3 (查询外表)
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="建表">
+
+```sql
+create table
+  countries (id int8 primary key, name text);
+create table
+  cities (
+    id int8 primary key,
+    country_id int8 not null references countries,
+    name text
+  );
+
+insert into
+  countries (id, name)
+values
+  (1, 'Germany'),
+  (2, 'Indonesia');
+insert into
+  cities (id, country_id, name)
+values
+  (1, 2, 'Bali'),
+  (2, 1, 'Munich');
+```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
+
+```javascript
+const { data, error } = await supabase
+  .from('countries')
+  .select(`
+    name,
+    cities (
+      name
+    )
+  `)
+```
+</TabPanel>
+
+<TabPanel id="demo3" label="返回结果">
+
+```json
+{
+  "data": [
+    {
+      "name": "Germany",
+      "cities": [
+        {
+          "name": "Munich"
+        }
+      ]
+    },
+    {
+      "name": "Indonesia",
+      "cities": [
+        {
+          "name": "Bali"
+        }
+      ]
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+```
+</TabPanel>
+<TabPanel id="demo4" label="NOTE">
+
+如果你的数据库有外键关联，你也可以查询相关表。
+
+</TabPanel>
+</Tabs>
+
+
+
+
+
+## 参数
+
+**column（列）**
+* 可选的
+* 查询
+* 要检索的列，用逗号分隔
+
+**options（选项）**
+* 可选的
+* 对象
+* 命名参数
+
+***
+
+#### 可接受的取值：
+
+**Count**
+* 可选的
+* "exact" | "planned" | "estimated"
+* 用于在表或视图中计算行数的计数算法。"exact"：精确但较慢的计数算法。在底层执行 COUNT(*)。
+"planned"：近似但更快速的计数算法。利用了 Postgres 的统计信息。"estimated"：对于较小的数字使用精确计数，对于较大的数字使用计划计数。
+
+
+**head**
+* 可选的
+* 布尔值
+* 当设置为 `true` 时，将不返回数据。如果只需要计数，这将非常有用。
+
+***
+
+
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page
