@@ -6,133 +6,191 @@ export const meta = {
   description: 'There are various ways to connect to your Postgres database.',
 }
 
-Supabase提供了几个以编程方式连接到Postgres数据库的选项:
-
-## 连接类型
-
-- 使用API的HTTP连接。
-- 使用Postgres的标准连接系统的直接连接。
-- 使用PgBouncer的连接池。
-
-### 直接连接与池化连接与API连接
-
-- "直接连接"是指使用Postgres的本地连接实现与数据库建立连接。你应该把它用在那些一直运行的工具上--通常安装在一个长期运行的服务器上。
-- "连接池"是一个保持连接 "开放 "的系统（在Postgres外部）。你应该把它用于无服务器功能和经常与数据库断开连接的工具。
-- API是一个自动生成的REST接口。你应该在所有的浏览器和应用程序的交互中使用它。API服务器内部处理一个连接池。
-
-为什么你要使用连接池？主要是因为Postgres处理连接的方式对于大量的临时连接来说不是很可扩展。
-你可以使用这些简单的问题来决定使用哪种连接方式。
-
-- 你是否正在连接一个数据库并保持一个连接？如果是，请使用直接连接。
-- 你是否连接到数据库，然后立即断开连接（例如，无服务器环境）？如果是，请使用连接池。
+MemFire Cloud 提供了几种连接Postgres数据库的方式:
+1. 直接连接：使用Postgres标准连接系统直接与数据库进行连接和交互。
+2. [无服务器API连接](/docs/guides/api)：使用无服务器API以编程方式来访问数据库。
 
 
-## API
-
-Supabase提供了一个自动更新的[API]（/docs/guides/api）。如果你要管理数据（获取、插入、更新），这是最简单的入门方法。
-
-### 接口
-
-我们提供了几种类型的API来满足你的喜好和使用需求。
-
-- [REST](/docs/guides/api#rest-api)：通过REST接口与你的数据库进行交互。
-- [GraphQL](/docs/guides/api#graphql-api)：通过GraphQL接口与你的数据库互动。
-- [Realtime](/docs/guides/api#realtime-api)：通过websockets监听数据库变化。
-
-你不能通过API管理数据库模式（出于安全原因）。要做到这一点，你可以使用仪表板或直接连接到你的数据库。
-
-### API URL和密钥
-
-你可以在[仪表板](https://app.supabase.com/project/_/settings/api)中找到API URL和密钥。
-
-<video width="99%" muted playsInline controls="true">
-  <source src="/docs/videos/api/api-url-and-key.mp4" type="video/mp4" muted playsInline />
-</video>
 
 ## 直接连接
+每个MemFire Cloud 应用内置一个完整的Postgres数据库，你可以使用任何支持Postgres的工具来连接到数据库。你可以在控制台内的数据库设置中获取连接信息：
 
-每个Supabase项目都提供一个完整的Postgres数据库。你可以使用任何支持Postgres的工具连接到数据库。
+1. 来到左侧菜单栏的 `设置`部分
+2. 点击`数据库`
+3. 启用数据库直连
+4. 找到应用的`连接信息`
 
-### 获取连接方式
-
-1. 转到`设置` 栏。
-2. 点击 "数据库"。
-3. 找到你的连接信息和连接字符串。直接连接的端口为`5432`。
-
-<video width="99%" muted playsInline controls="true">
-  <source src="/docs/videos/postgres-connection.mp4" type="video/mp4" muted playsInline />
-</video>
-
-## 连接池
-
-连接池对于管理大量的临时连接非常有用。例如，如果你使用[Prisma](/docs/guides/integrations/prisma)部署到无服务器环境。
-
-### 连接池如何工作
-
-连接池是一个管理连接的系统（Postgres外部），而不是PostgreSQL的本地系统。Supabase使用[PgBouncer](https://www.pgbouncer.org/)进行连接池的管理。
-
-当一个客户发出请求时，PgBouncer为客户 "分配 "一个可用的连接。
-当客户端交易或会话完成后，该连接将返回到池中，可供其他客户端使用。
-
-![Connection pooling](/docs/img/guides/database/connection-pool.png)
-
-### 池模式
-
-池模式决定了PgBouncer如何处理一个连接。
-
-#### 会话
-
-当一个新的客户端连接时，一个连接被分配给该客户端，直到它断开连接。之后，连接会被退回到池中。
-
-所有 PostgreSQL 的功能都可以使用这个选项。
-
-#### 事务
-
-这是对无服务器功能的建议选项。一个连接只在一个事务期间分配给客户端。来自同一个客户端的两个连续的事务可以通过两个不同的连接来执行。
-
-一些基于会话的PostgreSQL功能，如准备好的语句，不能使用此选项。
-一个全面的不兼容功能列表可以在[这里](https://www.pgbouncer.org/features.html)找到。
-
-#### 声明
-
-这是最细化的选项。连接在每个语句之后都会被返回到池中。不允许有多个语句的交易。在使用`AUTOCOMMIT'时最好使用这个选项。
-
-### 寻找连接池的配置
-
-1. 转到 "设置 "栏。
-2. 点击 "数据库"。
-3. 找到你的连接信息和连接字符串。连接池的端口为`6543`
-
-<video width="99%" muted playsInline controls="true">
-  <source src="/docs/videos/connection-pool-config.mp4" type="video/mp4" muted playsInline />
-</video>
-
-## 使用SSL连接
-
-当连接到你的数据库时，使用这个方法来防止窥探和中间人攻击。
-
-从你的应用程序的仪表板上获得连接信息和服务器根证书。
-![Connection Info and Certificate.](/docs/img/guides/database/connection-info-cert.png)
+![步骤](/docs/img/guides/database/数据库连接-步骤.png)
 
 
-假设你已经下载了你的证书，它位于`$HOME/Downloads/prod-ca-2021.cer`，并且你的主机地址是`db.abcdefghijklm.supabase.co`，你可以用以下方式连接到数据库启用SSL，如下图所示。
+### 白名单
+MemFire Cloud内置白名单功能，开启白名单后，只允许白名单内的IP地址段访问你的数据库。关闭白名单后，访问你数据库的IP地址不受限制，即任何IP地址只要有连接信息都可以与你的数据库进行直连。
+在进行白名单配置时，要遵循CIDR规则。MemFire Cloud中白名单功能 默认是关闭的，需用户手动开启。
 
-1. 使用`psql`
+![白名单](/docs/img/guides/database/数据库连接-白名单.png)
 
-```
-psql "sslmode=verify-full sslrootcert=$HOME/Downloads/prod-ca-2021.cer host=db.abcdefghijklm.supabase.co dbname=postgres user=postgres"
+
+
+## 无服务器API连接
+
+MemFire Cloud 提供了自动更新API，极大简化了操作数据库中数据的步骤（包括数据查询、插入、更新等等）。同时我们也提供了一些不同类型的API来满足你的业务需求。
+- [REST](/docs/guides/api/api#rest-api-overview)：通过REST接口与你的数据库进行交互。
+- [GraphQL](/docs/guides/api/api#graphql-api-overview)：通过GraphQL接口与你的数据库互动。
+- [Realtime](/docs/guides/api/api#realtime-api)：通过websockets监听数据库变化。
+
+
+
+
+## 案例教程
+### 案例1 使用Navicat连接
+Navicat是一个用于管理Postgres数据库的图形用户界面（GUI）工具。你可以使用它连接到你的数据库：
+
+#### 步骤1
+新建一个连接，选择:PostgreSQL
+![Navicat1](/docs/img/guides/database/数据库连接-navicat1.png)
+
+#### 步骤2
+在你的MemFire Cloud控制台中找到“连接信息”，并添加此处。点击“测试连接”，若返回成功弹窗则表明连接建立成功。
+![Navicat1](/docs/img/guides/database/数据库连接-navicat22.png)
+
+
+连接成功后即可管理和查询你的数据。
+![Navicat结果](/docs/img/guides/database/数据库连接-navicat结果.png)
+
+### 案例2 使用python连接
+
+配置：本例中选用pycharm编辑器，python3.8版本。
+
+#### 步骤1
+在 MemFire Cloud 控制台中启用数据库直连，找到python的“连接字符串”。
+![python字符串](/docs/img/guides/database/数据库连接-python.png)
+
+#### 步骤2
+在pycharm编辑器中，导入第三方库 `psycopg2`，`psycopg2`是一个流行的Python库，用于连接和操作PostgreSQL数据库。如果尚未安装此库，请通过以下命令进行安装：
+
+```bash
+pip install psycopg2
 ```
 
-2. 使用 `pgAdmin`
-   a. 注册一个新的Postgres服务器
-   ![Register a new postgres server.](/docs/img/guides/database/register-server-pgAdmin.png)
+*或者*在pycharm的 Python Interpreter中进行设置，步骤如下：
 
-   b. 根据个人喜好命名你的服务器，并添加连接信息.
-   ![Name Postgres Server.](/docs/img/guides/database/name-pg-server.png)
-   ![Add Connection Info.](/docs/img/guides/database/add-pg-server-conn-info.png)
+![python库1](/docs/img/guides/database/数据库连接-python库安装1.png)
+![python库2](/docs/img/guides/database/数据库连接-python库安装2.png)
 
-3. 导航到SSL标签，将SSL模式改为 "需要"。接下来导航到根证书输入，它将打开一个 文件选择器模式。选择你从Supabase仪表板上下载的证书，并保存服务器的详细信息。PgAdmin 现在应该能够通过SSL连接到你的Postgres。
-   ![Add Connection Info.](/docs/img/guides/database/add-ssl-config.png)
+
+
+
+#### 步骤3
+完成`psycopg2`的安装后，将连接字符串中的`[YOUR-PASSWORD]`替换为数据库的实际密码。`[YOUR-HOST]`替换为数据库的主机地址。
+`[USER-NAME]`替换为你的用户名。端口号默认为：`10010`，数据库名称默认为：`postgres`。建立与MemFire Cloud应用数据库连接，然后对数据库进行操作。
+
+代码如下：
+
+
+```python
+import psycopg2
+
+# 定义连接字符串
+connection_string = "user=[USER-NAME] password=[YOUR-PASSWORD] host=[YOUR-HOST] port=5432 dbname=postgres"
+
+try:
+    # 连接到数据库
+    connection = psycopg2.connect(connection_string)
+
+    # 创建一个游标对象
+    cursor = connection.cursor()
+
+    # 执行SQL查询或其他数据库操作
+    # 注：city是本次数据库中想要操作的表名
+    cursor.execute("SELECT * FROM city;")
+    rows = cursor.fetchall()
+
+    # 输出查询结果
+    for row in rows:
+        print(row)
+
+    # 关闭游标和连接
+    cursor.close()
+    connection.close()
+
+except psycopg2.Error as error:
+    print("Error connecting to the database:", error)
+```
+
+这段代码返回数据库中表“city”的全部内容。可以看出，返回结果与表中数据一致。
+
+![python结果](/docs/img/guides/database/数据库连接-python结果.png)
+![本地表](/docs/img/guides/database/数据库连接-本地表.png)
+
+*注*:如编译不通过，尝试将python连接字符串中参数`database`改为`dbname`。因为`psycopg2`库并不认可`database`这个参数
+
+
+
+### 案例3  使用Nodejs连接
+
+配置：本例中选用VScode编辑器，node.js版本v16.19.0
+
+#### 步骤1
+
+在 MemFire Cloud 控制台中启用数据库直连，找到nodejs的“连接字符串”。
+![nodejs字符串](/docs/img/guides/database/数据库连接-nodejs.png)
+
+
+#### 步骤2
+
+确保你的系统上已经安装了Node.js和npm。创建一个新的Node.js项目或使用现有项目。进入项目目录并安装pg库，这是Node.js中常用的PostgreSQL客户端。
+```bash
+npm install pg
+```
+
+#### 步骤3
+
+创建一个JavaScript文件（本例`app.js`）并在文件开头导入`pg`库，使用连接字符串建立数据库连接：
+将连接字符串中的`[YOUR-PASSWORD]`替换为数据库的实际密码。`[YOUR-HOST]`替换为数据库的主机地址。`[USER-NAME]`替换为你的用户名。端口号默认为：`10010`，数据库名称默认为：`postgres`。然后对数据库进行操作。
+
+代码如下：
+
+```javascript
+const { Client } = require('pg');
+
+const connectionString = 'postgresql://[USER-NAME]:[YOUR-PASSWORD]@[YOUR-HOST]:5432/postgres';
+
+const client = new Client({
+  connectionString: connectionString,
+});
+
+// 连接数据库
+client.connect()
+  .then(() => {
+    console.log('已连接到数据库');
+    // 现在你可以使用 'client' 对象执行查询
+  })
+  .catch((err) => {
+    console.error('连接数据库出错', err);
+  });
+
+//查询数据库
+  client.query('SELECT * FROM city;')
+  .then((result) => {
+    console.log('查询结果:', result.rows);
+  })
+  .catch((err) => {
+    console.error('执行查询出错:', err);
+  });
+
+```
+
+到 `app.js` 文件所在的目录下执行 node app.js，运行`app.js`文件，可得到返回结果
+
+```bash
+node app.js
+```
+这段代码返回数据库中表“city”的全部内容。可以看出，返回结果与表中数据一致。
+
+![nodejs结果](/docs/img/guides/database/数据库连接-nodejs结果.png)
+![本地表](/docs/img/guides/database/数据库连接-本地表.png)
+
+
 
 export const Page = ({ children }) => <Layout meta={meta} children={children} />
 
