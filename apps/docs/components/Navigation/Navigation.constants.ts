@@ -54,6 +54,7 @@ export const menuItems: NavMenu = {
         { name: '简介', url: '/', items: [] },
         { name: '功能', url: '/features', items: [] },
         { name: '架构', url: '/architecture', items: [] },
+        { name: '产品动态', url: '/history', items: [] },
         { name: '联系我们', url: '/contactus', items: [] },
       ],
     },
