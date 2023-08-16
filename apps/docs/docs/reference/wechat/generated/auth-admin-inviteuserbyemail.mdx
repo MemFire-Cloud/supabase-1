@@ -5,14 +5,28 @@ slug: /auth-admin-inviteuserbyemail
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-向一个电子邮件地址发送一个邀请链接。
 
-```js
+inviteUserByEmail()函数用于向一个用户电子邮件地址发送邀请链接。
+
+
+## 案例教程
+
+### 案例1 （邀请一个用户）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
 const { data, error } = await supabase.auth.admin.inviteUserByEmail('email@example.com')
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -23,10 +37,10 @@ const { data, error } = await supabase.auth.admin.inviteUserByEmail('email@examp
       email
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -41,18 +55,18 @@ const { data, error } = await supabase.auth.admin.inviteUserByEmail('email@examp
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      options
+      选项（option）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-未提供说明。
+用于指定在邀请时包含的额外选项。
 
   </div>
   
@@ -65,15 +79,15 @@ const { data, error } = await supabase.auth.admin.inviteUserByEmail('email@examp
       data
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-可选的用户元数据
+用于存储关于用户的其他元数据。这个数据对象映射到 auth.users.user_metadata 列，可以用于存储一些用户特定的信息。
 
   </div>
   
@@ -86,15 +100,16 @@ const { data, error } = await supabase.auth.admin.inviteUserByEmail('email@examp
       redirectTo
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-一个URL或移动深层链接，在用户被确认后发送给他们。
+
+它会附加在发送给用户电子邮件地址的邀请链接的 URL 后面。用户点击链接后将跳转到这个指定的 URL。
 
   </div>
   
@@ -105,27 +120,3 @@ const { data, error } = await supabase.auth.admin.inviteUserByEmail('email@examp
 </li>
 
 </ul>
-
-
-## 注释
-
-- 向用户的电子邮件地址发送一个邀请链接。
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 邀请一个用户
-
-
-
-```js
-const { data, error } = await supabase.auth.admin.inviteUserByEmail('email@example.com')
-```

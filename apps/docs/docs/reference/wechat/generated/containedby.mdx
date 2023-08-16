@@ -5,17 +5,208 @@ slug: /containedby
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-只与jsonb、数组和范围列有关。只匹配那些每一个出现在`column`中的元素都被`value`所包含。
 
-```ts
+
+该方法仅用于在 jsonb、数组（array）和范围（range）列上进行过滤
+
+contains()的作用是匹配那些其中每个元素都被包含在指定的值中的行。
+
+换句话说，在指定列中，给定的`数组（array）`是匹配出来的记录值的子集
+
+也就是说，在指定列中，匹配出来的记录的值包含了给定的`数组（array）`的所有元素。
+
+
+
+
+
+## 案例教程
+
+### 案例1 （关于数组列）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+                                                                                
+create table
+  classes (
+    id int8 primary key,
+    name text,
+    days text[]
+  );
+
+insert into
+  classes (id, name, days)
+values
+  (1, 'Chemistry', array['monday', 'friday']),
+  (2, 'History', array['monday', 'wednesday', 'thursday']);
+
+  ```
+
+</TabPanel>
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
 const { data, error } = await supabase
   .from('classes')
   .select('name')
   .containedBy('days', ['monday', 'tuesday', 'wednesday', 'friday'])
-```
+  ```
+
+</TabPanel>
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+                                                                                
+{
+  "data": [
+    {
+      "name": "Chemistry"
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+  ```
+
+</TabPanel>
+
+</Tabs>
+
+### 案例2 （关于范围列）
 
 
-## 参数
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+                                                                                
+create table
+  reservations (
+    id int8 primary key,
+    room_name text,
+    during tsrange
+  );
+
+insert into
+  reservations (id, room_name, during)
+values
+  (1, 'Emerald', '[2000-01-01 13:00, 2000-01-01 15:00)'),
+  (2, 'Topaz', '[2000-01-02 09:00, 2000-01-02 10:00)');
+
+  ```
+
+</TabPanel>
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
+const { data, error } = await supabase
+  .from('reservations')
+  .select()
+  .containedBy('during', '[2000-01-01 00:00, 2000-01-01 23:59)')
+  ```
+
+</TabPanel>
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+                                                                                
+{
+  "data": [
+    {
+      "id": 1,
+      "room_name": "Emerald",
+      "during": "[\"2000-01-01 13:00:00\",\"2000-01-01 15:00:00\")"
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+Postgres 支持多种[范围类型](https://www.postgresql.org/docs/current/rangetypes.html)。您可以使用范围值的字符串表示来过滤范围列。
+
+</TabPanel>
+</Tabs>
+
+
+
+
+
+
+### 案例3 （关于jsonb列）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+                                                                                
+create table
+  users (
+    id int8 primary key,
+    name text,
+    address jsonb
+  );
+
+insert into
+  users (id, name, address)
+values
+  (1, 'Michael', '{ "postcode": 90210, "street": "Melrose Place" }'),
+  (2, 'Jane', '{}');
+  ```
+
+</TabPanel>
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
+const { data, error } = await supabase
+  .from('users')
+  .select('name')
+  .containedBy('address', {})
+  ```
+
+</TabPanel>
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+                                                                                
+  {
+    "data": [
+      {
+        "name": "Jane"
+      }
+    ],
+    "status": 200,
+    "statusText": "OK"
+  }
+  
+  ```
+
+</TabPanel>
+
+</Tabs>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -23,13 +214,13 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      列
+      列（column）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>ColumnName</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -44,13 +235,13 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      值
+      值（value）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code> | <code>Record</code> | <code>array</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -59,236 +250,6 @@ const { data, error } = await supabase
 
   </div>
   
-<ul className="method-list-group">
-  <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      <code>object</code>
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      string
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      Record
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
-  
 </li>
 
 </ul>
-
-</li>
-
-</ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 举例
-
-### 关于数组列
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    classes (
-      id int8 primary key,
-      name text,
-      days text[]
-    );
-
-  insert into
-    classes (id, name, days)
-  values
-    (1, 'Chemistry', array['monday', 'friday']),
-    (2, 'History', array['monday', 'wednesday', 'thursday']);
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('classes')
-    .select('name')
-    .containedBy('days', ['monday', 'tuesday', 'wednesday', 'friday'])
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "name": "Chemistry"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-### 关于范围列
-
-Postgres支持一系列的[范围类型](https://www.postgresql.org/docs/current/rangetypes.html)。你可以可以使用范围值的字符串表示对范围列进行过滤值。
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    reservations (
-      id int8 primary key,
-      room_name text,
-      during tsrange
-    );
-
-  insert into
-    reservations (id, room_name, during)
-  values
-    (1, 'Emerald', '[2000-01-01 13:00, 2000-01-01 15:00)'),
-    (2, 'Topaz', '[2000-01-02 09:00, 2000-01-02 10:00)');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('reservations')
-    .select()
-    .containedBy('during', '[2000-01-01 00:00, 2000-01-01 23:59)')
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "id": 1,
-        "room_name": "Emerald",
-        "during": "[\"2000-01-01 13:00:00\",\"2000-01-01 15:00:00\")"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-### 关于`jsonb`列
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    users (
-      id int8 primary key,
-      name text,
-      address jsonb
-    );
-
-  insert into
-    users (id, name, address)
-  values
-    (1, 'Michael', '{ "postcode": 90210, "street": "Melrose Place" }'),
-    (2, 'Jane', '{}');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('users')
-    .select('name')
-    .containedBy('address', {})
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "name": "Jane"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>

@@ -5,16 +5,44 @@ slug: /storage-getbucket
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-检索现有存储桶的详细信息。
 
-```js
-const { data, error } = await supabase
+getBucket()用于获取现有存储桶的详细信息。
+
+需要RLS策略权限:
+  - `buckets`表的权限: `select`
+  - `objects`表的权限：无
+
+请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
+
+
+
+
+
+## 案例教程
+
+### 案例1 （获取存储桶信息）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase                                      
   .storage
   .getBucket('avatars')
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+
+
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -25,47 +53,18 @@ const { data, error } = await supabase
       id
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-你想检索的桶的唯一标识符。
+这是你创建存储桶的唯一标识符。
 
   </div>
   
 </li>
 
 </ul>
-
-
-## 注意事项
-
-- 需要RLS策略权限:
-  - `buckets`表权限: `选择'.
-  - `objects`表的权限：无
-- 请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
-
-
-
-
-
-
-
-
-
-
-## 实例
-
-### 获取桶
-
-
-
-```js
-const { data, error } = await supabase
-  .storage
-  .getBucket('avatars')
-```

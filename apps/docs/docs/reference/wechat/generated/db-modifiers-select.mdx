@@ -17,7 +17,70 @@ const { data, error } = await supabase
 ```
 
 
-## 参数
+## 案例教程 
+
+### 案例1 
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="建表">
+
+```sql
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'Afghanistan');
+
+```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
+
+```ts
+const { data, error } = await supabase
+  .from('countries')
+  .upsert({ id: 1, name: 'Algeria' })
+  .select()
+```
+</TabPanel>
+
+<TabPanel id="demo3" label="返回结果">
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Algeria"
+    }
+  ],
+  "status": 201,
+  "statusText": "Created"
+}
+
+```
+</TabPanel>
+</Tabs>
+
+
+
+
+
+
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -25,13 +88,13 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      列
+      列（column）
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>Query</code>
+      <code>query类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -43,84 +106,3 @@ const { data, error } = await supabase
 </li>
 
 </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 使用`upsert()`时
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'Afghanistan');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .upsert({ id: 1, name: 'Albania' })
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "status": 201,
-    "statusText": "Created"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="js">
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .upsert({ id: 1, name: 'Algeria' })
-    .select()
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "id": 1,
-        "name": "Algeria"
-      }
-    ],
-    "status": 201,
-    "statusText": "Created"
-  }
-  ```
-
-</TabPanel>
-</Tabs>

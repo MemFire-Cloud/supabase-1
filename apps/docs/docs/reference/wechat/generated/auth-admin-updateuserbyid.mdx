@@ -5,59 +5,156 @@ slug: /auth-admin-updateuserbyid
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-更新用户数据。
 
-```js
+updateUserById()用于更新用户数据。
+
+## 案例教程
+
+### 案例1 （更新用户的电子邮件地址）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
+const { data: user, error } = await supabase.auth.admin.updateUserById(
+  '6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
+  { email: 'new@email.com' }
+)
+  ```
+
+</TabPanel>
+</Tabs>
+
+### 案例2 （更新用户的密码）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
+const { data: user, error } = await supabase.auth.admin.updateUserById(
+  '6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
+  { password: 'new_password' }
+)
+  ```
+
+</TabPanel>
+</Tabs>
+
+### 案例3 （更新用户的元数据）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
 const { data: user, error } = await supabase.auth.admin.updateUserById(
   '6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
   { user_metadata: { hello: 'world' } }
 )
-```
+  ```
+
+</TabPanel>
+</Tabs>
+
+### 案例4 （更新用户的应用程序元数据）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
+const { data: user, error } = await supabase.auth.admin.updateUserById(
+  '6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
+  { app_metadata: { plan: 'trial' } }
+)
+  ```
+
+</TabPanel>
+</Tabs>
+
+### 案例5 （确认用户的电子邮件地址）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
+const { data: user, error } = await supabase.auth.admin.updateUserById(
+  '6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
+  { email_confirm: true }
+)
+  ```
+
+</TabPanel>
+</Tabs>
+
+### 案例6 （确认用户的电话号码）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
+const { data: user, error } = await supabase.auth.admin.updateUserById(
+  '6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
+  { phone_confirm: true }
+)
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+
+## 参数说明
 
 
 <ul className="method-list-group">
   
+
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
       uid
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-未提供说明。 
+
+用户的唯一标识符。
 
   </div>
   
 </li>
 
 
+
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      AdminUserAttributes
+      attributes
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>AdminUserAttributes类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
-
-未提供说明。 
-
-  </div>
   
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
@@ -68,21 +165,16 @@ const { data: user, error } = await supabase.auth.admin.updateUserById(
       app_metadata
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-一个自定义的数据对象，用于存储用户的特定应用元数据。这映射到`auth.users.app_metadata`列。
-
-只有服务角色可以修改。
-
-`app_metadata`应该是一个JSON对象，包括应用特定的信息，如身份提供者、角色和其他
-访问控制信息。
-
+用于存储用户特定应用程序元数据的自定义数据对象。这映射到 auth.users.app_metadata 列。只有服务角色可以修改。app_metadata 应该是一个 JSON 对象，其中包含应用程序特定的信息，例如身份提供者、角色和其他访问控制信息。
+  
   </div>
   
 </li>
@@ -94,45 +186,17 @@ const { data: user, error } = await supabase.auth.admin.updateUserById(
       ban_duration
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-Determines how long a user is banned for.
+决定一个用户被禁止多长时间。
 
-禁令持续时间的格式遵循带有单位后缀的十进制数字的严格序列。
-有效的时间单位是 "ns"、"us"（或 "µs"）、"ms"、"s"、"m"、"h"。
-
-例如，一些可能的持续时间包括。'300ms'，'2h45m'。
-
-将禁止期限设置为 "无 "可以解除对该用户的禁止。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      data
-    </span>
-    <span className="method-list-item-label-badge false">
-      可选的
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-一个自定义的数据对象来存储用户的元数据。这映射到`auth.users.user_metadata`列。
-
-`data`应该是一个JSON对象，包括用户的具体信息，如他们的名字和姓氏。
+确定用户被封禁的持续时间。封禁持续时间的格式遵循严格的十进制数字和单位后缀的顺序。有效的时间单位包括 "ns"、"us"（或 "µs"）、"ms"、"s"、"m"、"h"。例如，一些可能的持续时间包括：'300ms'、'2h45m'。将封禁持续时间设置为 'none' 将解除对用户的封禁。
 
   </div>
   
@@ -145,10 +209,10 @@ Determines how long a user is banned for.
       email
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -166,21 +230,44 @@ Determines how long a user is banned for.
       email_confirm
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>boolean</code>
+      <code>boolean类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-确认用户的电子邮件地址，如果设置为真。
-
-只有服务角色可以修改。
+如果设置为 true，则确认用户的电子邮件地址。只有服务角色可以修改。
 
   </div>
   
 </li>
+
+
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      nonce
+    </span>
+    <span className="method-list-item-label-badge false">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>string类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+如果要更新用户的密码，则发送的重新认证的随机数。首先调用 reauthenticate() 来获取随机数。
+
+  </div>
+  
+</li>
+
+
+
 
 
 <li className="method-list-item">
@@ -189,10 +276,10 @@ Determines how long a user is banned for.
       password
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -210,10 +297,10 @@ Determines how long a user is banned for.
       phone
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -231,17 +318,15 @@ Determines how long a user is banned for.
       phone_confirm
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>boolean</code>
+      <code>boolean类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-确认用户的电话号码，如果设置为真。
-
-只有服务角色可以修改。
+如果设置为 true，则确认用户的电话号码。只有服务角色可以修改。
 
   </div>
   
@@ -254,22 +339,15 @@ Determines how long a user is banned for.
       user_metadata
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-一个自定义的数据对象来存储用户的元数据。这映射到`auth.users.user_metadata`列。
-
-只有服务角色可以修改。
-
-`user_metadata`应该是一个JSON对象，包括用户的具体信息，如他们的名字和姓氏。
-
-注意：当使用GoTrueAdminApi并希望修改用户的元数据时。
-这个属性被用来代替UserAttributes数据。
+用于存储用户元数据的自定义数据对象。这映射到 auth.users.user_metadata 列。user_metadata 应该是一个 JSON 对象，其中包含用户特定的信息，例如他们的名字和姓氏。注意：在使用 GoTrueAdminApi 并想要修改用户的元数据时，将使用此属性代替 UserAttributes 数据。
 
   </div>
   
@@ -292,72 +370,3 @@ Determines how long a user is banned for.
 
 
 
-
-
-## 示例
-
-### 更新一个用户的电子邮件。
-
-
-
-```js
-const { data: user, error } = await supabase.auth.admin.updateUserById(
-  '6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
-  { email: 'new@email.com' }
-)
-```
-
-### 更新用户的密码。
-
-
-
-```js
-const { data: user, error } = await supabase.auth.admin.updateUserById(
-  '6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
-  { password: 'new_password' }
-)
-```
-
-### 更新用户的元数据。
-
-
-
-```js
-const { data: user, error } = await supabase.auth.admin.updateUserById(
-  '6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
-  { user_metadata: { hello: 'world' } }
-)
-```
-
-### 更新用户的app_metadata。
-
-
-
-```js
-const { data: user, error } = await supabase.auth.admin.updateUserById(
-  '6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
-  { app_metadata: { plan: 'trial' } }
-)
-```
-
-### 确认用户的电子邮件地址。
-
-
-
-```js
-const { data: user, error } = await supabase.auth.admin.updateUserById(
-  '6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
-  { email_confirm: true }
-)
-```
-
-### 确认用户的电话号码。
-
-
-
-```js
-const { data: user, error } = await supabase.auth.admin.updateUserById(
-  '6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
-  { phone_confirm: true }
-)
-```

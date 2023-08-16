@@ -5,9 +5,46 @@ slug: /not
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-只匹配不符合过滤器的行。
+仅匹配不满足筛选条件的行。
 
-与大多数过滤器不同，`opearator`和`value`是按原样使用的，需要遵循遵循[PostgREST语法](https://postgrest.org/en/stable/api.html#operators)。你还需要确保它们被正确地消毒。
+`not()`函数要求您使用原始的PostgREST语法来表示筛选条件的值。
+
+
+```ts
+.not('id', 'in', '(5,6,7)')  // Use `()` for `in` filter
+.not('arraycol', 'cs', '{"a","b"}')  // Use `cs` for `contains()`, `{}` for array values
+```
+
+
+
+## 案例教程 
+
+### 案例1 
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="建表">
+
+```sql
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'null'),
+  (2, null);
+
+```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```ts
 const { data, error } = await supabase
@@ -15,23 +52,41 @@ const { data, error } = await supabase
   .select()
   .not('name', 'is', null)
 ```
+</TabPanel>
+
+<TabPanel id="demo3" label="返回结果">
+
+```json
+  {
+    "data": [
+      {
+        "id": 1,
+        "name": "null"
+      }
+    ],
+    "status": 200,
+    "statusText": "OK"
+  }
+```
+</TabPanel>
+</Tabs>
 
 
-## 参数
 
+## 参数说明
 
 <ul className="method-list-group">
   
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      列
+      列（column）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>ColumnName</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -46,18 +101,18 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      operator
+      运算符（operator）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>FilterOperator</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-用来过滤的运算符，如下所示PostgREST语法
+要否定进行筛选的运算符，遵循PostgREST的语法规则。
 
   </div>
   
@@ -67,13 +122,13 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      值
+      值（value）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>任意类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -86,68 +141,3 @@ const { data, error } = await supabase
 
 </ul>
 
-
-## 注意
-
-not()希望你使用原始的PostgREST语法来表达过滤器的值。
-
-```ts
-.not('id', 'in', '(5,6,7)')  // Use `()` for `in` filter
-.not('arraycol', 'cs', '{"a","b"}')  // Use `cs` for `contains()`, `{}` for array values
-```
-
-
-
-
-
-
-
-
-
-
-## 举例
-
-### 用 `select()`
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'null'),
-    (2, null);
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .select()
-    .not('name', 'is', null)
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "id": 1,
-        "name": "null"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>

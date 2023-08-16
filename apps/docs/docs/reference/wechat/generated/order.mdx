@@ -5,21 +5,169 @@ slug: /order
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-按 `column`对查询结果进行排序。
+按列对查询结果进行排序。
 
-你可以多次调用这个方法来按多列排序。
+* 你可以多次调用这个方法来按多列排序。
 
-你可以对外域表进行排序，但这并不影响对当前表的排序。
+* 你可以对外部表进行排序，但这并不影响对当前表的排序。
+
+
+
+## 案例教程 
+
+### 案例1  （使用select）
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="建表">
+
+```sql
+create table
+  countries (id int8 primary key, name text);
+
+insert into
+  countries (id, name)
+values
+  (1, 'Afghanistan'),
+  (2, 'Albania'),
+  (3, 'Algeria');
+
+```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
 
 ```ts
 const { data, error } = await supabase
-  .from('cities')
-  .select('name', 'country_id')
+  .from('countries')
+  .select('id', 'name')
   .order('id', { ascending: false })
 ```
 
+</TabPanel>
 
-## 参数
+<TabPanel id="demo3" label="返回结果">
+
+```json
+{
+  "data": [
+    {
+      "id": 3,
+      "name": "Algeria"
+    },
+    {
+      "id": 2,
+      "name": "Albania"
+    },
+    {
+      "id": 1,
+      "name": "Afghanistan"
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+```
+</TabPanel>
+</Tabs>
+
+
+
+
+### 案例2  （在外部表）
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="demo1"
+>
+
+<TabPanel id="demo1" label="建表">
+
+```sql
+create table
+  countries (id int8 primary key, name text);
+create table
+  cities (
+    id int8 primary key,
+    country_id int8 not null references countries,
+    name text
+  );
+
+insert into
+  countries (id, name)
+values
+  (1, 'United States'),
+  (2, 'Vanuatu');
+insert into
+  cities (id, country_id, name)
+values
+  (1, 1, 'Atlanta'),
+  (2, 1, 'New York City');
+```
+
+</TabPanel>
+
+<TabPanel id="demo2" label="使用方法">
+
+```ts
+  const { data, error } = await supabase
+    .from('countries')
+    .select(`
+      name,
+      cities (
+        name
+      )
+    `)
+    .order('name', { foreignTable: 'cities', ascending: false })
+```
+
+</TabPanel>
+
+<TabPanel id="demo3" label="返回结果">
+
+```json
+{
+  "data": [
+    {
+      "name": "United States",
+      "cities": [
+        {
+          "name": "New York City"
+        },
+        {
+          "name": "Atlanta"
+        }
+      ]
+    },
+    {
+      "name": "Vanuatu",
+      "cities": []
+    }
+  ],
+  "status": 200,
+  "statusText": "OK"
+}
+```
+</TabPanel>
+
+
+<TabPanel id="demo4" label="注意事项">
+
+对外部表进行排序不会影响父表的排序。
+
+</TabPanel>
+</Tabs>
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -27,18 +175,18 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      列
+      列（column）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>ColumnName</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-列的排序方式
+要排序的列
 
   </div>
   
@@ -48,13 +196,13 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      options
+      选项（option）
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>[可选参数]</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -66,26 +214,6 @@ const { data, error } = await supabase
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
 
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      ascending
-    </span>
-    <span className="method-list-item-label-badge false">
-      optional
-    </span>
-    <span className="method-list-item-validation">
-      <code>boolean</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-如果 "true"，结果将按升序排列。
-
-  </div>
-  
-</li>
-
 
 <li className="method-list-item">
   <h4 className="method-list-item-label">
@@ -93,10 +221,10 @@ const { data, error } = await supabase
       foreignTable
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>undefined</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -108,13 +236,41 @@ const { data, error } = await supabase
 </li>
 
 
+
+
+
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      ascending
+    </span>
+    <span className="method-list-item-label-badge false">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>boolean类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+如果 "true"，结果将按升序排列。
+
+  </div>
+  
+</li>
+
+
+
+
+
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
       nullsFirst
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
       <code>boolean</code>
@@ -122,7 +278,7 @@ const { data, error } = await supabase
   </h4>
   <div class="method-list-item-description">
 
-如果 `true`，`null`首先出现。如果 `false`,则 `null`出现在最后。
+如果 true，null首先出现。如果 false,则 null 出现在最后。
 
   </div>
   
@@ -133,146 +289,3 @@ const { data, error } = await supabase
 </li>
 
 </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 使用 `select()`时
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'Afghanistan'),
-    (2, 'Albania'),
-    (3, 'Algeria');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .select()
-    .order('name', { ascending: false })
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "id": 3,
-        "name": "Algeria"
-      },
-      {
-        "id": 2,
-        "name": "Albania"
-      },
-      {
-        "id": 1,
-        "name": "Afghanistan"
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-### 在外域表上
-
-对外表的排序不影响父表的排序。
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-  create table
-    cities (
-      id int8 primary key,
-      country_id int8 not null references countries,
-      name text
-    );
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'United States'),
-    (2, 'Vanuatu');
-  insert into
-    cities (id, country_id, name)
-  values
-    (1, 1, 'Atlanta'),
-    (2, 1, 'New York City');
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .from('countries')
-    .select(`
-      name,
-      cities (
-        name
-      )
-    `)
-    .order('name', { foreignTable: 'cities', ascending: false })
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      {
-        "name": "United States",
-        "cities": [
-          {
-            "name": "New York City"
-          },
-          {
-            "name": "Atlanta"
-          }
-        ]
-      },
-      {
-        "name": "Vanuatu",
-        "cities": []
-      }
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>

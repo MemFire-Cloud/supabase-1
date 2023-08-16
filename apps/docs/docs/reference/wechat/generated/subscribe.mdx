@@ -5,19 +5,282 @@ slug: /subscribe
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-监听信息
 
-```js
+on().subscribe()创建一个事件处理程序，用于监听变更。
+
+
+* 默认情况下，广播（Broadcast）和在线状态（Presence）对所有项目都是启用的。
+* 对于新项目，默认情况下禁用了监听数据库变更，原因是出于数据库性能和安全方面的考虑。你可以通过管理实时数据的[复制功能](/docs/guides/api#managing-realtime)来启用它。
+* 你可以通过将表的 `REPLICA IDENTITY` 设置为 `FULL`（例如，执行 `ALTER TABLE your_table REPLICA IDENTITY FULL`;），来接收更新和删除操作的"之前"的数据。
+* 删除语句(delete statements)不适用行级安全（Row level security）。当启用行级安全并将复制标识（replica identity）设置为 full 时，只有主键会被发送到客户端。
+
+
+
+## 案例教程
+
+### 案例1 （监听广播消息）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 supabase
-  .channel('*')
+  .channel('any')
+  .on('broadcast', { event: 'cursor-pos' }, payload => {
+    console.log('Cursor position received!', payload)
+  })
+  .subscribe((status) => {
+    if (status === 'SUBSCRIBED') {
+      channel.send({
+        type: 'broadcast',
+        event: 'cursor-pos',
+        payload: { x: Math.random(), y: Math.random() },
+      })
+    }
+  })
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+### 案例2 （监听在线状态同步）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const channel = supabase.channel('any')
+channel
+  .on('presence', { event: 'sync' }, () => {
+    console.log('Synced presence state: ', channel.presenceState())
+  })
+  .subscribe(async (status) => {
+    if (status === 'SUBSCRIBED') {
+      await channel.track({ online_at: new Date().toISOString() })
+    }
+  })
+  ```
+
+</TabPanel>
+</Tabs>
+
+### 案例3 （监听用户加入状态）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const channel = supabase.channel('any')
+channel
+  .on('presence', { event: 'join' }, ({ newPresences }) => {
+    console.log('Newly joined presences: ', newPresences)
+  })
+  .subscribe(async (status) => {
+    if (status === 'SUBSCRIBED') {
+      await channel.track({ online_at: new Date().toISOString() })
+    }
+  })
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+### 案例4 （监听用户离开状态）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const channel = supabase.channel('any')
+channel
+  .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+    console.log('Newly left presences: ', leftPresences)
+  })
+  .subscribe(async (status) => {
+    if (status === 'SUBSCRIBED') {
+      await channel.track({ online_at: new Date().toISOString() })
+      await channel.untrack()
+    }
+  })
+  ```
+
+</TabPanel>
+</Tabs>
+
+### 案例5 （监听所有数据库变更）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase
+  .channel('any')
   .on('postgres_changes', { event: '*', schema: '*' }, payload => {
     console.log('Change received!', payload)
   })
   .subscribe()
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+### 案例6 （监听特定表格）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase
+  .channel('any')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'countries' }, payload => {
+    console.log('Change received!', payload)
+  })
+  .subscribe()
+  ```
+
+</TabPanel>
+</Tabs>
+
+### 案例7 （监听插入操作）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase
+  .channel('any')
+  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'countries' }, payload => {
+    console.log('Change received!', payload)
+  })
+  .subscribe()
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+### 案例8 （监听更新操作）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase
+  .channel('any')
+  .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'countries' }, payload => {
+    console.log('Change received!', payload)
+  })
+  .subscribe()
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+默认情况下，MemFire Cloud只会发送更新后的记录。如果你想要同时接收之前的值，你可以为你正在监听的表启用完整的复制（full replication）：
+
+alter table "your_table" replica identity full;
+
+</TabPanel>
+
+</Tabs>
+
+
+### 案例9 （监听删除操作）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase
+  .channel('any')
+  .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'countries' }, payload => {
+    console.log('Change received!', payload)
+  })
+  .subscribe()
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+默认情况下，MemFire Cloud不会发送已删除的记录。如果你想要接收已删除的记录，你可以为你正在监听的表启用完整的复制（full replication）：
+
+alter table "your_table" replica identity full;
+
+</TabPanel>
+
+</Tabs>
+
+
+### 案例10 （监听多个事件）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase
+  .channel('any')
+  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'countries' }, handleRecordInserted)
+  .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'countries' }, handleRecordDeleted)
+  .subscribe()
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+如果你想要监听同一张表的多个事件，你可以进行链式监听（chain listeners）。
+
+</TabPanel>
+
+</Tabs>
+
+
+### 案例11 （监听行级别变更）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase
+  .channel('any')
+  .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'countries', filter: 'id=eq.200' }, handleRecordUpdated)
+  .subscribe()
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+你可以使用格式 `{table}:{col}=eq.{val}` 来监听单个行，其中 `{col}` 是列名，`{val}` 是你要匹配的值。
+
+</TabPanel>
+</Tabs>
+
+
+
+
+
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -25,18 +288,18 @@ supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      type
+      类型（type）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>类型为 "broadcast" 的字符串</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-未提供说明。
+可选值为 "broadcast"、"presence" 或 "postgres_changes"。
 
   </div>
   
@@ -49,15 +312,15 @@ supabase
       filter
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-未提供说明。
+针对实时功能（realtime功能）的自定义对象，用于详细说明要接收哪些有效载荷（payloads）。
 
   </div>
   
@@ -70,17 +333,12 @@ supabase
       event
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
   
 </li>
 
@@ -95,136 +353,18 @@ supabase
       callback
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>函数类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-未提供说明。
+当事件处理程序被触发时要调用的函数。
 
   </div>
   
 </li>
 
 </ul>
-
-
-## 注释
-
-- 为了提高数据库性能和安全性，新项目的实时性默认是禁用的。你可以通过[管理复制](/docs/guides/api#managing-realtime)打开它。
-- 行级安全不应用于删除语句。
-- 如果你想接收更新和删除的 `先前`数据，你需要将`REPLICA IDENTITY`设置为`FULL`，像这样。`ALTER TABLE your_table REPLICA IDENTITY FULL;`。
-- 当删除发生时，old_record的内容将被广播给该表的所有订阅者，所以确保每个表的复制身份只包含可以安全公开的信息。
-- 通道名称必须与你想监听的模式/表/过滤器完全匹配，用冒号分隔。请看下面的例子以了解更多情况。
-
-
-
-
-
-
-
-
-
-
-## 实例
-
-### 听取所有的数据库变化
-
-
-
-```js
-supabase
-  .channel('*')
-  .on('postgres_changes', { event: '*', schema: '*' }, payload => {
-    console.log('Change received!', payload)
-  })
-  .subscribe()
-```
-
-### 监听一个特定的表
-
-
-
-```js
-supabase
-  .channel('public:countries')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'countries' }, payload => {
-    console.log('Change received!', payload)
-  })
-  .subscribe()
-```
-
-### 监听插入数据
-
-
-
-```js
-supabase
-  .channel('public:countries')
-  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'countries' }, payload => {
-    console.log('Change received!', payload)
-  })
-  .subscribe()
-```
-
-### 监听修改数据
-
-默认情况下，Supabase 将只发送更新的记录。如果你想同时接收以前的值，你可以为你所监听的表启用完全复制。
-
-```sql
-alter table "your_table" replica identity full;
-```
-
-
-```js
-supabase
-  .channel('public:countries')
-  .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'countries' }, payload => {
-    console.log('Change received!', payload)
-  })
-  .subscribe()
-```
-
-### 监听删除数据
-
-默认情况下，Supabase 不发送已删除的记录。如果你想接收删除的记录，你可以为你所监听的表启用完全复制功能。
-
-```sql
-alter table "your_table" replica identity full;
-```
-
-
-```js
-supabase
-  .channel('public:countries')
-  .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'countries' }, payload => {
-    console.log('Change received!', payload)
-  })
-  .subscribe()
-```
-
-### 监听多个事件
-
-如果你想监听每个表的多个事件，你可以使用连锁监听器。
-
-```js
-supabase
-  .channel('public:countries')
-  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'countries' }, handleRecordInserted)
-  .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'countries' }, handleRecordDeleted)
-  .subscribe()
-```
-
-### 监听行级变化
-
-你可以使用`{table}:{col}=eq.{val}`的格式来监听单个行 - 其中`{col}`是列名，`{val}`是你想要匹配的值。
-
-```js
-supabase
-  .channel('public:countries:id=eq.200')
-  .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'countries', filter: 'id=eq.200' }, handleRecordUpdated)
-  .subscribe()
-```

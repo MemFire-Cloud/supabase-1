@@ -5,16 +5,111 @@ slug: /auth-onauthstatechange
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-每次发生认证事件时都会收到通知。
 
-```js
+onAuthStateChange()用于监听认证事件，接收每次认证事件发生时的通知。
+
+* 认证事件类型： `SIGNED_IN（登录）`、`SIGNED_OUT（登出）`、`TOKEN_REFRESHED（令牌刷新）`、`USER_UPDATED（用户信息更新）`、`PASSWORD_RECOVERY（密码恢复）`
+* 然而目前使用 `onAuthStateChange()` 方法在不同的标签页之间无效。
+举例来说，在密码重置流程中，如果用户在一个标签页请求密码重置链接，当用户点击链接时，原始的标签页将无法收到`SIGNED_IN（登录）`和`PASSWORD_RECOVERY（密码恢复）`事件。
+
+
+
+
+
+## 案例教程
+
+### 案例1 （监听认证变化）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 supabase.auth.onAuthStateChange((event, session) => {
   console.log(event, session)
 })
-```
+  ```
+</TabPanel>
+</Tabs>
 
 
-## 参数
+### 案例2 （监听密码恢复事件）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event == 'PASSWORD_RECOVERY') {
+    console.log('PASSWORD_RECOVERY', session)
+
+    // show screen to update user's password
+    showPasswordResetScreen(true)
+  }
+})
+  ```
+</TabPanel>
+</Tabs>
+
+### 案例3 （监听登录）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event == 'SIGNED_IN') console.log('SIGNED_IN', session)
+})
+  ```
+</TabPanel>
+</Tabs>
+
+### 案例4 （监听退出登录）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event == 'SIGNED_OUT') console.log('SIGNED_OUT', session)
+})
+  ```
+</TabPanel>
+</Tabs>
+
+
+### 案例5 （监听令牌刷新）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event == 'TOKEN_REFRESHED') console.log('TOKEN_REFRESHED', session)
+})
+  ```
+</TabPanel>
+</Tabs>
+
+
+### 案例6 （监听用户的更新信息）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event == 'USER_UPDATED') console.log('USER_UPDATED', session)
+})
+  ```
+</TabPanel>
+</Tabs>
+
+
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -22,107 +117,21 @@ supabase.auth.onAuthStateChange((event, session) => {
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      callback
+      回调（callback）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>函数类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-一个回调函数，当一个认证事件发生时被调用。
+当发生认证事件时要调用的回调函数。
 
   </div>
   
 </li>
 
 </ul>
-
-
-## 注释
-
-- 认证事件的类型:`SIGNED_IN`, `SIGNED_OUT`, `TOKEN_REFRESHED`, `USER_UPDATED`, `USER_DELETED`, `PASSWORD_RECOVERY`
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 监听认证变化
-
-
-
-```js
-supabase.auth.onAuthStateChange((event, session) => {
-  console.log(event, session)
-})
-```
-
-### 监听登录
-
-
-
-```js
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event == 'SIGNED_IN') console.log('SIGNED_IN', session)
-})
-```
-
-### 监听退出登录
-
-
-
-```js
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event == 'SIGNED_OUT') console.log('SIGNED_OUT', session)
-})
-```
-
-### 监听令牌刷新
-
-
-
-```js
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event == 'TOKEN_REFRESHED') console.log('TOKEN_REFRESHED', session)
-})
-```
-
-### 监听用户的更新信息
-
-
-
-```js
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event == 'USER_UPDATED') console.log('USER_UPDATED', session)
-})
-```
-
-### 监听用户删除的内容
-
-
-
-```js
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event == 'USER_DELETED') console.log('USER_DELETED', session)
-})
-```
-
-### 监听密码恢复事件
-
-
-
-```js
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event == 'PASSWORD_RECOVERY') console.log('PASSWORD_RECOVERY', session)
-})
-```

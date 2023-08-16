@@ -5,17 +5,35 @@ slug: /storage-from-remove
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-删除同一桶中的文件
+from.remove()用于删除存储桶中的文件
 
-```js
+需要RLS策略权限:
+  - `buckets`表的权限: 无
+  - `objects`表的权限：`delete`和`select`权限
+
+请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
+
+## 案例教程
+
+### 案例1 （删除文件）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                   
 const { data, error } = await supabase
   .storage
   .from('avatars')
   .remove(['folder/avatar1.png'])
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -26,10 +44,10 @@ const { data, error } = await supabase
       paths
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>string[]类型（字符串数组）</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -43,31 +61,6 @@ const { data, error } = await supabase
 </ul>
 
 
-## 注意事项
-
-- 需要RLS策略权限:
-  - `buckets`表的权限: 无
-  - `objects`表的权限: `删除`和`选择`.
-- 请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
 
 
 
-
-
-
-
-
-
-
-## 实例
-
-### 删除文件
-
-
-
-```js
-const { data, error } = await supabase
-  .storage
-  .from('avatars')
-  .remove(['folder/avatar1.png'])
-```

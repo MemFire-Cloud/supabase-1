@@ -8,7 +8,13 @@ import { parseNumericRange } from './CodeBlock/CodeBlock.utils'
 import JwtGenerator from './JwtGenerator'
 
 // Page specific components
+//Frameworks快速入门组件 ，Frameworks1 SDK组件，Frameworks2最佳实践组件
+
+
 import Frameworks from './Frameworks'
+import Frameworks1 from './Frameworks1'
+import Frameworks2 from './Frameworks2'
+
 import AuthProviders from './AuthProviders'
 import FunctionsExamples from './FunctionsExamples'
 import Extensions from './Extensions'
@@ -26,6 +32,8 @@ const components = {
   ButtonCard,
   CodeBlock,
   Frameworks,
+  Frameworks1,
+  Frameworks2,
   AuthProviders,
   FunctionsExamples,
   JwtGenerator,

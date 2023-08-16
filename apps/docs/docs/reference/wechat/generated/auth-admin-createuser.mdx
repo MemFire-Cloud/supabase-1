@@ -5,19 +5,78 @@ slug: /auth-admin-createuser
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-创建一个新的用户。
-这个函数应该只在服务器上调用。不要在浏览器中暴露你的`service_role`键。
+createUser()用于创建一个新的用户。这个函数应该只在服务器上调用。不要在浏览器中暴露你的`service_role`密钥。
 
-```js
+* 为了确认用户的电子邮件地址或电话号码，请将 `email_confirm` 或 `phone_confirm` 设置为 true。如果不进行设置，这两个参数的默认值为 false。
+* `createUser()` 不会向用户发送确认电子邮件。如果你想发送邀请电子邮件，可以使用 `inviteUserByEmail()` 方法。
+* 如果你确定所创建的用户的电子邮件或电话号码是合法且经过验证的，你可以将 `email_confirm` 或 `phone_confirm` 参数设置为 `true。
+
+
+## 案例教程
+
+### 案例1 （带有自定义用户元数据）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
 const { data, error } = await supabase.auth.admin.createUser({
   email: 'user@email.com',
   password: 'password',
   user_metadata: { name: 'Yoda' }
 })
-```
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+如果密码超过了72个字符，它将被截断为前72个字符。
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+### 案例2 （自动确认用户的电子邮件）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
+const { data, error } = await supabase.auth.admin.createUser({
+  email: 'user@email.com',
+  email_confirm: true
+})                                                                             
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+### 案例3 （自动确认用户的电话号码）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                
+const { data, error } = await supabase.auth.admin.createUser({
+  phone: '1234567890',
+  phone_confirm: true
+})
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -25,20 +84,15 @@ const { data, error } = await supabase.auth.admin.createUser({
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      AdminUserAttributes
+      attributes
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>AdminUserAttributes类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
-
-未提供说明。 
-
-  </div>
   
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
@@ -49,21 +103,16 @@ const { data, error } = await supabase.auth.admin.createUser({
       app_metadata
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-一个自定义的数据对象，用于存储用户的特定应用元数据。这映射到`auth.users.app_metadata`列。
-
-只有服务角色可以修改。
-
-`app_metadata`应该是一个JSON对象，包括应用特定的信息，如身份提供者、角色和其他
-访问控制信息。
-
+用于存储用户特定应用程序元数据的自定义数据对象。这映射到 auth.users.app_metadata 列。只有服务角色可以修改。app_metadata 应该是一个 JSON 对象，其中包含应用程序特定的信息，例如身份提供者、角色和其他访问控制信息。
+  
   </div>
   
 </li>
@@ -75,45 +124,17 @@ const { data, error } = await supabase.auth.admin.createUser({
       ban_duration
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
 决定一个用户被禁止多长时间。
 
-禁令持续时间的格式遵循严格的十进制数字序列和单位后缀。
-有效的时间单位是 "ns"、"us"（或 "µs"）、"ms"、"s"、"m"、"h"。
-
-例如，一些可能的持续时间包括。'300ms'，'2h45m'。
-
-将禁止期限设置为 "无 "可以解除对该用户的禁止。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      data
-    </span>
-    <span className="method-list-item-label-badge false">
-      可选的
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-一个自定义的数据对象来存储用户的元数据。这映射到`auth.users.user_metadata`列。
-
-`data`应该是一个JSON对象，包括用户的具体信息，如他们的名字和姓氏。
+确定用户被封禁的持续时间。封禁持续时间的格式遵循严格的十进制数字和单位后缀的顺序。有效的时间单位包括 "ns"、"us"（或 "µs"）、"ms"、"s"、"m"、"h"。例如，一些可能的持续时间包括：'300ms'、'2h45m'。将封禁持续时间设置为 'none' 将解除对用户的封禁。
 
   </div>
   
@@ -126,10 +147,10 @@ const { data, error } = await supabase.auth.admin.createUser({
       email
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -147,21 +168,44 @@ const { data, error } = await supabase.auth.admin.createUser({
       email_confirm
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>boolean</code>
+      <code>boolean类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-确认用户的电子邮件地址，如果设置为真。
-
-只有服务角色可以修改。
+如果设置为 true，则确认用户的电子邮件地址。只有服务角色可以修改。
 
   </div>
   
 </li>
+
+
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      nonce
+    </span>
+    <span className="method-list-item-label-badge false">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>string类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+如果要更新用户的密码，则发送的重新认证的随机数。首先调用 reauthenticate() 来获取随机数。
+
+  </div>
+  
+</li>
+
+
+
 
 
 <li className="method-list-item">
@@ -170,10 +214,10 @@ const { data, error } = await supabase.auth.admin.createUser({
       password
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -191,10 +235,10 @@ const { data, error } = await supabase.auth.admin.createUser({
       phone
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -212,17 +256,15 @@ const { data, error } = await supabase.auth.admin.createUser({
       phone_confirm
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>boolean</code>
+      <code>boolean类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-确认用户的电话号码，如果设置为真。
-
-只有服务角色可以修改。
+如果设置为 true，则确认用户的电话号码。只有服务角色可以修改。
 
   </div>
   
@@ -235,22 +277,15 @@ const { data, error } = await supabase.auth.admin.createUser({
       user_metadata
     </span>
     <span className="method-list-item-label-badge false">
-      可选的
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-一个自定义的数据对象来存储用户的元数据。这映射到`auth.users.user_metadata`列。
-
-只有服务角色可以修改。
-
-`user_metadata`应该是一个JSON对象，包括用户的具体信息，如他们的名字和姓氏。
-
-注意：当使用GoTrueAdminApi并希望修改用户的元数据时。
-这个属性被用来代替UserAttributes数据。
+用于存储用户元数据的自定义数据对象。这映射到 auth.users.user_metadata 列。user_metadata 应该是一个 JSON 对象，其中包含用户特定的信息，例如他们的名字和姓氏。注意：在使用 GoTrueAdminApi 并想要修改用户的元数据时，将使用此属性代替 UserAttributes 数据。
 
   </div>
   
@@ -261,53 +296,3 @@ const { data, error } = await supabase.auth.admin.createUser({
 </li>
 
 </ul>
-
-
-## 注释
-
-- 要确认用户的电子邮件地址或电话号码，请将`email_confirm`或`phone_confirm`设为true。这两个参数默认为false。
-
-
-
-
-
-
-
-
-
-
-## 示例
-
-### 创建一个具有自定义用户元数据的新用户
-
-
-
-```js
-const { data, error } = await supabase.auth.admin.createUser({
-  email: 'user@email.com',
-  password: 'password',
-  user_metadata: { name: 'Yoda' }
-})
-```
-
-### 自动确认用户的电子邮件
-
-
-
-```js
-const { data, error } = await supabase.auth.admin.createUser({
-  email: 'user@email.com',
-  email_confirm: true
-})
-```
-
-### 自动确认用户的电话号码
-
-
-
-```js
-const { data, error } = await supabase.auth.admin.createUser({
-  phone: '1234567890',
-  phone_confirm: true
-})
-```
