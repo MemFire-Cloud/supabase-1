@@ -1,12 +1,15 @@
 ---
 id: rpc
-title: "Postgres functions: rpc()"
+title: "调用Postgres函数"
 slug: /rpc
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-你可以把Postgres函数作为_远程过程调用，即你可以从任何地方执行数据库中的逻辑。
-当逻辑很少改变时，函数是非常有用的，比如密码重设和更新。
+
+你可以将Postgres函数作为远程过程调用（Remote Procedure Calls）来调用，即你可以从任何地方执行数据库中的逻辑。
+函数在逻辑很少更改时非常有用，比如用于密码重置和更新等情况。
+
+下面是一个示例的 Postgres 函数定义：
 
 ```sql
 create or replace function hello_world() returns text as $$
@@ -14,13 +17,183 @@ create or replace function hello_world() returns text as $$
 $$ language sql;
 ```
 
-
-```ts
-const { data, error } = await supabase.rpc('hello_world')
-```
+这个函数叫做`hello_world`，它不带参数，返回一个`text`类型的结果。函数的逻辑很简单，就是返回字符串`"Hello world"`。
+你可以从任何地方调用这个函数，并获得结果`"Hello world"`。
 
 
-## 参数
+
+## 案例教程
+
+### 案例1  （调用一个没有参数的Postgres函数）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+  create function hello_world() returns text as $$
+    select 'Hello world';
+  $$ language sql;
+  ```
+
+</TabPanel>
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+  const { data, error } = await supabase.rpc('hello_world')
+  ```
+
+</TabPanel>
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+  {
+    "data": "Hello world",
+    "status": 200,
+    "statusText": "OK"
+  }
+  ```
+
+</TabPanel>
+</Tabs>
+
+### 案例2  （调用一个带参数的Postgres函数）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+  create function echo(say text) returns text as $$
+    select say;
+  $$ language sql;
+  ```
+
+</TabPanel>
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+  const { data, error } = await supabase.rpc('echo', { say: '👋' })
+  ```
+
+</TabPanel>
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+  {
+    "data": "👋",
+    "status": 200,
+    "statusText": "OK"
+  }
+  ```
+
+</TabPanel>
+</Tabs>
+
+### 案例3  （批量处理）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+  create function add_one_each(arr int[]) returns int[] as $$
+    select array_agg(n + 1) from unnest(arr) as n;
+  $$ language sql;
+  ```
+
+</TabPanel>
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+  const { data, error } = await supabase.rpc('add_one_each', { arr: [1, 2, 3] })
+  ```
+
+</TabPanel>
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+  {
+    "data": [
+      2,
+      3,
+      4
+    ],
+    "status": 200,
+    "statusText": "OK"
+  }
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+你可以通过传入一个数组作为参数来处理大型有效载荷。
+
+</TabPanel>
+</Tabs>
+
+### 案例4  （调用带有过滤器的Postgres函数）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo1">
+<TabPanel id="demo1" label="建表">
+
+  ```sql
+  create table
+    countries (id int8 primary key, name text);
+
+  insert into
+    countries (id, name)
+  values
+    (1, 'France'),
+    (2, 'United Kingdom');
+
+  create function list_stored_countries() returns setof countries as $$
+    select * from countries;
+  $$ language sql;
+  ```
+
+</TabPanel>
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+  const { data, error } = await supabase
+    .rpc('list_stored_countries')
+    .eq('id', 1)
+    .single()
+  ```
+
+</TabPanel>
+<TabPanel id="demo3" label="返回结果">
+
+  ```json
+  {
+    "data": {
+      "id": 1,
+      "name": "France"
+    },
+    "status": 200,
+    "statusText": "OK"
+  }
+  ```
+
+</TabPanel>
+
+
+<TabPanel id="demo4" label="注意事项">
+
+返回表格的 Postgres 函数还可以与[过滤器](/docs/reference/javascript/using-filters)和[修改器](/docs/reference/javascript/using-modifiers)相结合使用。
+
+</TabPanel>
+</Tabs>
+
+
+
+
+
+
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -31,10 +204,10 @@ const { data, error } = await supabase.rpc('hello_world')
       fn
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>FunctionName</code>
+      <code>FunctionName类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -52,10 +225,10 @@ const { data, error } = await supabase.rpc('hello_world')
       args
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -70,13 +243,13 @@ const { data, error } = await supabase.rpc('hello_world')
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      options
+      选项（option）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -94,7 +267,7 @@ const { data, error } = await supabase.rpc('hello_world')
       count
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
       <code>exact</code> | <code>planned</code> | <code>estimated</code>
@@ -102,17 +275,16 @@ const { data, error } = await supabase.rpc('hello_world')
   </h4>
   <div class="method-list-item-description">
 
-计数算法，用于计算函数返回的行数。
-函数返回的行数。只适用于[返回集合的函数](https://www.postgresql.org/docs/current/functions-srf.html)。
+用来计算更新行的计数算法。函数返回的行数。只适用于[返回集合的函数](https://www.postgresql.org/docs/current/functions-srf.html)。
 
-`"exact"`: 准确但缓慢的计数算法。执行 "COUNT(*)"。
-引擎盖。
 
-`"planned"`: 近似但快速的计数算法。使用了Postgres
-的统计数据。
+exact:可以精确计算行数，但执行速度较慢。执行 "COUNT(*)"操作。
 
-`"estimated"`: 低数字使用精确计数，高数字使用计划计数。
-数。
+planned:可以快速计算行数，但是结果可能略有偏差。使用了Postgres的统计数据。
+
+estimated:对于较小的数值使用精确计数，对于较大的数值使用计划计数。根据行数的大小决定使用精确计数或计划计数的算法。
+
+
 
   </div>
   
@@ -125,10 +297,10 @@ const { data, error } = await supabase.rpc('hello_world')
       head
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>boolean</code>
+      <code>boolean类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -159,157 +331,3 @@ const { data, error } = await supabase.rpc('hello_world')
 
 
 
-## 示例
-
-### 调用一个没有参数的Postgres函数
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create function hello_world() returns text as $$
-    select 'Hello world';
-  $$ language sql;
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase.rpc('hello_world')
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": "Hello world",
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-### 调用一个带参数的Postgres函数
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create function echo(say text) returns text as $$
-    select say;
-  $$ language sql;
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase.rpc('echo', { say: '👋' })
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": "👋",
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-### 大量处理
-
-你可以通过传入一个数组作为参数来处理大型有效载荷。
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create function add_one_each(arr int[]) returns int[] as $$
-    select array_agg(n + 1) from unnest(arr) as n;
-  $$ language sql;
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase.rpc('add_one_each', { arr: [1, 2, 3] })
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": [
-      2,
-      3,
-      4
-    ],
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>
-
-### 调用带有过滤器的Postgres函数
-
-返回表格的Postgres函数也可以与
-[过滤器](/docs/reference/javascript/using-filters)和
-[修改器](/docs/reference/javascript/using-modifiers)。
-
-<Tabs scrollable size="small" type="underlined" defaultActiveId="schema">
-<TabPanel id="schema" label="Schema">
-
-  ```sql
-  create table
-    countries (id int8 primary key, name text);
-
-  insert into
-    countries (id, name)
-  values
-    (1, 'France'),
-    (2, 'United Kingdom');
-
-  create function list_stored_countries() returns setof countries as $$
-    select * from countries;
-  $$ language sql;
-  ```
-
-</TabPanel>
-<TabPanel id="js" label="JavaScript">
-
-  ```ts
-  const { data, error } = await supabase
-    .rpc('list_stored_countries')
-    .eq('id', 1)
-    .single()
-  ```
-
-</TabPanel>
-<TabPanel id="result" label="Result">
-
-  ```json
-  {
-    "data": {
-      "id": 1,
-      "name": "France"
-    },
-    "status": 200,
-    "statusText": "OK"
-  }
-  ```
-
-</TabPanel>
-</Tabs>

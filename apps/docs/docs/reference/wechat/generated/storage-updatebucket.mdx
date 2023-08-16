@@ -5,17 +5,42 @@ slug: /storage-updatebucket
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-更新存储桶
+updateBucket()用于更新存储桶
 
-```js
-const { data, error } = await supabase
+需要RLS策略权限:
+  - `buckets`表的权限: `select`和`update`
+  - `objects`表的权限：无
+
+请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
+
+
+
+## 案例教程
+
+### 案例1 （更新存储桶）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase                                      
   .storage
-  .updateBucket('avatars', { public: false })
-```
+  .updateBucket('avatars', {
+    public: false,
+    allowedMimeTypes: ['image/png'],
+    fileSizeLimit: 1024
+  })
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
 
+
+
+## 参数说明
 
 <ul className="method-list-group">
   
@@ -25,15 +50,15 @@ const { data, error } = await supabase
       id
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-你要更新的桶的唯一标识符。
+这是你创建存储桶的唯一标识符。
 
   </div>
   
@@ -43,20 +68,15 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      options
+      选项（option）
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>object类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
   
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
@@ -67,51 +87,66 @@ const { data, error } = await supabase
       public
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>boolean</code>
+      <code>boolean类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-桶的可见性。公用桶不需要授权令牌来下载对象，但仍然需要一个有效的令牌来进行所有其他操作。
+存储桶的可见性。公开桶不需要授权令牌来下载对象，但对于所有其他操作仍需要有效的令牌。默认情况下，存储桶是私有的。
 
   </div>
   
 </li>
 
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      allowedMimeTypes
+    </span>
+    <span className="method-list-item-label-badge required">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>object类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+指定此存储桶在上传过程中允许接受的 MIME 类型。默认值为 null，允许上传具有所有 MIME 类型的文件。每个指定的 MIME 类型可以是通配符，例如 image/*，也可以是特定的 MIME 类型，例如 image/png。
+
+  </div>
+  
+</li>
+
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      fileSizeLimit
+    </span>
+    <span className="method-list-item-label-badge required">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>null | 字符串 | 数字</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+指定可以上传到此存储桶的最大文件大小（以字节为单位）。全局文件大小限制优先于此值。默认值为 null，表示不设置每个存储桶的文件大小限制。
+
+  </div>
+  
+</li>
+
+
+
 </ul>
 
 </li>
 
 </ul>
-
-
-## 注意事项
-
-- 需要RLS策略权限:
-  - `buckets`表的权限: `更新'.
-  - `objects`表的权限：无
-- 请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
-
-
-
-
-
-
-
-
-
-
-## 实例
-
-### 更新桶
-
-
-
-```js
-const { data, error } = await supabase
-  .storage
-  .updateBucket('avatars', { public: false })
-```

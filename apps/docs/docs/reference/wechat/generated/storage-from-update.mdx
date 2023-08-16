@@ -5,21 +5,68 @@ slug: /storage-from-update
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-用一个新文件替换指定路径下的现有文件。.
+from.update()用于实现一个新文件替换指定路径下的现有文件。.
 
-```js
+需要RLS策略权限:
+  - `buckets`表的权限: 无
+  - `objects`表的权限：`update`和`select`权限
+
+请参考[存储指南](/docs/guides/storage#access-control)中关于访问控制的工作方式。
+
+对于使用 React Native 进行开发的情况，直接使用 Blob、File 或 FormData 对象来进行文件操作可能会无法达到预期的效果。
+相反，建议使用来自 base64 文件数据的 ArrayBuffer 来更新文件。可以参考提供的示例代码来了解如何以此方式进行文件更新操作。
+
+
+
+## 案例教程
+
+### 案例1 （更新文件）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                   
 const avatarFile = event.target.files[0]
 const { data, error } = await supabase
   .storage
   .from('avatars')
   .update('public/avatar1.png', avatarFile, {
     cacheControl: '3600',
-    upsert: false
+    upsert: true
   })
-```
+  ```
+
+</TabPanel>
+</Tabs>
 
 
-## 参数
+### 案例2 （使用ArrayBuffer从base64文件数据更新文件）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+                                                                                   
+import {decode} from 'base64-arraybuffer'
+
+const { data, error } = await supabase
+  .storage
+  .from('avatars')
+  .update('public/avatar1.png', decode('base64FileData'), {
+    contentType: 'image/png'
+  })                                                                         
+  ```
+
+</TabPanel>
+</Tabs>
+
+
+
+
+## 参数说明
 
 
 <ul className="method-list-group">
@@ -27,22 +74,24 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      path
+      路径（path）
     </span>
-    <span className="method-list-item-label-badge required">
-      required
+    <span className="method-list-item-label-badge false">
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-相对文件路径。应该是`folder/subfolder/filename.png`的格式。在尝试更新之前，该桶必须已经存在。
+文件路径，包括文件名。应该采用folder/subfolder/filename.png的格式。在尝试上传之前，必须确保存储桶已经存在。
+
 
   </div>
   
 </li>
+
 
 
 <li className="method-list-item">
@@ -50,11 +99,11 @@ const { data, error } = await supabase
     <span className="method-list-item-label-name">
       fileBody
     </span>
-    <span className="method-list-item-label-badge required">
-      required
+    <span className="method-list-item-label-badge false">
+      [必要参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code> | <code>ArrayBuffer</code> | <code>ArrayBufferView</code> | <code>Blob</code> | <code>Buffer</code> | <code>File</code> | <code>FormData</code> | <code>ReadableStream</code> | <code>ReadableStream</code> | <code>URLSearchParams</code>
+      <code>object类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
@@ -63,240 +112,24 @@ const { data, error } = await supabase
 
   </div>
   
-<ul className="method-list-group">
-  <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      URLSearchParams
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
-  
 </li>
+
+
 
 
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      string
+      fileOptions
     </span>
     <span className="method-list-item-label-badge required">
-      required
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>object</code>
+      <code>FileOptions类型</code>
     </span>
   </h4>
-  <div class="method-list-item-description">
 
-未提供说明。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      ReadableStream
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      ReadableStream
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      FormData
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      File
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      Buffer
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      Blob
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      ArrayBufferView
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      ArrayBuffer
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
-  
-</li>
-
-</ul>
-
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      FileOptions
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。
-
-  </div>
   
 <ul className="method-list-group">
   <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
@@ -307,15 +140,15 @@ const { data, error } = await supabase
       cacheControl
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-资产在浏览器和 Supabase CDN 中被缓存的秒数。这是在 `Cache-Control: max-age=<seconds>`头中设置的。默认为3600秒。
+资源在浏览器和Supabase CDN中被缓存的秒数。这是在`Cache-Control: max-age=<seconds>`标头中设置的。默认为3600秒。
 
   </div>
   
@@ -328,15 +161,15 @@ const { data, error } = await supabase
       contentType
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>string</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-`Content-Type`头的值。如果使用的 `fileBody `既不是 `Blob`也不是 `File`也不是 `FormData`，则应指定该类型，否则将默认为  `text/plain;charset=UTF-8`。
+`Content-Type`头的值（header value），如果使用的 `fileBody` 不是 `Blob`、`File` 或 `FormData`，则应明确指定该值；否则，默认为 `text/plain;charset=UTF-8`。
 
   </div>
   
@@ -346,75 +179,59 @@ const { data, error } = await supabase
 <li className="method-list-item">
   <h4 className="method-list-item-label">
     <span className="method-list-item-label-name">
-      upsert
+      duplex
     </span>
     <span className="method-list-item-label-badge false">
-      optional
+      [可选参数]
     </span>
     <span className="method-list-item-validation">
-      <code>boolean</code>
+      <code>string类型</code>
     </span>
   </h4>
   <div class="method-list-item-description">
 
-`Content-Type`头的值。如果使用的 `fileBody`既不是 `Blob`也不是 `File`也不是 `FormData`，则应指定该类型，否则将默认为 `text/plain;charset=UTF-8`。
+`duplex` 是一个可选的字符串参数，用于启用或禁用双工流，允许在同一流中读取和写入数据。它可以作为 `fetch()` 方法的选项进行传递。
+
+双工流（duplex streaming）是一种数据流传输模式，在该模式下，可以同时进行读取和写入操作，并且这些操作可以在同一个数据流中进行。
+
+当 `duplex` 参数被设置为启用时，可以在请求过程中不间断地读取和写入数据。这对于需要实时交互、传输大量数据或需要同时进行读写操作的情况非常有用。
 
   </div>
   
 </li>
 
+
+
+
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      upsert
+    </span>
+    <span className="method-list-item-label-badge false">
+      [可选参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>boolean类型</code>
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+当 upsert 设置为 true 时，如果文件已经存在，则覆盖该文件。当设置为 false 时，如果对象已经存在，则抛出错误。默认为 false。
+
+  </div>
+  
+</li>
+
+
+
+
 </ul>
 
 </li>
 
+
+
 </ul>
 
 
-## 注意事项
-
-- 需要RLS策略权限:
-  - `buckets`表的权限: 没有
-  - `objects`表的权限: `更新`和`选择`.
-- 请参考[Storage guide](/docs/guides/storage#access-control)中关于访问控制的工作方式。
-- 对于React Native，使用`Blob`、`File`或`FormData`都不能达到预期效果。使用`ArrayBuffer`从base64文件数据中更新文件，见下面的例子。
-
-
-
-
-
-
-
-
-
-
-## 实例
-
-### 更新文件
-
-
-
-```js
-const avatarFile = event.target.files[0]
-const { data, error } = await supabase
-  .storage
-  .from('avatars')
-  .update('public/avatar1.png', avatarFile, {
-    cacheControl: '3600',
-    upsert: false
-  })
-```
-
-### 使用`ArrayBuffer`从base64文件数据更新文件
-
-
-
-```js
-import {decode} from 'base64-arraybuffer'
-
-const { data, error } = await supabase
-  .storage
-  .from('avatars')
-  .update('public/avatar1.png', decode('base64FileData'), {
-    contentType: 'image/png'
-  })
-```

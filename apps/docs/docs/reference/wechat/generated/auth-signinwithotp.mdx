@@ -5,378 +5,155 @@ slug: /auth-signinwithotp
 custom_edit_url: https://github.com/supabase/supabase/edit/master/spec/supabase_js_v2.yml
 ---
 
-使用magiclink或一次性密码（OTP）登录用户。
-如果在电子邮件模板中指定了`{{ .ConfirmationURL }}`变量，将发送一个magiclink。
-如果在电子邮件模板中指定了`{{ .Token }}`变量，将发送一个OTP。
-如果你使用电话签到，将只发送一个OTP。你将无法为电话签到发送一个魔法链接。
+使用魔法链接（Magiclink）或一次性密码（OTP）登录用户，需要提供电子邮件或手机号码中的任意一种。
 
-```js
+
+这个方法用于无需密码的登录，其中一次性密码（OTP）将发送到用户的电子邮件或手机号码。
+如果用户不存在，`signInWithOtp()` 将代替其进行用户注册。要限制此行为，您可以将 `SignInWithPasswordlessCredentials.options` 中的 `shouldCreateUser` 设置为 `false`。
+
+
+* 如果您使用电子邮件，您可以配置是否要向用户发送魔法链接或一次性密码（OTP）。
+
+* 如果您使用手机号码，您可以配置是否要向用户发送一次性密码（OTP）。
+
+魔法链接的目标URL由 `SITE_URL` 决定。请查看[重定向URL和通配符](/docs/guides/auth)以向您的项目添加其他重定向URL。
+
+魔法链接和OTP共享相同的实现。若要向用户发送一次性密码（OTP）而不是魔法链接，请修改魔法链接的[电子邮件模板](https://memfiredb.com/)，将 `{{ .ConfirmationURL }}` 替换为 `{{ .Token }}`。
+
+有关配置WhatsApp登录的详细信息，请参阅我们的[Twilio Phone Auth指南](https://supabase.com/docs/guides/auth/phone-login/twilio)。
+
+
+
+## 案例教程
+
+### 案例1 （使用电子邮件登录）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
 const { data, error } = await supabase.auth.signInWithOtp({
   email: 'example@email.com',
+  options: {
+    emailRedirectTo: 'https://example.com/welcome'
+  }
 })
-```
+  ```
 
+</TabPanel>
 
-## 参数
+<TabPanel id="demo4" label="注意事项">
 
+用户将收到一封电子邮件，其中包含魔法链接或者一次性密码（OTP）亦或是两者都有。默认情况下，同一用户在60秒内只能请求一次一次性密码（OTP）。
 
-<ul className="method-list-group">
-  
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      SignInWithPasswordlessCredentials
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>reflection</code> | <code>reflection</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
+</TabPanel>
 
-未提供说明。 
+</Tabs>
 
-  </div>
-  
-<ul className="method-list-group">
-  <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
 
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      <code>object</code>
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
+### 案例2 （使用短信OTP登陆）
 
-未提供说明。 
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
 
-  </div>
-  
-<ul className="method-list-group">
-  <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
 
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      phone
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>string</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
+<TabPanel id="demo2" label="使用方法">
 
-该用户的电话号码。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      options
-    </span>
-    <span className="method-list-item-label-badge false">
-      可选的
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。 
-
-  </div>
-  
-<ul className="method-list-group">
-  <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      验证码令牌
-    </span>
-    <span className="method-list-item-label-badge false">
-      可选的
-    </span>
-    <span className="method-list-item-validation">
-      <code>string</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-当用户完成网站上的验证码时收到的验证令牌。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      data
-    </span>
-    <span className="method-list-item-label-badge false">
-      可选的
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-一个自定义的数据对象来存储用户的元数据。这映射到`auth.users.user_metadata`列。
-
-`data`应该是一个JSON对象，包括用户的具体信息，如他们的名字和姓氏。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      shouldCreateUser
-    </span>
-    <span className="method-list-item-label-badge false">
-      可选的
-    </span>
-    <span className="method-list-item-validation">
-      <code>boolean</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-如果设置为false，该方法将不会创建一个新的用户。默认为true。
-
-  </div>
-  
-</li>
-
-</ul>
-
-</li>
-
-</ul>
-
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      <code>object</code>
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。 
-
-  </div>
-  
-<ul className="method-list-group">
-  <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      email
-    </span>
-    <span className="method-list-item-label-badge required">
-      required
-    </span>
-    <span className="method-list-item-validation">
-      <code>string</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-用户的电子邮件地址。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      options
-    </span>
-    <span className="method-list-item-label-badge false">
-      可选的
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-未提供说明。 
-
-  </div>
-  
-<ul className="method-list-group">
-  <h5 class="method-list-title method-list-title-isChild expanded">特性</h5>
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      验证码令牌
-    </span>
-    <span className="method-list-item-label-badge false">
-      可选的
-    </span>
-    <span className="method-list-item-validation">
-      <code>string</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-当用户完成网站上的验证码时收到的验证令牌。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      data
-    </span>
-    <span className="method-list-item-label-badge false">
-      可选的
-    </span>
-    <span className="method-list-item-validation">
-      <code>object</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-一个自定义的数据对象来存储用户的元数据。这映射到`auth.users.user_metadata`列。
-
-`data`应该是一个JSON对象，包括用户的具体信息，如他们的名字和姓氏。
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      emailRedirectTo
-    </span>
-    <span className="method-list-item-label-badge false">
-      可选的
-    </span>
-    <span className="method-list-item-validation">
-      <code>string</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-嵌入电子邮件链接中的重定向网址
-
-  </div>
-  
-</li>
-
-
-<li className="method-list-item">
-  <h4 className="method-list-item-label">
-    <span className="method-list-item-label-name">
-      shouldCreateUser
-    </span>
-    <span className="method-list-item-label-badge false">
-      可选的
-    </span>
-    <span className="method-list-item-validation">
-      <code>boolean</code>
-    </span>
-  </h4>
-  <div class="method-list-item-description">
-
-如果设置为false，该方法将不会创建一个新的用户。默认为true。
-
-  </div>
-  
-</li>
-
-</ul>
-
-</li>
-
-</ul>
-
-</li>
-
-</ul>
-
-</li>
-
-</ul>
-
-
-## 备注
-
-- 需要有电子邮件或电话号码。
-- 这种方法用于无密码登录，OTP被发送到用户的电子邮件或电话号码。
-- 如果你使用电子邮件，你可以配置你是否希望用户收到一个magiclink或OTP。
-- 如果你使用电话，你可以配置你是否希望用户收到OTP。
-- 魔法链接的目标URL是由[`SITE_URL`](https://supabase.com/docs/reference/auth/config#site_url)决定的。你可以修改`SITE_URL`或在[你的项目](https://app.supabase.com/project/_/auth/settings)中添加额外的重定向url。
-
-
-
-
-
-
-
-
-
-
-## 例子
-
-### 用电子邮件登录。
-
-用户将被发送一封电子邮件，其中包含一个magiclink或一个OTP或两者。默认情况下，一个特定的用户每60秒只能请求一次OTP。
-
-```js
-const { data, error } = await supabase.auth.signInWithOtp({
-  email: 'example@email.com',
-})
-```
-
-### 用短信OTP登录。
-
-用户将被发送一条包含OTP的短信。默认情况下，一个特定的用户每60秒只能请求一次OTP。
-
-```js
+  ```ts
 const { data, error } = await supabase.auth.signInWithOtp({
   phone: '+13334445555',
 })
-```
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+用户将收到一条包含一次性密码（OTP）的短信。默认情况下，同一用户在60秒内只能请求一次一次性密码（OTP）。
+
+</TabPanel>
+</Tabs>
+
+
+### 案例3 （使用WhatsApp OTP登录）
+
+<Tabs scrollable size="small" type="underlined" defaultActiveId="demo2">
+
+
+<TabPanel id="demo2" label="使用方法">
+
+  ```ts
+const { data, error } = await supabase.auth.signInWithOtp({
+  phone: '+13334445555',
+  options: {
+    channel:'whatsapp',
+  }
+})
+  ```
+
+</TabPanel>
+
+<TabPanel id="demo4" label="注意事项">
+
+用户将收到一条包含一次性密码（OTP）的WhatsApp消息。
+默认情况下，同一用户在60秒内只能请求一次一次性密码（OTP）。请注意，为了使用此功能，用户需要拥有一个与Twilio关联的有效WhatsApp账号。
+
+</TabPanel>
+</Tabs>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 参数说明
+
+
+<ul className="method-list-group">
+  
+<li className="method-list-item">
+  <h4 className="method-list-item-label">
+    <span className="method-list-item-label-name">
+      credentials
+    </span>
+    <span className="method-list-item-label-badge required">
+      [必要参数]
+    </span>
+    <span className="method-list-item-validation">
+      <code>SignUpWithPasswordCredentials</code> 
+    </span>
+  </h4>
+  <div class="method-list-item-description">
+
+SignUpWithPasswordCredentials是使用密码进行身份验证的一种凭据类型。通常包含以下信息：
+
+1.email（电子邮件）：用户的电子邮件地址，作为账户的唯一标识符之一。
+
+2.password（密码）：用户选择的密码，用于以后登录时进行身份验证。
+
+3.可能还包含其他一些相关的字段，例如用户名、手机号码或其他自定义的用户信息。
+
+  </div>
+  
+
+</li>
+
+</ul>
+
+
+
