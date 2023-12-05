@@ -1,0 +1,227 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: 'Android Kotlin',
+  title: '快速入门: Android Kotlin',
+  description: '了解如何在你的Android Kotlin中使用Supabase。',
+  sidebar_label: 'Android Kotlin',
+}
+
+## 第一步：在 MemFire Cloud 仪表板中[创建](https://cloud.memfiredb.com/project)一个新应用。
+
+应用准备就绪后，进入应用，在左侧菜单->表编辑器选择 SQL 编辑器在 MemFire Cloud 数据库中创建一个表。使用以下 SQL 语句创建包含一些示例数据的国家/地区表。
+
+```bash
+  -- Create the table
+  CREATE TABLE countries (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+  );
+  -- Insert some sample data into the table
+  INSERT INTO countries (name) VALUES ('United States');
+  INSERT INTO countries (name) VALUES ('Canada');
+  INSERT INTO countries (name) VALUES ('Mexico');
+```
+
+
+## 第二步：使用 Android Studio 创建 Android 应用
+
+打开 Android Studio > 新建 > 新建 Android 项目。
+
+```bash
+npm create vite@latest my-app -- --template react
+```
+
+## 第三步：安装 Supabase 客户端库
+
+导入 Supabase 和所有必需的依赖项。将版本占位符 $supabase_version 和 $ktor_version 替换为各自的最新版本。
+
+```bash
+  implementation "io.github.jan-tennert.supabase:postgrest-kt:$supabase_version"
+  implementation "io.ktor:ktor-client-android:$ktor_version"
+
+```
+
+## 第四步： 安装序列化插件
+打开build.gradle（app），添加序列化插件以使用注解进行数据解析。请注意，插件版本应与应用中的 Kotlin 版本相同。
+
+```bash
+  plugins {
+      ...
+      id 'org.jetbrains.kotlin.plugin.serialization' version '$kotlin_version'
+      ...
+  }
+
+
+```
+
+
+## 第五步：初始化 Supabase 客户端
+每当需要执行 API 调用时，您都可以创建 Supabase 客户端。话虽这么说，建议使用像 [Hilt](https://developer.android.com/training/dependency-injection/hilt-android?hl=zh-cn#kts) 这样的依赖注入库。
+
+```bash
+val client = createSupabaseClient(
+    supabaseUrl = "https://xyzcompany.supabase.co",
+    supabaseKey = "public-anon-key"
+  ) {
+    install(Postgrest)
+}
+
+
+```
+
+## 第六步：创建数据传输对象
+```js
+  @Serializable
+data class ProductDto(
+    @SerialName("productid")
+    val productId: String,
+    @SerialName("name")
+    val name: String,
+    @SerialName("description")
+    val description: String,
+    @SerialName("price")
+    val price: Double,
+    @SerialName("image")
+    val image: String,
+    @SerialName("category")
+    val category: String,
+    @SerialName("nutrition")
+    val nutrition: String,
+    @SerialName("_id")
+    val _id: Int,
+)
+
+```
+
+## 第七步：创建一个domain 对象
+这种对象将被视图消耗。
+
+```bash
+data class Product(
+    val productId: String,
+    val name: String,
+    val description: String,
+    val price: Double,
+    val image: String,
+    val category: String,
+    val nutrition: String,
+    val _id: Int,
+)
+
+```
+
+## 第八步：从应用程序查询数据
+创建存储库以与数据源交互。
+
+```bash
+interface ProductRepository {
+  fun getProducts(): List<ProductDto>
+}
+
+class ProductRepositoryImpl @Inject constructor(
+      private val postgrest: Postgrest,
+  ) : ProductRepository {
+    override suspend fun getProducts(): List<ProductDto> {
+      val result = client.postgrest["products"]
+          .select().decodeList<ProductDto>()
+      // Handle result data for next step
+      return result
+    }
+}
+
+
+```
+
+## 第九步：创建一个模块来提供存储库
+使用Hilt进行依赖注入。
+
+```bash
+InstallIn(SingletonComponent::class)
+@Module
+abstract class RepositoryModule {
+    @Binds
+    abstract fun bindProductRepository(impl: ProductRepositoryImpl): ProductRepository
+}
+
+
+```
+
+## 第十步：从协程范围内的 ViewModel 获取数据
+添加 @Inject 注释以在 ViewModel 中使用存储库。
+
+```bash
+class ProductListViewModel @Inject constructor(
+  private val productRepository: ProductRepository
+) : ViewModel() {
+
+  private val _productList = MutableStateFlow<List<Product>?>(listOf())
+  val productList: Flow<List<Product>?> = _productList
+
+  init {
+      getProducts()
+  }
+
+  fun getProducts() {
+      viewModelScope.launch {
+          val products = productRepository.getProducts()
+          _productList.emit(products?.map { it -> it.asDomainModel() })
+      }
+  }
+
+  private fun ProductDto.asDomainModel(): Product {
+    return Product(
+        productId = this.productId,
+        name = this.name,
+        price = this.price,
+        image = this.image,
+        description = this.description,
+        category = this.category,
+        nutrition = this.nutrition,
+        _id = this._id
+    )
+}
+
+
+```
+## 第十步：观察可组合项中的数据
+
+```bash
+  @Composable
+  fun ProductListScreen(
+      modifier: Modifier = Modifier,
+      navController: NavController,
+      viewModel: ProductListViewModel = hiltViewModel(),
+  ) {
+      val productList = viewModel.productList.collectAsState(initial = listOf()).value
+      if (!productList.isNullOrEmpty()) {
+          LazyColumn(
+              modifier = modifier.padding(24.dp),
+              contentPadding = PaddingValues(5.dp)
+          ) {
+              items(productList) { item ->
+                  ProductListItem(
+                      product = item,
+                      modifier = modifier,
+                      onClick = {
+                          navController.navigate(
+                              ProductDetailsDestination.createRouteWithParam(
+                                  item.id
+                              )
+                          )
+                      },
+                  )
+              }
+          }
+      }
+  }
+
+
+
+```
+
+## 第十二步：启动应用程序
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page

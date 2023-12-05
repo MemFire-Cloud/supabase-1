@@ -2,389 +2,95 @@ import Layout from '~/layouts/DefaultGuideLayout'
 
 export const meta = {
   id: 'with-vue-3',
-  title: '快速入门: Vue 3',
-  description: '了解如何在你的Vue 3应用程序中使用Supabase。',
-  sidebar_label: 'Vue 3',
+  title: '快速入门: Vue',
+  description: '了解如何在你的Vue应用程序中使用Supabase。',
+  sidebar_label: 'Vue',
 }
 
-<QuickstartIntro />
 
-![Supabase用户管理实例](/docs/img/user-management-demo.png)
 
-### GitHub
+## 第一步：在 MemFire Cloud 仪表板中[创建](https://cloud.memfiredb.com/project)一个新应用。
 
-如果你在阅读指南时遇到困难，请参考[此版本](https://github.com/supabase/supabase/tree/master/examples/user-management/vue3-user-management)。
-
-<ProjectSetup />
-
-## 构建应用程序
-
-让我们开始从头开始构建Vue 3应用程序。
-
-### 初始化一个Vue 3应用程序
-
-我们可以快速使用[Vite with Vue 3 Template](https://vitejs.dev/guide/#scaffolding-your-first-vite-project)来初始化
-一个名为`supabase-vue-3'的应用程序。
+应用准备就绪后，进入应用，在左侧菜单->表编辑器选择 SQL 编辑器在 MemFire Cloud 数据库中创建一个表。使用以下 SQL 语句创建包含一些示例数据的国家/地区表。
 
 ```bash
-# npm 6.x
-npm create vite@latest supabase-vue-3 --template vue
-
-# npm 7+, extra double-dash is needed:
-npm create vite@latest supabase-vue-3 -- --template vue
-
-cd supabase-vue-3
+  -- Create the table
+  CREATE TABLE countries (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+  );
+  -- Insert some sample data into the table
+  INSERT INTO countries (name) VALUES ('United States');
+  INSERT INTO countries (name) VALUES ('Canada');
+  INSERT INTO countries (name) VALUES ('Mexico');
 ```
 
-然后让我们安装唯一的额外依赖：[supabase-js](https://github.com/supabase/supabase-js)
+
+## 第二步：创建 Vue 应用
+
+使用 npm init 命令创建 Vue 应用。
 
 ```bash
-npm install @supabase/supabase-js
+npm init vue@latest my-app
 ```
 
-最后，我们要把环境变量保存在`.env`中。
-我们所需要的是API URL和你[早些时候]复制的`anon`密钥（#get-theapi-keys）。
+## 第三步：安装 Supabase 客户端库
 
-```bash title=.env
-VITE_SUPABASE_URL=YOUR_SUPABASE_URL
-VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+最快的入门方法是使用 supabase-js 客户端库，它提供了一些简便的API，用于在 Vue 应用程序中使用 Supabase。
+导航到 Vue 应用程序并安装 supabase-js 。
+
+```bash
+cd my-app && npm install @supabase/supabase-js
 ```
 
-现在我们已经有了API凭证，让我们创建一个辅助文件来初始化Supabase客户端。这些变量将被暴露在
-在浏览器上，这完全没有问题，因为我们的数据库已经启用了[行级安全](/docs/guides/auth#row-level-security)。
 
-```js title=src/supabase.js
-import { createClient } from '@supabase/supabase-js'
+## 第四步：创建 Supabase 客户端
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+在您的 Vue 应用程序中创建一个 /src/lib 目录，创建一个名为 supabaseClient.js 的文件，并添加以下代码以使用您的项目 URL 和公共 API（匿名）密钥初始化 Supabase 客户端。
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+```bash
+  import { createClient } from '@supabase/supabase-js'
+
+  export const supabase = createClient('https://<project>.supabase.co', '<your-anon-key>')
 ```
 
-可以选择更新[src/style.css](https://raw.githubusercontent.com/supabase/supabase/master/examples/user-management/vue3-user-management/src/style.css)，为应用程序设置样式。
 
-### 设置一个登录组件
+## 第五步：在应用程序中查询数据
 
-让我们建立一个Vue组件来管理登录和注册。我们将使用Magic Links，所以用户可以用他们的电子邮件登录，而不需要使用密码。
+将 App.vue 文件中的现有内容替换为以下代码。
 
-```html title=/src/components/Auth.vue
-<script setup>
-  import { ref } from 'vue'
-  import { supabase } from '../supabase'
+```js
+  <script setup>
+  import { ref, onMounted } from 'vue'
+  import { supabase } from './lib/supabaseClient'
 
-  const loading = ref(false)
-  const email = ref('')
+  const countries = ref([])
 
-  const handleLogin = async () => {
-    try {
-      loading.value = true
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email.value,
-      })
-      if (error) throw error
-      alert('Check your email for the login link!')
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(error.message)
-      }
-    } finally {
-      loading.value = false
-    }
+  async function getCountries() {
+    const { data } = await supabase.from('countries').select()
+    countries.value = data
   }
-</script>
-
-<template>
-  <form class="row flex-center flex" @submit.prevent="handleLogin">
-    <div class="col-6 form-widget">
-      <h1 class="header">Supabase + Vue 3</h1>
-      <p class="description">Sign in via magic link with your email below</p>
-      <div>
-        <input class="inputField" type="email" placeholder="Your email" v-model="email" />
-      </div>
-      <div>
-        <input
-          type="submit"
-          class="button block"
-          :value="loading ? 'Loading' : 'Send magic link'"
-          :disabled="loading"
-        />
-      </div>
-    </div>
-  </form>
-</template>
-```
-
-### 账号页面
-
-在用户登录后，我们可以让他们编辑他们的个人资料细节和管理他们的账户。
-让我们为其创建一个新的组件，名为`Account.vue`。
-
-```html title=src/components/Account.vue
-<script setup>
-  import { supabase } from '../supabase'
-  import { onMounted, ref, toRefs } from 'vue'
-
-  const props = defineProps(['session'])
-  const { session } = toRefs(props)
-
-  const loading = ref(true)
-  const username = ref('')
-  const website = ref('')
-  const avatar_url = ref('')
 
   onMounted(() => {
-    getProfile()
+    getCountries()
   })
+  </script>
 
-  async function getProfile() {
-    try {
-      loading.value = true
-      const { user } = session.value
-
-      let { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', user.id)
-        .single()
-
-      if (error && status !== 406) throw error
-
-      if (data) {
-        username.value = data.username
-        website.value = data.website
-        avatar_url.value = data.avatar_url
-      }
-    } catch (error) {
-      alert(error.message)
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function updateProfile() {
-    try {
-      loading.value = true
-      const { user } = session.value
-
-      const updates = {
-        id: user.id,
-        username: username.value,
-        website: website.value,
-        avatar_url: avatar_url.value,
-        updated_at: new Date(),
-      }
-
-      let { error } = await supabase.from('profiles').upsert(updates)
-
-      if (error) throw error
-    } catch (error) {
-      alert(error.message)
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function signOut() {
-    try {
-      loading.value = true
-      let { error } = await supabase.auth.signOut()
-      if (error) throw error
-    } catch (error) {
-      alert(error.message)
-    } finally {
-      loading.value = false
-    }
-  }
-</script>
-
-<template>
-  <form class="form-widget" @submit.prevent="updateProfile">
-    <div>
-      <label for="email">Email</label>
-      <input id="email" type="text" :value="session.user.email" disabled />
-    </div>
-    <div>
-      <label for="username">Name</label>
-      <input id="username" type="text" v-model="username" />
-    </div>
-    <div>
-      <label for="website">Website</label>
-      <input id="website" type="website" v-model="website" />
-    </div>
-
-    <div>
-      <input
-        type="submit"
-        class="button primary block"
-        :value="loading ? 'Loading ...' : 'Update'"
-        :disabled="loading"
-      />
-    </div>
-
-    <div>
-      <button class="button block" @click="signOut" :disabled="loading">Sign Out</button>
-    </div>
-  </form>
-</template>
+  <template>
+    <ul>
+      <li v-for="country in countries" :key="country.id">{{ country.name }}</li>
+    </ul>
+  </template>
 ```
+## 第六步：启动应用程序
 
-### 启动
-
-让我们为其创建一个新的组件，名为`Account.vue`。
-
-```html title=src/App.vue
-<script setup>
-  import { onMounted, ref } from 'vue'
-  import Account from './components/Account.vue'
-  import Auth from './components/Auth.vue'
-  import { supabase } from './supabase'
-
-  const session = ref()
-
-  onMounted(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      session.value = data.session
-    })
-
-    supabase.auth.onAuthStateChange((_, _session) => {
-      session.value = _session
-    })
-  })
-</script>
-
-<template>
-  <div class="container" style="padding: 50px 0 100px 0">
-    <Account v-if="session" :session="session" />
-    <Auth v-else />
-  </div>
-</template>
-```
-
-一旦完成，在终端窗口运行这个程序。
+启动应用程序并在浏览器中访问 http://localhost:5173，您应该会看到国家/地区列表。
 
 ```bash
 npm run dev
 ```
 
-然后打开浏览器到[localhost:5173](http://localhost:5173)，你应该看到完成的应用程序。
 
-![Supabase Vue 3](/docs/img/supabase-vue-3-demo.png)
-
-## 个人照片
-
-每个Supabase项目都配置了[存储](/docs/guides/storage)，用于管理照片和视频等大文件。
-
-### 创建一个上传小组件
-
-让我们为用户创建一个头像，以便他们可以上传个人资料照片。我们可以从创建一个新的组件开始。
-
-```html title=src/components/Avatar.vue
-<script setup>
-  import { ref, toRefs, watch } from 'vue'
-  import { supabase } from '../supabase'
-
-  const prop = defineProps(['path', 'size'])
-  const { path, size } = toRefs(prop)
-
-  const emit = defineEmits(['upload', 'update:path'])
-  const uploading = ref(false)
-  const src = ref('')
-  const files = ref()
-
-  const downloadImage = async () => {
-    try {
-      const { data, error } = await supabase.storage.from('avatars').download(path.value)
-      if (error) throw error
-      src.value = URL.createObjectURL(data)
-    } catch (error) {
-      console.error('Error downloading image: ', error.message)
-    }
-  }
-
-  const uploadAvatar = async (evt) => {
-    files.value = evt.target.files
-    try {
-      uploading.value = true
-      if (!files.value || files.value.length === 0) {
-        throw new Error('You must select an image to upload.')
-      }
-
-      const file = files.value[0]
-      const fileExt = file.name.split('.').pop()
-      const filePath = `${Math.random()}.${fileExt}`
-
-      let { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file)
-
-      if (uploadError) throw uploadError
-      emit('update:path', filePath)
-      emit('upload')
-    } catch (error) {
-      alert(error.message)
-    } finally {
-      uploading.value = false
-    }
-  }
-
-  watch(path, () => {
-    if (path.value) downloadImage()
-  })
-</script>
-
-<template>
-  <div>
-    <img
-      v-if="src"
-      :src="src"
-      alt="Avatar"
-      class="avatar image"
-      :style="{ height: size + 'em', width: size + 'em' }"
-    />
-    <div v-else class="avatar no-image" :style="{ height: size + 'em', width: size + 'em' }" />
-
-    <div :style="{ width: size + 'em' }">
-      <label class="button primary block" for="single">
-        {{ uploading ? "Uploading ..." : "Upload" }}
-      </label>
-      <input
-        style="visibility: hidden; position: absolute"
-        type="file"
-        id="single"
-        accept="image/*"
-        @change="uploadAvatar"
-        :disabled="uploading"
-      />
-    </div>
-  </div>
-</template>
-```
-
-### 添加新的小组件
-
-然后我们就可以把这个小部件添加到账号页面:
-
-```html title=src/components/Account.vue
-<script>
-  // Import the new component
-  import Avatar from './Avatar.vue'
-</script>
-
-<template>
-  <form class="form-widget" @submit.prevent="updateProfile">
-    <!-- Add to body -->
-    <Avatar v-model:path="avatar_url" @upload="updateProfile" size="10" />
-
-    <!-- Other form elements -->
-  </form>
-</template>
-```
-
-## 下一步
-
-在这个阶段，你已经有了一个功能完备的应用程序!
-
-- 有问题吗？[在此提问](https://community.memfiredb.com/).
-- 请登录[MemFire Cloud](https://cloud.memfiredb.com/)
 
 export const Page = ({ children }) => <Layout meta={meta} children={children} />
 

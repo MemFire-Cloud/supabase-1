@@ -7,396 +7,81 @@ export const meta = {
   sidebar_label: 'React',
 }
 
-<QuickstartIntro />
+## 第一步：在 MemFire Cloud 仪表板中[创建](https://cloud.memfiredb.com/project)一个新应用。
 
-![Supabase用户管理实例](/docs/img/user-management-demo.png)
-
-### GitHub
-
-如果你在阅读指南时遇到困难，请参考[此版本](https://github.com/supabase/supabase/tree/master/examples/user-management/react-user-management)。
-
-<ProjectSetup />
-
-## 构建应用程序
-
-让我们开始从头开始构建React应用程序。
-
-### 初始化一个React应用
-
-我们可以使用[Create React App](https://create-react-app.dev/docs/getting-started/)来初始化
-一个名为`supabase-react'的应用程序。
+应用准备就绪后，进入应用，在左侧菜单->表编辑器选择 SQL 编辑器在 MemFire Cloud 数据库中创建一个表。使用以下 SQL 语句创建包含一些示例数据的国家/地区表。
 
 ```bash
-npx create-react-app supabase-react
-cd supabase-react
+  -- Create the table
+  CREATE TABLE countries (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+  );
+  -- Insert some sample data into the table
+  INSERT INTO countries (name) VALUES ('United States');
+  INSERT INTO countries (name) VALUES ('Canada');
+  INSERT INTO countries (name) VALUES ('Mexico');
 ```
 
-然后让我们安装唯一的额外依赖：[supabase-js](https://github.com/supabase/supabase-js)。
+
+## 第二步：创建 React 应用
+
+使用 Vite 模板创建 React 应用。
 
 ```bash
-npm install @supabase/supabase-js
+npm create vite@latest my-app -- --template react
 ```
 
-最后，我们要把环境变量保存在`.env`中。
-我们所需要的是API URL和你[早些时候]复制的`anon`密钥(#get-theapi-keys)。
+## 第三步：安装 Supabase 客户端库
 
-```bash title=.env
-REACT_APP_SUPABASE_URL=YOUR_SUPABASE_URL
-REACT_APP_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-```
-
-现在我们已经有了API凭证，让我们创建一个辅助文件来初始化Supabase客户端。这些变量将被暴露在
-在浏览器上，这完全没有问题，因为我们的数据库已经启用了[行级安全](/docs/guides/auth#row-level-security)。
-
-```js title=src/supabaseClient.js
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
-const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-```
-
-还有一个可选的步骤是更新CSS文件`src/index.css`以使应用程序看起来漂亮。
-你可以找到这个文件的全部内容[这里](https://raw.githubusercontent.com/supabase/supabase/master/examples/user-management/react-user-management/src/index.css)。
-
-### 设置一个登录组件
-
-让我们建立一个React组件来管理登录和注册。我们将使用Magic Links，所以用户可以用他们的电子邮件登录，而不需要使用密码。
-
-```jsx title=src/Auth.js
-import { useState } from 'react'
-import { supabase } from './supabaseClient'
-
-export default function Auth() {
-  const [loading, setLoading] = useState(false)
-  const [email, setEmail] = useState('')
-
-  const handleLogin = async (e) => {
-    e.preventDefault()
-
-    try {
-      setLoading(true)
-      const { error } = await supabase.auth.signInWithOtp({ email })
-      if (error) throw error
-      alert('Check your email for the login link!')
-    } catch (error) {
-      alert(error.error_description || error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="row flex-center flex">
-      <div className="col-6 form-widget" aria-live="polite">
-        <h1 className="header">Supabase + React</h1>
-        <p className="description">Sign in via magic link with your email below</p>
-        {loading ? (
-          'Sending magic link...'
-        ) : (
-          <form onSubmit={handleLogin}>
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              className="inputField"
-              type="email"
-              placeholder="Your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <button className="button block" aria-live="polite">
-              Send magic link
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
-  )
-}
-```
-
-### 账号页面
-
-在用户登录后，我们可以让他们编辑他们的个人资料细节和管理他们的账户。
-
-让我们为其创建一个新的组件，名为`Account.js`。
-
-```jsx title=src/Account.js
-import { useState, useEffect } from 'react'
-import { supabase } from './supabaseClient'
-
-const Account = ({ session }) => {
-  const [loading, setLoading] = useState(true)
-  const [username, setUsername] = useState(null)
-  const [website, setWebsite] = useState(null)
-  const [avatar_url, setAvatarUrl] = useState(null)
-
-  useEffect(() => {
-    getProfile()
-  }, [session])
-
-  const getProfile = async () => {
-    try {
-      setLoading(true)
-      const { user } = session
-
-      let { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', user.id)
-        .single()
-
-      if (error && status !== 406) {
-        throw error
-      }
-
-      if (data) {
-        setUsername(data.username)
-        setWebsite(data.website)
-        setAvatarUrl(data.avatar_url)
-      }
-    } catch (error) {
-      alert(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const updateProfile = async (e) => {
-    e.preventDefault()
-
-    try {
-      setLoading(true)
-      const { user } = session
-
-      const updates = {
-        id: user.id,
-        username,
-        website,
-        avatar_url,
-        updated_at: new Date(),
-      }
-
-      let { error } = await supabase.from('profiles').upsert(updates)
-
-      if (error) {
-        throw error
-      }
-    } catch (error) {
-      alert(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div aria-live="polite">
-      {loading ? (
-        'Saving ...'
-      ) : (
-        <form onSubmit={updateProfile} className="form-widget">
-          <div>Email: {session.user.email}</div>
-          <div>
-            <label htmlFor="username">Name</label>
-            <input
-              id="username"
-              type="text"
-              value={username || ''}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="website">Website</label>
-            <input
-              id="website"
-              type="url"
-              value={website || ''}
-              onChange={(e) => setWebsite(e.target.value)}
-            />
-          </div>
-          <div>
-            <button className="button primary block" disabled={loading}>
-              Update profile
-            </button>
-          </div>
-        </form>
-      )}
-      <button type="button" className="button block" onClick={() => supabase.auth.signOut()}>
-        Sign Out
-      </button>
-    </div>
-  )
-}
-
-export default Account
-```
-
-### 启动
-
-现在我们已经有了所有的组件，让我们来更新`App.js`。
-
-```jsx title=src/App.js
-import './index.css'
-import { useState, useEffect } from 'react'
-import { supabase } from './supabaseClient'
-import Auth from './Auth'
-import Account from './Account'
-
-export default function App() {
-  const [session, setSession] = useState(null)
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-    })
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
-  }, [])
-
-  return (
-    <div className="container" style={{ padding: '50px 0 100px 0' }}>
-      {!session ? <Auth /> : <Account key={session.user.id} session={session} />}
-    </div>
-  )
-}
-```
-
-一旦完成，在终端窗口运行这个程序。
+最快的入门方法是使用 supabase-js 客户端库，它提供了一些简便的API，用于在 React 应用程序中使用 Supabase。
+导航到 React 应用程序并安装 supabase-js 。
 
 ```bash
-npm start
+cd my-app && npm install @supabase/supabase-js
 ```
 
-然后打开浏览器到[localhost:3000](http://localhost:3000)，你应该看到完成的应用程序。
+## 第四步：在应用程序中查询数据
 
-![Supabase React](/docs/img/supabase-react-demo.png)
+在 App.jsx 中，使用您的项目 URL 和公共 API（匿名）密钥创建 Supabase 客户端。
+添加 getCountries 函数以获取数据并将查询结果显示到页面。
 
-## 个人照片
+```js
+  import { useEffect, useState } from "react";
+  import { createClient } from "@supabase/supabase-js";
 
-每个Supabase项目都配置了[存储](/docs/guides/storage)，用于管理照片和视频等大文件。
+  const supabase = createClient("https://<project>.supabase.co", "<your-anon-key>");
 
-### 创建一个上传小组件
+  function App() {
+    const [countries, setCountries] = useState([]);
 
-让我们为用户创建一个头像，以便他们可以上传个人资料照片。我们可以从创建一个新的组件开始。
+    useEffect(() => {
+      getCountries();
+    }, []);
 
-```jsx title=src/Avatar.js
-import { useEffect, useState } from 'react'
-import { supabase } from './supabaseClient'
-
-export default function Avatar({ url, size, onUpload }) {
-  const [avatarUrl, setAvatarUrl] = useState(null)
-  const [uploading, setUploading] = useState(false)
-
-  useEffect(() => {
-    if (url) downloadImage(url)
-  }, [url])
-
-  const downloadImage = async (path) => {
-    try {
-      const { data, error } = await supabase.storage.from('avatars').download(path)
-      if (error) {
-        throw error
-      }
-      const url = URL.createObjectURL(data)
-      setAvatarUrl(url)
-    } catch (error) {
-      console.log('Error downloading image: ', error.message)
+    async function getCountries() {
+      const { data } = await supabase.from("countries").select();
+      setCountries(data);
     }
+
+    return (
+      <ul>
+        {countries.map((country) => (
+          <li key={country.name}>{country.name}</li>
+        ))}
+      </ul>
+    );
   }
 
-  const uploadAvatar = async (event) => {
-    try {
-      setUploading(true)
-
-      if (!event.target.files || event.target.files.length === 0) {
-        throw new Error('You must select an image to upload.')
-      }
-
-      const file = event.target.files[0]
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random()}.${fileExt}`
-      const filePath = `${fileName}`
-
-      let { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file)
-
-      if (uploadError) {
-        throw uploadError
-      }
-
-      onUpload(filePath)
-    } catch (error) {
-      alert(error.message)
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  return (
-    <div style={{ width: size }} aria-live="polite">
-      <img
-        src={avatarUrl ? avatarUrl : `https://place-hold.it/${size}x${size}`}
-        alt={avatarUrl ? 'Avatar' : 'No image'}
-        className="avatar image"
-        style={{ height: size, width: size }}
-      />
-      {uploading ? (
-        'Uploading...'
-      ) : (
-        <>
-          <label className="button primary block" htmlFor="single">
-            Upload an avatar
-          </label>
-          <div className="visually-hidden">
-            <input
-              type="file"
-              id="single"
-              accept="image/*"
-              onChange={uploadAvatar}
-              disabled={uploading}
-            />
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
+  export default App;
 ```
+## 第五步：启动应用程序
 
-### 添加新的小组件
+启动应用程序，在浏览器中访问 http://localhost:5173，然后打开浏览器控制台，您应该会看到国家/地区列表。
 
-然后我们就可以把这个小部件添加到账号页面:
-
-```jsx title=src/Account.js
-// Import the new component
-import Avatar from './Avatar'
-
-// ...
-
-return (
-  <div className="form-widget">
-    {/* Add to the body */}
-    <Avatar
-      url={avatar_url}
-      size={150}
-      onUpload={(url) => {
-        setAvatarUrl(url)
-        updateProfile({ username, website, avatar_url: url })
-      }}
-    />
-    {/* ... */}
-  </div>
-)
+```bash
+npm run dev
 ```
-
-## 下一步
-
-在这个阶段，你已经有了一个功能完备的应用程序!
-
-- 有问题吗？[在此提问](https://community.memfiredb.com/).
-- 请登录[MemFire Cloud](https://cloud.memfiredb.com/)
 
 export const Page = ({ children }) => <Layout meta={meta} children={children} />
 
