@@ -49,13 +49,23 @@ export const REFERENCES: References = {
 export const menuItems: NavMenu = {
   docs: [
     {
-      label: '概述',
+      label: '应用开发概述',
       items: [
         { name: '简介', url: '/', items: [] },
         { name: '功能', url: '/features', items: [] },
         { name: '架构', url: '/architecture', items: [] },
         { name: '产品动态', url: '/history', items: [] },
         { name: '联系我们', url: '/contactus', items: [] },
+      ],
+    },
+    {
+      label: '购买指南',
+      items: [
+        { name: '价格文档', url: '/guides/purchase/price', items: [] },
+        { name: '包年包月套餐说明', url: '/guides/purchase/package', items: [] },
+        { name: '欠费说明', url: '/guides/purchase/arrears', items: [] },
+        { name: '退订说明', url: '/guides/purchase/unsubscribe', items: [] },
+        { name: '计费相关问题', url: '/guides/purchase/qa', items: [] },
       ],
     },
     {
@@ -280,7 +290,7 @@ export const menuItems: NavMenu = {
       ],
     },
     {
-      label: '云存储',
+      label: '对象存储',
       items: [
         { name: '概述', url: '/guides/storage', items: [] },
 
@@ -315,7 +325,7 @@ export const menuItems: NavMenu = {
         //   ],
         // },
 
-        
+
       ],
     },
     {
@@ -344,7 +354,7 @@ export const menuItems: NavMenu = {
         { name: '别踩白块游戏小程序', url: '/guides/example/notClickWhite', items: [] },
         { name: '微信聊天室小程序', url: '/guides/example/WechatRoom', items: [] },
         { name: 'Web实时游戏场', url: '/guides/example/Playground', items: [] },
-        // { name: 'CDN', url: '/guides/storage-cdn', items: [] },
+        { name: '前端框架的脚手架', url: '/guides/example/scaffold', items: [] },
       ],
     },
     // {

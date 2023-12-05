@@ -139,7 +139,7 @@ SDK使用教程
 
 进入页面先调用getUser()判断是否登陆过，登录过会通过这个接口去获取用户信息，获取之后进行信息回填；没有登陆过则不会进行信息回填。
 
-- 修改头像选择图片时，需要将头像的临时地址上传到memfire cloud的云存储生成永久图片，再进行下载,在此之前需要去memfire cloud创建一个新的公开bucket。
+- 修改头像选择图片时，需要将头像的临时地址上传到memfire cloud的对象存储生成永久图片，再进行下载,在此之前需要去memfire cloud创建一个新的公开bucket。
 
 ```js
 import { supabase } from '../../lib/supabase'
@@ -206,7 +206,7 @@ Page({
       })
     }
   },
-  //选择头像，需要将头像的临时地址上传到memfire cloud的云存储生成永久图片，再进行下载
+  //选择头像，需要将头像的临时地址上传到memfire cloud的对象存储生成永久图片，再进行下载
   //在此之前需要去memfire cloud创建一个新的bucket
   async onChooseAvatar(e) {
     let { avatarUrl } = e.detail

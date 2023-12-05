@@ -1,8 +1,6 @@
-[
-  {
+[{
     "title": "功能介绍",
-    "links": [
-      {
+    "links": [{
         "text": "数据库",
         "url": "/docs/guides/database"
       },
@@ -15,7 +13,7 @@
         "url": "/docs/guides/realtime"
       },
       {
-        "text": "云存储",
+        "text": "对象存储",
         "url": "/docs/guides/storage"
       },
       {
@@ -30,8 +28,7 @@
   },
   {
     "title": "开发者",
-    "links": [
-      {
+    "links": [{
         "text": "文档",
         "url": "/docs"
       },

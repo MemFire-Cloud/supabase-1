@@ -1,0 +1,43 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: 'api',
+  title: '欠费说明',
+  description: 'Description of arrears.',
+  sidebar_label: 'Arrears',
+}
+
+## 包年包月
+
+### 套餐到期前7天
+
+系统会多次发送续费提醒通知，请及时续费。
+
+### 套餐到期
+
+系统将在到期时间点开始进行停服处理，应用进入已隔离状态，线上业务停服、控制台页面无法访问、应用无法操作。
+
+此时，用户可以续费来恢复应用。如果不需继续使用亦可删除应用。
+
+<Admonition type="todo" label="note">
+
+如果用户在应用到期暂停期间内，执行续费操作恢复应用，则续费周期的起始时间是原到期时间。
+
+例如：应用在1月1日到期，1月4日续费一个月。那么，应用新的到期时间是2月1日（按原到期时间计算）。
+
+</Admonition>
+
+
+### 套餐到期超过7天
+
+系统将在第8天自动删除应用，清除所有资源和数据。删除应用后，则不可恢复、找回资源和数据。
+
+### 账户欠款，套餐未到期
+
+如果出现账户欠费，但是套餐未到期，应用仍可正常使用，但无法续费、无法变更套餐。
+
+需先充值将欠款将账户冲正后，才可续费或变更套餐。
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page

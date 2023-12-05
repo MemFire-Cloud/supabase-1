@@ -16,7 +16,7 @@ export const meta = {
 
 ## 如何添加RLS
 
-我们使用MemFire Cloud开发应用时，需要关注的对象包括数据表、云存储的bucket，可以使用RLS来设置用户的访问权限，保证用户数据安全性。
+我们使用MemFire Cloud开发应用时，需要关注的对象包括数据表、对象存储的bucket，可以使用RLS来设置用户的访问权限，保证用户数据安全性。
 
 ### 数据表
 
@@ -40,9 +40,9 @@ ALTER TABLE <name> ENABLE ROW LEVEL SECURITY
 
 ③ 用户认证->策略->给指定表启用RLS
 
-### 云存储bucket
+### 对象存储bucket
 
-云存储bucket的RLS默认就是开启的，无需手动开启。新建bucket时，如果选择公开bucket，则任何人可以访问bucket中的对象文件；否则无权访问。
+对象存储bucket的RLS默认就是开启的，无需手动开启。新建bucket时，如果选择公开bucket，则任何人可以访问bucket中的对象文件；否则无权访问。
 
 ## 如何给数据表设置访问权限
 

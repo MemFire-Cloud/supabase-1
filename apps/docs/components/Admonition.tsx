@@ -14,16 +14,16 @@ const Admonition: FC<Props> = ({ type = 'note', label, children }) => {
         'shadow p-4 rounded border-l-[5px] space-y-2 my-4',
         `${
           type === 'note'
-            ? 'bg-scale-400 border-scale-800'
+            ? 'bg-cyan-300 border-cyan-800'
             : type === 'info'
-            ? 'bg-scale-500 border-scale-800'
+            ? 'bg-cyan-300 border-cyan-800'
             : type === 'tip'
             ? 'bg-brand-300 border-brand-800'
             : type === 'caution'
             ? 'bg-yellow-400 border-yellow-800'
             : type === 'danger'
             ? 'bg-red-500 border-red-800'
-            : 'bg-scale-500 border-scale-800'
+            : 'bg-cyan-300 border-cyan-800'
         }`,
       ].join(' ')}
     >
