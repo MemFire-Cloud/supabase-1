@@ -1426,7 +1426,7 @@ pages:
             insert into
               countries (id, name)
             values
-              (1, 'Taiwan');
+              (1, 'Singapore');
             ```
 
           </TabPanel>
@@ -1500,7 +1500,7 @@ pages:
             insert into
               countries (id, name)
             values
-              (1, 'Taiwan');
+              (1, 'Singapore');
             ```
 
           </TabPanel>

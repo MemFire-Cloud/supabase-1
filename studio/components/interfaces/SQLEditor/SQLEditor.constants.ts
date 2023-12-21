@@ -373,7 +373,6 @@ insert into public.countries (name,iso2,iso3,local_name,continent) values
   ('Sweden','SE','SWE','Sverige','Europe'),
   ('Switzerland','CH','CHE','Schweiz/Suisse/Svizzera/Svizra','Europe'),
   ('Syrian Arab Republic','SY','SYR','Suriya','Asia'),
-  ('Taiwan (Province of China)','TW','TWN','Tai-wan','Asia'),
   ('Tajikistan','TJ','TJK','Tajikistan','Asia'),
   ('Tanzania, United Republic of','TZ','TZA','Tanzania','Africa'),
   ('Thailand','TH','THA','Prathet Thai','Asia'),

@@ -213,7 +213,6 @@ export const COUNTRIES = [
   { code: 'SE', name: 'Sweden' },
   { code: 'CH', name: 'Switzerland' },
   { code: 'SY', name: 'Syria' },
-  { code: 'TW', name: 'Taiwan' },
   { code: 'TJ', name: 'Tajikistan' },
   { code: 'TZ', name: 'Tanzania' },
   { code: 'TH', name: 'Thailand' },

@@ -404,12 +404,6 @@ export const TAX_IDS: TaxId[] = [
     placeholder: '1234567891234',
   },
   {
-    name: 'TW VAT',
-    code: 'tw_vat',
-    country: 'Taiwan',
-    placeholder: '12345678',
-  },
-  {
     name: 'UA VAT',
     code: 'ua_vat',
     country: 'Ukraine',
