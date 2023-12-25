@@ -7,110 +7,47 @@ export const meta = {
   sidebar_label: 'Flutter',
 }
 
-<QuickstartIntro />
+## 第一步：在 MemFire Cloud 仪表板中[创建](https://cloud.memfiredb.com/project)一个新应用。
 
-![Supabase用户管理实例](/docs/img/supabase-flutter-demo.png)
-
-### GitHub
-
-如果你在阅读指南时遇到困难，请参考[此版本](https://github.com/supabase/supabase/tree/master/examples/user-management/flutter-user-management)。
-
-<ProjectSetup />
-
-## 构建应用程序
-
-让我们开始从头开始构建Flutter应用程序。
-
-### 初始化一个Flutter应用程序
-
-我们可以使用[`flutter create`](https://flutter.dev/docs/get-started/test-drive)来初始化
-一个名为`supabase_quickstart`的应用程序。
+应用准备就绪后，进入应用，在左侧菜单->表编辑器选择 SQL 编辑器在 MemFire Cloud 数据库中创建一个表。使用以下 SQL 语句创建包含一些示例数据的国家/地区表。
 
 ```bash
-flutter create supabase_quickstart
+  -- Create the table
+  CREATE TABLE countries (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+  );
+  -- Insert some sample data into the table
+  INSERT INTO countries (name) VALUES ('United States');
+  INSERT INTO countries (name) VALUES ('Canada');
+  INSERT INTO countries (name) VALUES ('Mexico');
 ```
 
-然后让我们安装唯一的额外依赖：[`supabase_flutter`](https://pub.dev/packages/supabase_flutter)
 
-在你的pubspec.yaml中复制并粘贴以下一行来安装该软件包。
+## 第二步：创建 Flutter 应用
 
-```yaml
-supabase_flutter: ^1.0.0
+使用 flutter create 命令创建 Flutter 应用程序。如果您已有可用的应用程序，则可以跳过此步骤。
+
+```bash
+flutter create my_app
 ```
 
-运行 `flutter pub get`来安装依赖性。
+## 第三步：安装 Supabase 客户端库
 
-### 设置深度链接
+最快的入门方法是使用 supabase_flutter 客户端库，它提供了一些简便的API，用于在 Flutter 应用程序中使用 Supabase。
+在Flutter应用程序中打开pubspec.yaml文件，并将supabase_flutter添加为依赖项。
 
-现在我们已经安装了依赖性，让我们来设置深度链接，这样通过魔法链接或OAuth登录的用户就可以回到应用中来。
-
-添加`io.supabase.flutterquickstart://login-callback/`作为Dashboard中新的[重定向URL](https://app.supabase.com/project/_/auth/url-configuration)。
-
-![Supabase控制台深度链接设置](/docs/img/deeplink-setting.png)
-
-这就是Supabase的一端，其余的是平台特定的设置。
-
-对于安卓，添加一个意图过滤器来启用深度链接。
-
-```xml title=android/app/src/main/AndroidManifest.xml
-<manifest ...>
-  <!-- ... other tags -->
-  <application ...>
-    <activity ...>
-      <!-- ... other tags -->
-
-      <!-- Add this intent-filter for Deep Links -->
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <!-- Accepts URIs that begin with YOUR_SCHEME://YOUR_HOST -->
-        <data
-          android:scheme="io.supabase.flutterquickstart"
-          android:host="login-callback" />
-      </intent-filter>
-
-    </activity>
-  </application>
-</manifest>
+```bash
+supabase_flutter: ^1.6.2
 ```
 
-对于iOS来说，添加CFBundleURLTypes来启用深度链接。
+## 第四步：初始化 Supabase 客户端
 
-```xml title=ios/Runner/Info.plist"
-<!-- ... other tags -->
-<plist>
-<dict>
-  <!-- ... other tags -->
+打开 lib/main.dart 并编辑 main 函数以使用您的项目 URL 和公共 API（匿名）密钥初始化 Supabase。
 
-  <!-- Add this array for Deep Links -->
-  <key>CFBundleURLTypes</key>
-  <array>
-    <dict>
-      <key>CFBundleTypeRole</key>
-      <string>Editor</string>
-      <key>CFBundleURLSchemes</key>
-      <array>
-        <string>io.supabase.flutterquickstart</string>
-      </array>
-    </dict>
-  </array>
-  <!-- ... other tags -->
-</dict>
-</plist>
-```
+```bash
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-用于web:
-
-没有额外的配置。
-
-### 主要功能
-
-现在我们已经准备好了深度链接，让我们在`main`函数中用你复制的API凭证（#get-the-api-keys）初始化Supabase客户端。
-这些变量将被暴露在应用程序中，这完全没有问题，因为我们有
-[行级安全](/docs/guides/auth#row-level-security)在我们的数据库上启用。
-
-```dart title=lib/main.dart
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -122,678 +59,70 @@ Future<void> main() async {
 }
 ```
 
-### 设置一些常数和方便的函数
+## 第五步：在应用程序中查询数据
 
-让我们也创建一个常量文件，以使Supabase客户端更容易使用。
-我们还将包括一个扩展方法声明，用一行代码调用`showSnackBar`。
+使用 FutureBuilder 在主页加载时获取数据并在 ListView 中显示查询结果。
+使用以下代码替换默认的 MyApp 和 MyHomePage 类。
 
-```dart title=lib/constants.dart
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-final supabase = Supabase.instance.client;
-
-extension ShowSnackBar on BuildContext {
-  void showSnackBar({
-    required String message,
-    Color backgroundColor = Colors.white,
-  }) {
-    ScaffoldMessenger.of(this).showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: backgroundColor,
-    ));
-  }
-
-  void showErrorSnackBar({required String message}) {
-    showSnackBar(message: message, backgroundColor: Colors.red);
-  }
-}
-```
-
-### 设置闪屏
-
-让我们创建一个闪屏，在用户打开应用程序后立即显示给他们。
-这个屏幕会检索当前会话并相应地重定向用户。
-
-```dart title=lib/pages/splash_page.dart
-import 'package:flutter/material.dart';
-import 'package:supabase_quickstart/constants.dart';
-
-class SplashPage extends StatefulWidget {
-  const SplashPage({super.key});
-
-  @override
-  _SplashPageState createState() => _SplashPageState();
-}
-
-class _SplashPageState extends State<SplashPage> {
-  bool _redirectCalled = false;
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _redirect();
-  }
-
-  Future<void> _redirect() async {
-    await Future.delayed(Duration.zero);
-    if (_redirectCalled || !mounted) {
-      return;
-    }
-
-    _redirectCalled = true;
-    final session = supabase.auth.currentSession;
-    if (session != null) {
-      Navigator.of(context).pushReplacementNamed('/account');
-    } else {
-      Navigator.of(context).pushReplacementNamed('/login');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
-    );
-  }
-}
-
-```
-
-### 设置一个登录页面
-
-让我们创建一个Flutter小部件来管理登录和注册。
-我们将使用Magic Links，所以用户可以用他们的电子邮件登录，而不使用密码。
-请注意，这个页面使用`onAuthStateChange`为用户的认证状态设置了一个监听器。
-当用户通过点击他们的魔法链接回到应用程序时，一个新的事件将被触发，这个页面可以捕捉到并相应地重定向用户。
-
-```dart title=lib/pages/login_page.dart
-import 'dart:async';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import 'package:supabase_quickstart/constants.dart';
-
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  bool _isLoading = false;
-  bool _redirecting = false;
-  late final TextEditingController _emailController;
-  late final StreamSubscription<AuthState> _authStateSubscription;
-
-  Future<void> _signIn() async {
-    setState(() {
-      _isLoading = true;
-    });
-    try {
-      await supabase.auth.signInWithOtp(
-        email: _emailController.text,
-        emailRedirectTo:
-            kIsWeb ? null : 'io.supabase.flutterquickstart://login-callback/',
-      );
-      if (mounted) {
-        context.showSnackBar(message: 'Check your email for login link!');
-        _emailController.clear();
-      }
-    } on AuthException catch (error) {
-      context.showErrorSnackBar(message: error.message);
-    } catch (error) {
-      context.showErrorSnackBar(message: 'Unexpected error occurred');
-    }
-
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  @override
-  void initState() {
-    _emailController = TextEditingController();
-    _authStateSubscription = supabase.auth.onAuthStateChange.listen((data) {
-      if (_redirecting) return;
-      final session = data.session;
-      if (session != null) {
-        _redirecting = true;
-        Navigator.of(context).pushReplacementNamed('/account');
-      }
-    });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _authStateSubscription.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Sign In')),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
-        children: [
-          const Text('Sign in via the magic link with your email below'),
-          const SizedBox(height: 18),
-          TextFormField(
-            controller: _emailController,
-            decoration: const InputDecoration(labelText: 'Email'),
-          ),
-          const SizedBox(height: 18),
-          ElevatedButton(
-            onPressed: _isLoading ? null : _signIn,
-            child: Text(_isLoading ? 'Loading' : 'Send Magic Link'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-```
-
-### 设置账号页面
-
-在用户登录后，我们可以让他们编辑他们的个人资料和管理他们的账户。
-让我们创建一个新的widget，称为`account_page.dart`，用于此目的。
-
-```dart title=lib/pages/account_page.dart"
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:supabase_quickstart/components/avatar.dart';
-import 'package:supabase_quickstart/constants.dart';
-
-class AccountPage extends StatefulWidget {
-  const AccountPage({super.key});
-
-  @override
-  _AccountPageState createState() => _AccountPageState();
-}
-
-class _AccountPageState extends State<AccountPage> {
-  final _usernameController = TextEditingController();
-  final _websiteController = TextEditingController();
-  String? _avatarUrl;
-  var _loading = false;
-
-  /// Called once a user id is received within `onAuthenticated()`
-  Future<void> _getProfile() async {
-    setState(() {
-      _loading = true;
-    });
-
-    try {
-      final userId = supabase.auth.currentUser!.id;
-      final data = await supabase
-          .from('profiles')
-          .select()
-          .eq('id', userId)
-          .single() as Map;
-      _usernameController.text = (data['username'] ?? '') as String;
-      _websiteController.text = (data['website'] ?? '') as String;
-      _avatarUrl = (data['avatar_url'] ?? '') as String;
-    } on PostgrestException catch (error) {
-      context.showErrorSnackBar(message: error.message);
-    } catch (error) {
-      context.showErrorSnackBar(message: 'Unexpected exception occurred');
-    }
-
-    setState(() {
-      _loading = false;
-    });
-  }
-
-  /// Called when user taps `Update` button
-  Future<void> _updateProfile() async {
-    setState(() {
-      _loading = true;
-    });
-    final userName = _usernameController.text;
-    final website = _websiteController.text;
-    final user = supabase.auth.currentUser;
-    final updates = {
-      'id': user!.id,
-      'username': userName,
-      'website': website,
-      'updated_at': DateTime.now().toIso8601String(),
-    };
-    try {
-      await supabase.from('profiles').upsert(updates);
-      if (mounted) {
-        context.showSnackBar(message: 'Successfully updated profile!');
-      }
-    } on PostgrestException catch (error) {
-      context.showErrorSnackBar(message: error.message);
-    } catch (error) {
-      context.showErrorSnackBar(message: 'Unexpeted error occurred');
-    }
-    setState(() {
-      _loading = false;
-    });
-  }
-
-  Future<void> _signOut() async {
-    try {
-      await supabase.auth.signOut();
-    } on AuthException catch (error) {
-      context.showErrorSnackBar(message: error.message);
-    } catch (error) {
-      context.showErrorSnackBar(message: 'Unexpected error occurred');
-    }
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/');
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _getProfile();
-  }
-
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _websiteController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
-        children: [
-          TextFormField(
-            controller: _usernameController,
-            decoration: const InputDecoration(labelText: 'User Name'),
-          ),
-          const SizedBox(height: 18),
-          TextFormField(
-            controller: _websiteController,
-            decoration: const InputDecoration(labelText: 'Website'),
-          ),
-          const SizedBox(height: 18),
-          ElevatedButton(
-            onPressed: _updateProfile,
-            child: Text(_loading ? 'Saving...' : 'Update'),
-          ),
-          const SizedBox(height: 18),
-          TextButton(onPressed: _signOut, child: const Text('Sign Out')),
-        ],
-      ),
-    );
-  }
-}
-```
-
-### 启动
-
-现在我们已经有了所有的组件，让我们来更新`lib/main.dart`。
-
-```dart title=lib/main.dart
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:supabase_quickstart/pages/account_page.dart';
-import 'package:supabase_quickstart/pages/login_page.dart';
-import 'package:supabase_quickstart/pages/splash_page.dart';
-
-Future<void> main() async {
-  await Supabase.initialize(
-    // TODO: Replace credentials with your own
-    url: 'YOUR_SUPABASE_URL',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY',
-  );
-  runApp(MyApp());
-}
-
+```js
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Supabase Flutter',
-      theme: ThemeData.dark().copyWith(
-        primaryColor: Colors.green,
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.green,
-          ),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor: Colors.green,
-          ),
-        ),
+    return const MaterialApp(
+      title: 'Countries',
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final _future = Supabase.instance.client
+      .from('countries')
+      .select<List<Map<String, dynamic>>>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _future,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final countries = snapshot.data!;
+          return ListView.builder(
+            itemCount: countries.length,
+            itemBuilder: ((context, index) {
+              final country = countries[index];
+              return ListTile(
+                title: Text(country['name']),
+              );
+            }),
+          );
+        },
       ),
-      initialRoute: '/',
-      routes: <String, WidgetBuilder>{
-        '/': (_) => const SplashPage(),
-        '/login': (_) => const LoginPage(),
-        '/account': (_) => const AccountPage(),
-      },
     );
   }
 }
 ```
+## 第六步：启动应用程序
 
-一旦完成，在终端窗口中运行这个，在安卓或iOS上启动。
+运行您的应用程序，默认情况下，应用程序应在您的网络浏览器中启动。
+请注意，supabase_flutter 与网络、iOS、Android、macOS 和 Windows 应用程序兼容。
+在 MacOS 上运行应用程序需要额外配置来设置权利。
 
 ```bash
 flutter run
 ```
-
-或者对于web，运行以下命令，在 `localhost:3000`启动它
-
-```bash
-flutter run -d web-server --web-hostname localhost --web-port 3000
-```
-
-然后打开浏览器到[localhost:3000](http://localhost:3000)，你应该看到完成的应用程序。
-
-![Supabase用户管理实例](/docs/img/supabase-flutter-account-page.png)
-
-## 简介照片
-
-每个Supabase项目都配置了[存储](/docs/guides/storage)，用于管理大型文件，如
-照片和视频。
-
-### 确保我们有一个公共桶
-
-我们将把图片存储为可公开分享的图片。
-确保你的 `avatars`桶被设置为公开的，如果不是，通过点击悬停在桶名上的点状菜单来改变公开。
-如果你的水桶被设置为公开，你应该在桶名称旁边看到一个橙色的 `公开`徽章。
-
-### 在账户页面添加图片上传功能
-
-我们将使用[`image_picker`](https://pub.dev/packages/image_picker)插件来选择设备中的图片。
-
-在你的pubspec.yaml文件中添加以下一行来安装`image_picker`:
-
-```yaml
-image_picker: ^0.8.4
-```
-
-使用[`image_picker`](https://pub.dev/packages/image_picker)需要一些额外的准备，这取决于平台。
-按照[`image_picker`](https://pub.dev/packages/image_picker)的README.md说明如何为你所使用的平台进行设置。
-
-一旦你完成了上述所有工作，现在是时候深入到编码中去了。
-
-### 创建一个上传小组件
-
-让我们为用户创建一个头像，以便他们可以上传个人资料照片。
-我们可以从创建一个新的组件开始。
-
-```dart title=lib/components/avatar.dart
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:supabase_quickstart/constants.dart';
-
-class Avatar extends StatefulWidget {
-  const Avatar({
-    super.key,
-    required this.imageUrl,
-    required this.onUpload,
-  });
-
-  final String? imageUrl;
-  final void Function(String) onUpload;
-
-  @override
-  _AvatarState createState() => _AvatarState();
-}
-
-class _AvatarState extends State<Avatar> {
-  bool _isLoading = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        if (widget.imageUrl == null || widget.imageUrl!.isEmpty)
-          Container(
-            width: 150,
-            height: 150,
-            color: Colors.grey,
-            child: const Center(
-              child: Text('No Image'),
-            ),
-          )
-        else
-          Image.network(
-            widget.imageUrl!,
-            width: 150,
-            height: 150,
-            fit: BoxFit.cover,
-          ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _upload,
-          child: const Text('Upload'),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _upload() async {
-    final picker = ImagePicker();
-    final imageFile = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 300,
-      maxHeight: 300,
-    );
-    if (imageFile == null) {
-      return;
-    }
-    setState(() => _isLoading = true);
-
-    try {
-      final bytes = await imageFile.readAsBytes();
-      final fileExt = imageFile.path.split('.').last;
-      final fileName = '${DateTime.now().toIso8601String()}.$fileExt';
-      final filePath = fileName;
-      await supabase.storage.from('avatars').uploadBinary(
-            filePath,
-            bytes,
-            fileOptions: FileOptions(contentType: imageFile.mimeType),
-          );
-      final imageUrlResponse = await supabase.storage
-          .from('avatars')
-          .createSignedUrl(filePath, 60 * 60 * 24 * 365 * 10);
-      widget.onUpload(imageUrlResponse);
-    } on StorageException catch (error) {
-      if (mounted) {
-        context.showErrorSnackBar(message: error.message);
-      }
-    } catch (error) {
-      if (mounted) {
-        context.showErrorSnackBar(message: 'Unexpected error occurred');
-      }
-    }
-
-    setState(() => _isLoading = false);
-  }
-}
-```
-
-### 添加新的小组件
-
-然后我们可以在账户页面上添加小部件，以及一些逻辑来更新`avatar_url`，只要用户上传一个新的头像。
-
-```dart title=lib/pages/account_page.dart
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:supabase_quickstart/components/avatar.dart';
-import 'package:supabase_quickstart/constants.dart';
-
-class AccountPage extends StatefulWidget {
-  const AccountPage({super.key});
-
-  @override
-  _AccountPageState createState() => _AccountPageState();
-}
-
-class _AccountPageState extends State<AccountPage> {
-  final _usernameController = TextEditingController();
-  final _websiteController = TextEditingController();
-  String? _avatarUrl;
-  var _loading = false;
-
-  /// Called once a user id is received within `onAuthenticated()`
-  Future<void> _getProfile() async {
-    setState(() {
-      _loading = true;
-    });
-
-    try {
-      final userId = supabase.auth.currentUser!.id;
-      final data = await supabase
-          .from('profiles')
-          .select()
-          .eq('id', userId)
-          .single() as Map;
-      _usernameController.text = (data['username'] ?? '') as String;
-      _websiteController.text = (data['website'] ?? '') as String;
-      _avatarUrl = (data['avatar_url'] ?? '') as String;
-    } on PostgrestException catch (error) {
-      context.showErrorSnackBar(message: error.message);
-    } catch (error) {
-      context.showErrorSnackBar(message: 'Unexpected exception occurred');
-    }
-
-    setState(() {
-      _loading = false;
-    });
-  }
-
-  /// Called when user taps `Update` button
-  Future<void> _updateProfile() async {
-    setState(() {
-      _loading = true;
-    });
-    final userName = _usernameController.text;
-    final website = _websiteController.text;
-    final user = supabase.auth.currentUser;
-    final updates = {
-      'id': user!.id,
-      'username': userName,
-      'website': website,
-      'updated_at': DateTime.now().toIso8601String(),
-    };
-    try {
-      await supabase.from('profiles').upsert(updates);
-      if (mounted) {
-        context.showSnackBar(message: 'Successfully updated profile!');
-      }
-    } on PostgrestException catch (error) {
-      context.showErrorSnackBar(message: error.message);
-    } catch (error) {
-      context.showErrorSnackBar(message: 'Unexpeted error occurred');
-    }
-    setState(() {
-      _loading = false;
-    });
-  }
-
-  Future<void> _signOut() async {
-    try {
-      await supabase.auth.signOut();
-    } on AuthException catch (error) {
-      context.showErrorSnackBar(message: error.message);
-    } catch (error) {
-      context.showErrorSnackBar(message: 'Unexpected error occurred');
-    }
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/');
-    }
-  }
-
-  /// Called when image has been uploaded to Supabase storage from within Avatar widget
-  Future<void> _onUpload(String imageUrl) async {
-    try {
-      final userId = supabase.auth.currentUser!.id;
-      await supabase.from('profiles').upsert({
-        'id': userId,
-        'avatar_url': imageUrl,
-      });
-      if (mounted) {
-        context.showSnackBar(message: 'Updated your profile image!');
-      }
-    } on PostgrestException catch (error) {
-      context.showErrorSnackBar(message: error.message);
-    } catch (error) {
-      context.showErrorSnackBar(message: 'Unexpected error has occurred');
-    }
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _avatarUrl = imageUrl;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _getProfile();
-  }
-
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _websiteController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
-        children: [
-          Avatar(
-            imageUrl: _avatarUrl,
-            onUpload: _onUpload,
-          ),
-          const SizedBox(height: 18),
-          TextFormField(
-            controller: _usernameController,
-            decoration: const InputDecoration(labelText: 'User Name'),
-          ),
-          const SizedBox(height: 18),
-          TextFormField(
-            controller: _websiteController,
-            decoration: const InputDecoration(labelText: 'Website'),
-          ),
-          const SizedBox(height: 18),
-          ElevatedButton(
-            onPressed: _updateProfile,
-            child: Text(_loading ? 'Saving...' : 'Update'),
-          ),
-          const SizedBox(height: 18),
-          TextButton(onPressed: _signOut, child: const Text('Sign Out')),
-        ],
-      ),
-    );
-  }
-}
-```
-
-恭喜您，您现在已经使用Flutter和Supabase建立了一个功能齐全的用户管理应用程序。您现在已经使用Flutter和Supabase建立了一个功能齐全的用户管理应用
-
-## 还请参见
-
-- [Flutter教程：建立一个Flutter聊天应用程序](https://supabase.com/blog/flutter-tutorial-building-a-chat-app)
 
 export const Page = ({ children }) => <Layout meta={meta} children={children} />
 

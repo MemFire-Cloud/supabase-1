@@ -7,731 +7,85 @@ export const meta = {
   sidebar_label: 'Next.js',
 }
 
-<QuickstartIntro />
+## 第一步：在 MemFire Cloud 仪表板中[创建](https://cloud.memfiredb.com/project)一个新应用。
 
-![Supabase用户管理实例](/docs/img/user-management-demo.png)
-
-### 视频指南
-
-<div class="video-container">
-  <iframe
-    src="https://www.youtube-nocookie.com/embed/0Fs96oZ4se0"
-    frameBorder="1"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowFullScreen
-  ></iframe>
-</div>
-
-### GitHub
-
-如果你在阅读指南时遇到困难，请参考[此版本](https://github.com/supabase/supabase/tree/master/examples/user-management/nextjs-ts-user-management)。
-
-<ProjectSetup />
-
-## 构建应用程序
-
-让我们开始从头开始构建Next.js应用程序。
-
-### 初始化一个Next.js应用程序
-
-我们可以使用[`create-next-app`](https://nextjs.org/docs/getting-started)来初始化
-一个名为`supabase-nextjs`的应用程序。
-
-<Tabs
-  scrollable
-  size="small"
-  type="underlined"
-  defaultActiveId="js"
->
-<TabPanel id="js" label="JavaScript">
+应用准备就绪后，进入应用，在左侧菜单->表编辑器选择 SQL 编辑器在 MemFire Cloud 数据库中创建一个表。使用以下 SQL 语句创建包含一些示例数据的国家/地区表。
 
 ```bash
-npx create-next-app@latest --use-npm supabase-nextjs
-cd supabase-nextjs
+  -- Create the table
+  CREATE TABLE countries (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+  );
+  -- Insert some sample data into the table
+  INSERT INTO countries (name) VALUES ('United States');
+  INSERT INTO countries (name) VALUES ('Canada');
+  INSERT INTO countries (name) VALUES ('Mexico');
 ```
 
-</TabPanel>
-<TabPanel id="ts" label="TypeScript">
+
+## 第二步：创建  Next.js  应用
+
+使用 npx 模板创建 Next.js 应用。
 
 ```bash
-npx create-next-app@latest --ts --use-npm supabase-nextjs
-cd supabase-nextjs
+npx create-next-app my-next-app
 ```
 
-</TabPanel>
-</Tabs>
 
-然后安装Supabase客户端库。[supabase-js](https://github.com/supabase/supabase-js)
+## 第三步：安装 Supabase 客户端库
+
+最快的入门方法是使用 supabase-js 客户端库，它提供了一些简便的API，用于在 Next.js 应用程序中使用 Supabase。
+导航到 Next.js 应用程序并安装 supabase-js 。
 
 ```bash
-npm install @supabase/supabase-js
-```
+cd my-app && npm install @supabase/supabase-js
 
-最后，我们要把环境变量保存在`.env.local`中。
-我们所需要的是API URL和你[早些时候]复制的`anon`密钥(#get-theapi-keys)。
+## 第四步： 声明 Supabase 环境变量
 
-```bash title=.env.local
-NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-```
-
-还有一个可选的步骤是更新CSS文件`styles/globals.css`，使应用程序看起来漂亮。
-你可以找到这个文件的全部内容[这里](https://raw.githubusercontent.com/supabase/supabase/master/examples/user-management/nextjs-ts-user-management/styles/globals.css)。
-
-### 设置一个登录组件
-
-#### Supabase 认证帮助程序
-
-Next.js是一个高度通用的框架，提供构建时的预渲染（SSG）、请求时的服务器端渲染（SSR）、API路由和中间件边缘功能。
-
-在所有这些不同的环境中验证你的用户可能是一个挑战，这就是为什么我们创建了[Supabase Auth Helpers]（/docs/guides/auth/auth-helpers/nextjs），使Next.js内的用户管理和数据获取尽可能简单。
-
-安装React和Next.js的Auth帮助器
+在根目录创建名为 .env.local 并使用项目的 URL 和 Anon Key 进行填充。
 
 ```bash
-npm install @supabase/auth-helpers-react @supabase/auth-helpers-nextjs
+  NEXT_PUBLIC_SUPABASE_URL=your-project-url
+  NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-<Tabs
-  scrollable
-  size="small"
-  type="underlined"
-  defaultActiveId="js"
->
-<TabPanel id="js" label="JavaScript">
 
-用 "SessionContextProvider "组件来包装你的`pages/_app.js`组件。
+## 第五步：从 Next.js 查询 Supabase 数据
 
-```jsx title=pages/_app.js
-import '../styles/globals.css'
-import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs'
-import { SessionContextProvider } from '@supabase/auth-helpers-react'
+在 app/notes/page.tsx 创建一个新文件并填充以下内容。
+这将从 Supabase 中的注释表中选择所有行并将它们呈现在页面上。
 
-function MyApp({ Component, pageProps }) {
-  const [supabase] = useState(() => createBrowserSupabaseClient())
+```js
+   import { useEffect, useState } from "react";
+   import { createClient } from "@supabase/supabase-js";
 
-  return (
-    <SessionContextProvider
-      supabaseClient={supabase}
-      initialSession={pageProps.initialSession}
-    >
-      <Component {...pageProps} />
-    </SessionContextProvider>
-  )
-}
-export default MyApp
-```
+  export default async function Notes() {
+    const [countries, setCountries] = useState([]);
 
-</TabPanel>
-<TabPanel id="ts" label="TypeScript">
+    useEffect(() => {
+      getCountries();
+    }, []);
 
-用`SessionContextProvider`组件包装你的`pages/_app.tsx`组件。
-
-```jsx lines=2,8 title=pages/_app.tsx
-import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs'
-import { SessionContextProvider, Session } from '@supabase/auth-helpers-react'
-
-function MyApp({
-  Component,
-  pageProps,
-}: AppProps<{
-  initialSession: Session,
-}>) {
-  const [supabase] = useState(() => createBrowserSupabaseClient())
-
-  return (
-    <SessionContextProvider
-      supabaseClient={supabase}
-      initialSession={pageProps.initialSession}
-    >
-      <Component {...pageProps} />
-    </SessionContextProvider>
-  )
-}
-export default MyApp
-```
-
-请参阅[Auth Helpers docs](/docs/guides/auth/auth-helpers/nextjs#usage-with-typescript)以了解更多关于TypeScript的使用细节。
-
-</TabPanel>
-</Tabs>
-
-#### Supabase 认证用户界面
-
-我们可以使用[Supabase Auth UI](/docs/guides/auth/auth-helpers/auth-ui)这个预建的React组件，通过OAuth、电子邮件和魔法链接来验证用户。
-
-安装Supabase Auth UI for React
-
-```bash
-npm install @supabase/auth-ui-react
-```
-
-在你的主页上添加 "Auth "组件
-
-```jsx title=pages/index.js
-import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
-
-const Home = () => {
-  const session = useSession()
-  const supabase = useSupabaseClient()
-
-  return (
-    <div className="container" style={{ padding: '50px 0 100px 0' }}>
-      {!session ? (
-        <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} theme="dark" />
-      ) : (
-        <p>Account page will go here.</p>
-      )}
-    </div>
-  )
-}
-
-export default Home
-```
-
-### 账号页面
-
-在用户登录后，我们可以让他们编辑他们的个人资料细节和管理他们的账户。
-
-<Tabs
-  scrollable
-  size="small"
-  type="underlined"
-  defaultActiveId="js"
->
-<TabPanel id="js" label="JavaScript">
-
-让我们在 "components "文件夹中创建一个名为 "Account.js "的新组件。
-
-```tsx title=components/Account.js
-import { useState, useEffect } from 'react'
-import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
-
-export default function Account({ session }) {
-  const supabase = useSupabaseClient()
-  const user = useUser()
-  const [loading, setLoading] = useState(true)
-  const [username, setUsername] = useState(null)
-  const [website, setWebsite] = useState(null)
-  const [avatar_url, setAvatarUrl] = useState(null)
-
-  useEffect(() => {
-    getProfile()
-  }, [session])
-
-  async function getProfile() {
-    try {
-      setLoading(true)
-
-      let { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', user.id)
-        .single()
-
-      if (error && status !== 406) {
-        throw error
-      }
-
-      if (data) {
-        setUsername(data.username)
-        setWebsite(data.website)
-        setAvatarUrl(data.avatar_url)
-      }
-    } catch (error) {
-      alert('Error loading user data!')
-      console.log(error)
-    } finally {
-      setLoading(false)
+    async function getCountries() {
+      const { data } = await supabase.from("countries").select();
+      setCountries(data);
     }
+
+    return <ul>
+        {countries.map((country) => (
+          <li key={country.name}>{country.name}</li>
+        ))}
+      </ul>
   }
-
-  async function updateProfile({ username, website, avatar_url }) {
-    try {
-      setLoading(true)
-
-      const updates = {
-        id: user.id,
-        username,
-        website,
-        avatar_url,
-        updated_at: new Date().toISOString(),
-      }
-
-      let { error } = await supabase.from('profiles').upsert(updates)
-      if (error) throw error
-      alert('Profile updated!')
-    } catch (error) {
-      alert('Error updating the data!')
-      console.log(error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="form-widget">
-      <div>
-        <label htmlFor="email">Email</label>
-        <input id="email" type="text" value={session.user.email} disabled />
-      </div>
-      <div>
-        <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          type="text"
-          value={username || ''}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="website">Website</label>
-        <input
-          id="website"
-          type="website"
-          value={website || ''}
-          onChange={(e) => setWebsite(e.target.value)}
-        />
-      </div>
-
-      <div>
-        <button
-          className="button primary block"
-          onClick={() => updateProfile({ username, website, avatar_url })}
-          disabled={loading}
-        >
-          {loading ? 'Loading ...' : 'Update'}
-        </button>
-      </div>
-
-      <div>
-        <button className="button block" onClick={() => supabase.auth.signOut()}>
-          Sign Out
-        </button>
-      </div>
-    </div>
-  )
-}
 ```
+## 第六步：启动应用程序
 
-</TabPanel>
-<TabPanel id="ts" label="TypeScript">
-
-让我们在 "components "文件夹中为其创建一个新的组件，名为 "Account.tsx"。
-
-```tsx title=components/Account.tsx
-import { useState, useEffect } from 'react'
-import { useUser, useSupabaseClient, Session } from '@supabase/auth-helpers-react'
-import { Database } from '../utils/database.types'
-type Profiles = Database['public']['Tables']['profiles']['Row']
-
-export default function Account({ session }: { session: Session }) {
-  const supabase = useSupabaseClient<Database>()
-  const user = useUser()
-  const [loading, setLoading] = useState(true)
-  const [username, setUsername] = useState<Profiles['username']>(null)
-  const [website, setWebsite] = useState<Profiles['website']>(null)
-  const [avatar_url, setAvatarUrl] = useState<Profiles['avatar_url']>(null)
-
-  useEffect(() => {
-    getProfile()
-  }, [session])
-
-  async function getProfile() {
-    try {
-      setLoading(true)
-      if (!user) throw new Error('No user')
-
-      let { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', user.id)
-        .single()
-
-      if (error && status !== 406) {
-        throw error
-      }
-
-      if (data) {
-        setUsername(data.username)
-        setWebsite(data.website)
-        setAvatarUrl(data.avatar_url)
-      }
-    } catch (error) {
-      alert('Error loading user data!')
-      console.log(error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function updateProfile({
-    username,
-    website,
-    avatar_url,
-  }: {
-    username: Profiles['username']
-    website: Profiles['website']
-    avatar_url: Profiles['avatar_url']
-  }) {
-    try {
-      setLoading(true)
-      if (!user) throw new Error('No user')
-
-      const updates = {
-        id: user.id,
-        username,
-        website,
-        avatar_url,
-        updated_at: new Date().toISOString(),
-      }
-
-      let { error } = await supabase.from('profiles').upsert(updates)
-      if (error) throw error
-      alert('Profile updated!')
-    } catch (error) {
-      alert('Error updating the data!')
-      console.log(error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="form-widget">
-      <div>
-        <label htmlFor="email">Email</label>
-        <input id="email" type="text" value={session.user.email} disabled />
-      </div>
-      <div>
-        <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          type="text"
-          value={username || ''}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="website">Website</label>
-        <input
-          id="website"
-          type="website"
-          value={website || ''}
-          onChange={(e) => setWebsite(e.target.value)}
-        />
-      </div>
-
-      <div>
-        <button
-          className="button primary block"
-          onClick={() => updateProfile({ username, website, avatar_url })}
-          disabled={loading}
-        >
-          {loading ? 'Loading ...' : 'Update'}
-        </button>
-      </div>
-
-      <div>
-        <button className="button block" onClick={() => supabase.auth.signOut()}>
-          Sign Out
-        </button>
-      </div>
-    </div>
-  )
-}
-```
-
-</TabPanel>
-</Tabs>
-
-### 启动
-
-现在我们已经有了所有的组件，让我们来更新`pages/index.js`。
-
-```jsx lines=3,14 title=pages/index.js
-import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
-import Account from '../components/Account'
-
-const Home = () => {
-  const session = useSession()
-  const supabase = useSupabaseClient()
-
-  return (
-    <div className="container" style={{ padding: '50px 0 100px 0' }}>
-      {!session ? (
-        <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} theme="dark" />
-      ) : (
-        <Account session={session} />
-      )}
-    </div>
-  )
-}
-
-export default Home
-```
-
-一旦完成，在终端窗口运行这个程序。
+运行开发服务器，在浏览器中访问 http://localhost:3000/notes，您应该会看到笔记列表。
 
 ```bash
 npm run dev
 ```
-
-然后打开浏览器到[localhost:3000](http://localhost:3000)，你应该看到完成的应用程序。
-
-## 个人照片
-
-每个Supabase项目都配置了[存储](/docs/guides/storage)，用于管理大型文件，如
-照片和视频。
-
-### 创建一个上传小组件
-
-让我们为用户创建一个头像部件，以便他们可以上传个人资料照片。我们可以从创建一个新的组件开始。
-
-<Tabs
-  scrollable
-  size="small"
-  type="underlined"
-  defaultActiveId="js"
->
-<TabPanel id="js" label="JavaScript">
-
-```jsx title=components/Avatar.js
-import React, { useEffect, useState } from 'react'
-import { useSupabaseClient } from '@supabase/auth-helpers-react'
-
-export default function Avatar({ uid, url, size, onUpload }) {
-  const supabase = useSupabaseClient()
-  const [avatarUrl, setAvatarUrl] = useState(null)
-  const [uploading, setUploading] = useState(false)
-
-  useEffect(() => {
-    if (url) downloadImage(url)
-  }, [url])
-
-  async function downloadImage(path) {
-    try {
-      const { data, error } = await supabase.storage.from('avatars').download(path)
-      if (error) {
-        throw error
-      }
-      const url = URL.createObjectURL(data)
-      setAvatarUrl(url)
-    } catch (error) {
-      console.log('Error downloading image: ', error)
-    }
-  }
-
-  const uploadAvatar = async (event) => {
-    try {
-      setUploading(true)
-
-      if (!event.target.files || event.target.files.length === 0) {
-        throw new Error('You must select an image to upload.')
-      }
-
-      const file = event.target.files[0]
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${uid}.${fileExt}`
-      const filePath = `${fileName}`
-
-      let { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true })
-
-      if (uploadError) {
-        throw uploadError
-      }
-
-      onUpload(filePath)
-    } catch (error) {
-      alert('Error uploading avatar!')
-      console.log(error)
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  return (
-    <div>
-      {avatarUrl ? (
-        <img
-          src={avatarUrl}
-          alt="Avatar"
-          className="avatar image"
-          style={{ height: size, width: size }}
-        />
-      ) : (
-        <div className="avatar no-image" style={{ height: size, width: size }} />
-      )}
-      <div style={{ width: size }}>
-        <label className="button primary block" htmlFor="single">
-          {uploading ? 'Uploading ...' : 'Upload'}
-        </label>
-        <input
-          style={{
-            visibility: 'hidden',
-            position: 'absolute',
-          }}
-          type="file"
-          id="single"
-          accept="image/*"
-          onChange={uploadAvatar}
-          disabled={uploading}
-        />
-      </div>
-    </div>
-  )
-}
-```
-
-</TabPanel>
-<TabPanel id="ts" label="TypeScript">
-
-```tsx title=components/Avatar.tsx
-import React, { useEffect, useState } from 'react'
-import { useSupabaseClient } from '@supabase/auth-helpers-react'
-import { Database } from '../utils/database.types'
-type Profiles = Database['public']['Tables']['profiles']['Row']
-
-export default function Avatar({
-  uid,
-  url,
-  size,
-  onUpload,
-}: {
-  uid: string
-  url: Profiles['avatar_url']
-  size: number
-  onUpload: (url: string) => void
-}) {
-  const supabase = useSupabaseClient<Database>()
-  const [avatarUrl, setAvatarUrl] = useState<Profiles['avatar_url']>(null)
-  const [uploading, setUploading] = useState(false)
-
-  useEffect(() => {
-    if (url) downloadImage(url)
-  }, [url])
-
-  async function downloadImage(path: string) {
-    try {
-      const { data, error } = await supabase.storage.from('avatars').download(path)
-      if (error) {
-        throw error
-      }
-      const url = URL.createObjectURL(data)
-      setAvatarUrl(url)
-    } catch (error) {
-      console.log('Error downloading image: ', error)
-    }
-  }
-
-  const uploadAvatar: React.ChangeEventHandler<HTMLInputElement> = async (event) => {
-    try {
-      setUploading(true)
-
-      if (!event.target.files || event.target.files.length === 0) {
-        throw new Error('You must select an image to upload.')
-      }
-
-      const file = event.target.files[0]
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${uid}.${fileExt}`
-      const filePath = `${fileName}`
-
-      let { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true })
-
-      if (uploadError) {
-        throw uploadError
-      }
-
-      onUpload(filePath)
-    } catch (error) {
-      alert('Error uploading avatar!')
-      console.log(error)
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  return (
-    <div>
-      {avatarUrl ? (
-        <img
-          src={avatarUrl}
-          alt="Avatar"
-          className="avatar image"
-          style={{ height: size, width: size }}
-        />
-      ) : (
-        <div className="avatar no-image" style={{ height: size, width: size }} />
-      )}
-      <div style={{ width: size }}>
-        <label className="button primary block" htmlFor="single">
-          {uploading ? 'Uploading ...' : 'Upload'}
-        </label>
-        <input
-          style={{
-            visibility: 'hidden',
-            position: 'absolute',
-          }}
-          type="file"
-          id="single"
-          accept="image/*"
-          onChange={uploadAvatar}
-          disabled={uploading}
-        />
-      </div>
-    </div>
-  )
-}
-```
-
-</TabPanel>
-</Tabs>
-
-### 添加新的小组件
-
-然后我们就可以把小部件添加到账号页面。
-
-```jsx title=components/Account.js
-// Import the new component
-import Avatar from './Avatar'
-
-// ...
-
-return (
-  <div className="form-widget">
-    {/* Add to the body */}
-    <Avatar
-      uid={user.id}
-      url={avatar_url}
-      size={150}
-      onUpload={(url) => {
-        setAvatarUrl(url)
-        updateProfile({ username, website, avatar_url: url })
-      }}
-    />
-    {/* ... */}
-  </div>
-)
-```
-
-## 下一步
-
-在这个阶段，你已经有了一个功能完备的应用程序!
-
-- 查看完整的[GitHub上的例子](https://github.com/supabase/supabase/tree/master/examples/user-management/nextjs-ts-user-management)并将其部署到Vercel。
-- 探索[React的预建Auth UI](/docs/guides/auth/auth-helpers/auth-ui)。
-- 探索[Next.js的Auth助手](/docs/guides/auth/auth-helpers/nextjs)。
-- 探索[Supabase Cache Helpers](https://github.com/psteinroe/supabase-cache-helpers)。
-- 查看GitHub上的[Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)模板。
-- 有问题吗？[在此提问](https://community.memfiredb.com/).
-- 请登录[MemFire Cloud](https://cloud.memfiredb.com/)
 
 export const Page = ({ children }) => <Layout meta={meta} children={children} />
 
