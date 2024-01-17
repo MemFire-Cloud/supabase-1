@@ -65,7 +65,7 @@ export const menuItems: NavMenu = {
           name: '公告',
           url: undefined,
           items: [
-            { name: '【2023年12月22日】MemFire Cloud应用开发正式推出计费套餐', url: '/guides/announcement/1', items: [] },
+            { name: '【2024年01月03日】MemFire Cloud应用开发正式推出计费套餐', url: '/guides/announcement/1', items: [] },
           ],
         },
       ],
@@ -88,19 +88,19 @@ export const menuItems: NavMenu = {
         { name: 'Flutter', url: '/guides/with-flutter', items: [] },
         { name: 'Next.js', url: '/guides/with-nextjs', items: [] },
         { name: 'Androrid Kotlin', url: '/guides/with-kotlin', items: [] },
-        // { name: 'Angular', url: '/guides/with-angular', items: [] },
-        // { name: 'Expo', url: '/guides/with-expo', items: [] },
-        
-        // { name: 'Ionic Angular', url: '/guides/with-ionic-angular', items: [] },
-        // { name: 'Ionic React', url: '/guides/with-ionic-react', items: [] },
-        // { name: 'Ionic Vue', url: '/guides/with-ionic-vue', items: [] },
-        
-        // { name: 'Nuxt 3', url: '/guides/with-nuxt-3', items: [] },
-        
-        // { name: 'RedwoodJS', url: '/guides/with-redwoodjs', items: [] },
-        // { name: 'SolidJS', url: '/guides/with-solidjs', items: [] },
-        // { name: 'Svelte', url: '/guides/with-svelte', items: [] },
-        // { name: 'SvelteKit', url: '/guides/with-sveltekit', items: [] },
+        { name: 'Angular', url: '/guides/with-angular', items: [] },
+        { name: 'Expo', url: '/guides/with-expo', items: [] },
+
+        { name: 'Ionic Angular', url: '/guides/with-ionic-angular', items: [] },
+        { name: 'Ionic React', url: '/guides/with-ionic-react', items: [] },
+        { name: 'Ionic Vue', url: '/guides/with-ionic-vue', items: [] },
+
+        { name: 'Nuxt 3', url: '/guides/with-nuxt-3', items: [] },
+
+        { name: 'RedwoodJS', url: '/guides/with-redwoodjs', items: [] },
+        { name: 'SolidJS', url: '/guides/with-solidjs', items: [] },
+        { name: 'Svelte', url: '/guides/with-svelte', items: [] },
+        { name: 'SvelteKit', url: '/guides/with-sveltekit', items: [] },
       ],
     },
     // {
@@ -363,18 +363,22 @@ export const menuItems: NavMenu = {
     {
       label: '最佳实践',
       items: [
-        { name: '小程序示例', items: [
-          { name: 'Super课表小程序', url: '/guides/example/timetable', items: [] },
-          { name: 'BBS论坛小程序', url: '/guides/example/helloBBS', items: [] },
-          { name: '别踩白块游戏小程序', url: '/guides/example/notClickWhite', items: [] },
-          { name: '微信聊天室小程序', url: '/guides/example/WechatRoom', items: [] },
-        ] },
-        { name: 'web示例', items: [
-          { name: 'Posts论坛', url: '/guides/example/PostsForum', items: [] },
-          { name: 'Discussbase论坛', url: '/guides/example/DiscussbaseForum', items: [] },
-          { name: 'Web实时游戏场', url: '/guides/example/Playground', items: [] },
-        ] },
-        
+        {
+          name: '小程序示例', items: [
+            { name: 'Super课表小程序', url: '/guides/example/timetable', items: [] },
+            { name: 'BBS论坛小程序', url: '/guides/example/helloBBS', items: [] },
+            { name: '别踩白块游戏小程序', url: '/guides/example/notClickWhite', items: [] },
+            { name: '微信聊天室小程序', url: '/guides/example/WechatRoom', items: [] },
+          ]
+        },
+        {
+          name: 'web示例', items: [
+            { name: 'Posts论坛', url: '/guides/example/PostsForum', items: [] },
+            { name: 'Discussbase论坛', url: '/guides/example/DiscussbaseForum', items: [] },
+            { name: 'Web实时游戏场', url: '/guides/example/Playground', items: [] },
+          ]
+        },
+
         // { name: 'Posts论坛', url: '/guides/example/PostsForum', items: [] },
         // { name: 'Discussbase论坛', url: '/guides/example/DiscussbaseForum', items: [] },
         // { name: 'Super课表小程序', url: '/guides/example/timetable', items: [] },
