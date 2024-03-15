@@ -255,6 +255,21 @@ export const menuItems: NavMenu = {
             { name: '查询优化', url: '/guides/database/query-optimization', items: [] },
           ],
         },
+
+        {
+          name: 'FDW',
+          url: undefined,
+          items: [
+            { name: '总览', url: '/guides/database/extensions/wrappers/overview', items: [] },
+            { name: '连接到Airtable', url: '/guides/database/extensions/wrappers/airtable', items: [] },
+            { name: '连接到AWS s3', url: '/guides/database/extensions/wrappers/s3', items: [] },
+            { name: '连接到Bigquery', url: '/guides/database/extensions/wrappers/bigquery', items: [] },
+            { name: '连接到Clickhouse', url: '/guides/database/extensions/wrappers/clickhouse', items: [] },
+            { name: '连接到Firebase', url: '/guides/database/extensions/wrappers/firebase', items: [] },
+            { name: '连接到Logflare', url: '/guides/database/extensions/wrappers/logflare', items: [] },
+            { name: '连接到Stripe', url: '/guides/database/extensions/wrappers/stripe', items: [] },
+          ],
+        },
       ],
     },
 

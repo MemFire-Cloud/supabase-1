@@ -1,0 +1,195 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: 'ClickHouse',
+  title: 'ClickHouse',
+  description: 'Using the JSON data type in PostgreSQL.',
+}
+
+
+[ClickHouse](https://clickhouse.com/)  是一个快速的开源列式数据库管理系统，它允许使用 SQL 查询实时生成分析数据报告。
+
+ClickHouse 封装器允许您在 Postgres 数据库中读取和写入 ClickHouse 的数据。
+
+## 支持的数据类型
+
+| Postgres  类型   | ClickHouse  类型 |
+| ---------------- | --------------- |
+| boolean          | UInt8           |
+| smallint         | Int16           |
+| integer          | UInt16          |
+| integer          | Int32           |
+| bigint           | UInt32          |
+| bigint           | Int64           |
+| bigint           | UInt64          |
+| real             | Float32         |
+| double precision | Float64         |
+| text             | String          |
+| date             | Date            |
+| timestamp        | DateTime        |
+
+## 准备
+
+在开始之前，请确保您的数据库上安装了  `wrappers` 扩展：
+
+```sql
+create extension if not exists wrappers with schema extensions;
+```
+
+然后创建外部数据封装器:
+
+```sql
+create foreign data wrapper clickhouse_wrapper
+  handler click_house_fdw_handler
+  validator click_house_fdw_validator;
+```
+
+### 安全保护您的凭证（可选）
+
+默认情况下，Postgres 将 FDW 凭证以明文形式存储在  `pg_catalog.pg_foreign_server` 中。任何有权访问此表的人都能够查看这些凭证。封装器设计为与 [Vault](https://supabase.com/docs/guides/database/vault) 配合使用，Vault 为存储凭证提供了额外的安全级别。我们建议您使用 Vault 存储您的凭证。
+
+```sql
+-- Save your ClickHouse credential in Vault and retrieve the `key_id`
+insert into vault.secrets (name, secret)
+values (
+  'clickhouse',
+  'tcp://default:@localhost:9000/default'
+)
+returning key_id;
+```
+
+### 连接到 ClickHouse
+
+我们需要为 Postgres 提供连接到 ClickHouse 的凭证和任何额外的选项。我们可以使用 `create server` 命令来完成这个操作：
+
+ 使用Vault
+
+```sql
+    create server clickhouse_server
+      foreign data wrapper clickhouse_wrapper
+      options (
+        conn_string_id '<key_ID>' -- The Key ID from above.
+      );
+```
+
+ 不使用Vault
+
+```sql
+    create server clickhouse_server
+      foreign data wrapper clickhouse_wrapper
+      options (
+        conn_string 'tcp://default:@localhost:9000/default'
+      );
+```
+
+一些连接字符串示例：
+
+- `tcp://user:password@host:9000/clicks?compression=lz4&ping_timeout=42ms`
+- `tcp://default:PASSWORD@abc.eu-west-1.aws.clickhouse.cloud:9440/default?connection_timeout=30s&ping_before_query=false`
+
+查看 [更多连接字符串参数](https://github.com/suharev7/clickhouse-rs#dns).
+
+## 创建外部表
+
+ClickHouse 封装器支持从 ClickHouse 读取和写入数据。
+
+| Integration | Select | Insert | Update | Delete | Truncate |
+| ----------- | :----: | :----: | :----: | :----: | :------: |
+| ClickHouse  |   ✅   |   ✅   |   ✅   |   ✅   |    ❌    |
+
+例如：
+
+```sql
+create foreign table my_clickhouse_table (
+  id bigint,
+  name text
+)
+  server clickhouse_server
+  options (
+    table 'people'
+  );
+```
+
+### 外部表选项
+
+完整的外部表选项如下：
+
+- `table` - ClickHouse 中的源表名称，必需.
+
+ 这也可是一个用括号括起来的子查询，例如，
+
+  ```sql
+  table '(select * from my_table)'
+  ```
+
+  [参数化视图](https://clickhouse.com/docs/en/sql-reference/statements/create/view#parameterized-view)也在子查询中得到支持。在这种情况下，您需要为每个参数定义一个列，并使用 `where` 来传递值给它们。例如，
+
+  ```sql
+   create foreign table test_vw (
+     id bigint,
+     col1 text,
+     col2 bigint,
+     _param1 text,
+     _param2 bigint
+   )
+     server clickhouse_server
+     options (
+       table '(select * from my_view(column1=${_param1}, column2=${_param2}))'
+     );
+
+   select * from test_vw where _param1='aaa' and _param2=32;
+  ```
+
+- `rowid_column` - 主键列名称，数据扫描时可选，数据修改时必需。
+
+## 查询下推支持
+
+这个 FDW 支持 `where`, `order by` 和 `limit` 子句下推，以及参数化视图（见上）.
+
+## 示例
+
+一些关于如何使用 ClickHouse 外部表的示例。
+
+### 基本示例
+
+这将在您的 Postgres 数据库中创建一个名为 `people` 的“外部表”：
+
+```sql
+-- Run below SQLs on ClickHouse to create source table
+drop table if exists people;
+create table people (
+    id Int64,
+    name String
+)
+engine=MergeTree()
+order by id;
+
+-- Add some test data
+insert into people values (1, 'Luke Skywalker'), (2, 'Leia Organa'), (3, 'Han Solo');
+```
+
+Create foreign table on Postgres database:
+
+```sql
+create foreign table people (
+  id bigint,
+  name text
+)
+  server clickhouse_server
+  options (
+    table 'people'
+  );
+
+-- data scan
+select * from people;
+
+-- data modify
+insert into people values (4, 'Yoda');
+update people set name = 'Princess Leia' where id = 2;
+delete from people where id = 3;
+```
+
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page
