@@ -1,0 +1,314 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: 'Presence',
+  title: 'Presence',
+  description: "使用 Realtime Presence 在用户之间共享状态。",
+}
+
+让我们探讨如何实现实时状态来跟踪多个用户之间的状态。
+
+## 用法
+
+您可以使用 MemFire Cloud 客户端库来跟踪用户之间的状态。
+
+### 初始化客户端
+
+转到 MemFire Cloud 项目的 `设置`-> `API`，获取 `URL` 和匿名公共 `API` 密钥。
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="js"
+  queryGroup="language"
+>
+<TabPanel id="js" label="JavaScript">
+
+```js
+import { createClient } from '@supabase/supabase-js'
+
+const SUPABASE_URL = 'https://<project>.supabase.co'
+const SUPABASE_KEY = '<your-anon-key>'
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+```
+
+</TabPanel>
+<TabPanel id="dart" label="Dart">
+
+```dart
+void main() {
+  Supabase.initialize(
+    url: 'https://<project>.supabase.co',
+    anonKey: '<your-anon-key>',
+  );
+
+  runApp(MyApp());
+}
+
+final supabase = Supabase.instance.client;
+```
+
+</TabPanel>
+<TabPanel id="kotlin" label="Kotlin">
+
+```kotlin
+val supabaseUrl = "https://<project>.supabase.co"
+val supabaseKey = "<your-anon-key>"
+val supabase = createSupabaseClient(supabaseUrl, supabaseKey) {
+    install(Realtime)
+}
+```
+
+</TabPanel>
+</Tabs>
+
+### 同步和跟踪状态
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="js"
+  queryGroup="language"
+>
+<TabPanel id="js" label="JavaScript">
+
+
+侦听每当任何客户端加入或离开频道或更改其状态切片时触发的`sync`、`join`和`leave`事件：
+
+```js
+const roomOne = supabase.channel('room_01')
+
+roomOne
+  .on('presence', { event: 'sync' }, () => {
+    const newState = roomOne.presenceState()
+    console.log('sync', newState)
+  })
+  .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+    console.log('join', key, newPresences)
+  })
+  .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+    console.log('leave', key, leftPresences)
+  })
+  .subscribe()
+```
+
+</TabPanel>
+<TabPanel id="dart" label="Dart">
+
+```dart
+final supabase = Supabase.instance.client;
+
+final roomOne = supabase.channel('room_01');
+
+roomOne.onPresenceSync((_) {
+  final newState = roomOne.presenceState();
+  print('sync: $newState');
+}).onPresenceJoin((payload) {
+  print('join: $payload');
+}).onPresenceLeave((payload) {
+  print('leave: $payload');
+}).subscribe();
+```
+
+</TabPanel>
+<TabPanel id="kotlin" label="Kotlin">
+
+侦听状态更改流，每当有人加入或离开时，都会发出新的 PresenceAction：
+
+```kotlin
+val roomOne = supabase.channel("room_01")
+val presenceFlow: Flow<PresenceAction> = roomOne.presenceChangeFlow()
+presenceFlow
+    .onEach {
+        println(it.joins) //You can also use it.decodeJoinsAs<YourType>()
+        println(it.leaves) //You can also use it.decodeLeavesAs<YourType>()
+    }
+    .launchIn(yourCoroutineScope) //You can also use .collect { } here
+
+roomOne.subscribe()
+```
+
+</TabPanel>
+</Tabs>
+
+### 发送状态
+
+您可以使用 track（） 将状态发送给所有订阅者：
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="js"
+  queryGroup="language"
+>
+<TabPanel id="js" label="JavaScript">
+
+
+```js
+const roomOne = supabase.channel('room_01')
+
+const userStatus = {
+  user: 'user-1',
+  online_at: new Date().toISOString(),
+}
+
+roomOne.subscribe(async (status) => {
+  if (status !== 'SUBSCRIBED') { return }
+
+  const presenceTrackStatus = await roomOne.track(userStatus)
+  console.log(presenceTrackStatus)
+})
+```
+
+</TabPanel>
+<TabPanel id="dart" label="Dart">
+
+```dart
+final roomOne = supabase.channel('room_01');
+
+final userStatus = {
+  'user': 'user-1',
+  'online_at': DateTime.now().toIso8601String(),
+};
+
+roomOne.subscribe((status, error) async {
+  if (status != RealtimeSubscribeStatus.subscribed) return;
+
+  final presenceTrackStatus = await roomOne.track(userStatus);
+  print(presenceTrackStatus);
+});
+```
+
+</TabPanel>
+<TabPanel id="kotlin" label="Kotlin">
+
+```kotlin
+val roomOne = supabase.channel("room_01")
+
+val userStatus = UserStatus( //Your custom class
+    user = "user-1",
+    onlineAt = Clock.System.now().toEpochMilliseconds()
+)
+
+roomOne.subscribe(blockUntilSubscribed = true) //You can also use the roomOne.status flow instead, but this parameter will block the coroutine until the status is joined.
+
+roomOne.track(userStatus)
+```
+
+</TabPanel>
+</Tabs>
+
+
+客户端将从订阅同一主题的任何其他客户端接收状态（在本例中为 `room_01`）。它还将自动触发自己的同步和联接事件处理程序。
+
+### 停止跟踪
+
+您可以使用 untrack（） 方法停止跟踪状态。这将触发`sync`和`leave`事件处理程序。
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="js"
+  queryGroup="language"
+>
+<TabPanel id="js" label="JavaScript">
+
+```js
+const untrackPresence = async () => {
+  const presenceUntrackStatus = await roomOne.untrack()
+  console.log(presenceUntrackStatus)
+}
+
+untrackPresence()
+```
+
+</TabPanel>
+<TabPanel id="dart" label="Dart">
+
+```dart
+final roomOne = supabase.channel('room_01');
+
+untrackPresence() async {
+  final presenceUntrackStatus = await roomOne.untrack();
+  print(presenceUntrackStatus);
+}
+
+untrackPresence();
+```
+
+</TabPanel>
+<TabPanel id="kotlin" label="Kotlin">
+
+```kotlin
+suspend fun untrackPresence() {
+	roomOne.untrack()
+}
+
+untrackPresence()
+```
+
+</TabPanel>
+</Tabs>
+
+## 状态选项
+
+您可以在初始化 MemFire Cloud 客户端时传递配置选项。
+
+### 状态键
+
+默认情况下，Presence 将在服务器上生成唯一的 UUIDv1 密钥，以跟踪客户端通道的状态。如果您愿意，可以在创建通道时提供自定义密钥。此密钥在客户端中应该是唯一的。
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="js"
+  queryGroup="language"
+>
+<TabPanel id="js" label="JavaScript">
+
+```js
+import { createClient } from '@supabase/supabase-js'
+
+const channelC = supabase.channel('test', {
+  config: {
+    presence: {
+      key: 'userId-123',
+    },
+  },
+})
+```
+
+</TabPanel>
+<TabPanel id="dart" label="Dart">
+
+```dart
+final channelC = supabase.channel(
+  'test',
+  opts: const RealtimeChannelConfig(key: 'userId-123'),
+);
+```
+
+</TabPanel>
+<TabPanel id="kotlin" label="Kotlin">
+
+```kotlin
+val channelC = supabase.channel("test") {
+    presence {
+        key = "userId-123"
+    }
+}
+```
+
+</TabPanel>
+</Tabs>
+
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page

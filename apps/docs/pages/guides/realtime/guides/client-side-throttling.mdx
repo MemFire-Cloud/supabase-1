@@ -1,0 +1,93 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: '限制消息',
+  title: '限制消息',
+  description: "使用客户端限制来管理消息频率。",
+}
+
+
+MemFire Cloud 客户端包括限制消息的功能。
+
+## 管理客户端限制
+
+您可以在创建客户端时自定义客户端限制：
+
+<Tabs
+  scrollable
+  size="small"
+  type="underlined"
+  defaultActiveId="js"
+  queryGroup="language"
+>
+<TabPanel id="js" label="JavaScript">
+
+```js
+import { createClient } from '@supabase/supabase-js'
+
+const SUPABASE_URL = 'https://<project>.supabase.co'
+const SUPABASE_ANON_KEY = '<your-anon-key>'
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  realtime: {
+    params: {
+      eventsPerSecond: 2,
+    },
+  },
+})
+```
+
+</TabPanel>
+<TabPanel id="dart" label="Dart">
+
+```dart
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+void main() async {
+  Supabase.initialize(
+    url: 'https://<project>.supabase.co',
+    anonKey: '<your-anon-key>',
+    realtimeClientOptions: const RealtimeClientOptions(
+      eventsPerSecond: 2,
+    ),
+  );
+  runApp(const MyApp());
+}
+
+final supabase = Supabase.instance.client;
+```
+
+</TabPanel>
+<TabPanel id="kotlin" label="Kotlin">
+
+```kotlin
+val supabase = createSupabaseClient(
+    "https://<project>.supabase.co",
+    "<your-anon-key>"
+) {
+    install(Realtime) {
+        eventsPerSecond = 2
+    }
+}
+```
+
+</TabPanel>
+</Tabs>
+
+## 默认客户端限制
+
+默认情况下，MemFire Cloud 客户端将消息限制为每秒 10 条消息（每 100 毫秒 1 条消息）。这是在您开始时作为安全保障提供的软限制。您很少需要发送比这更多的消息。
+
+每个客户端都有自己的限制行为。如果实例化两个客户端，则默认情况下，每秒将向项目发送 20 条消息。
+
+## 项目配额
+
+每条广播和状态消息都计入您的[项目配额](/docs/guides/realtime/deep-dive/quotas)。
+
+无意中用消息淹没实时服务是很常见的。例如，在不限制的情况下跟踪鼠标移动每秒将发送数百个事件。您很少需要这么多消息。对于人眼来说，即使每秒更新几次鼠标移动通常也足够了。
+
+限制参数可防止这些意外洪水。
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page

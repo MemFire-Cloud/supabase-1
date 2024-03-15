@@ -1,0 +1,201 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: '实时协议',
+  title: '实时协议',
+}
+
+实时协议是一组消息格式，用于在实时客户端和服务器之间通过 WebSocket 连接进行通信。这些消息用于启动连接、更新访问令牌、接收系统状态更新以及从 Postgres 数据库接收实时更新。
+
+## 连接
+
+在初始消息中，客户端发送一条消息，指定他们想要使用的功能（广播、状态、Postgres 更改）。
+
+```ts
+{
+   "event": "phx_join",
+   "topic": string,
+   "payload": {
+      "config": {
+         "broadcast": {
+            "self": boolean
+         },
+         "presence": {
+            "key": string
+         },
+         "postgres_changes": [
+            {
+               "event": "*" | "INSERT" | "UPDATE" | "DELETE",
+               "schema": string,
+               "table": string,
+               "filter": string + '=' + "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" +  '.' + string
+            }
+         ]
+      }
+   },
+   "ref": string
+}
+```
+
+<Admonition type="note">
+
+in 筛选器的格式为 `COLUMN_NAME=in.(value1,value2,value3)`。但是，其他筛选器使用 COLUMN_NAME=FILTER_NAME.value 格式。
+
+</Admonition>
+
+作为响应，服务器发送具有唯一 ID 的 Postgres 配置。使用此 ID，客户端应将传入的更改路由到相应的回调。
+
+```ts
+{
+   "event": "phx_reply",
+   "topic": string,
+   "payload": {
+      "response": {
+         "postgres_changes": [
+            {
+               "id": number,
+               "event": "*" | "INSERT" | "UPDATE" | "DELETE",
+               "schema": string,
+               "table": string,
+               "filter": string + '=' + "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" +  '.' + string
+            }
+         ]
+      },
+      "status": "ok" | "error"
+   },
+   "ref": string
+}
+```
+
+## 系统消息
+
+系统消息用于通知客户端 Postgres 订阅的状态。`payload.status`指示订阅是否成功。
+payload.message 的正文可以是“订阅 PostgreSQL”或“订阅 PostgreSQL 失败”，并带有订阅参数。
+
+
+
+```ts
+{
+   "event": "system",
+   "topic": string,
+   "payload":{
+      "channel": string,
+      "extension": "postgres_changes",
+      "message": "Subscribed to PostgreSQL" | "Subscribing to PostgreSQL failed",
+      "status": "ok" | "error"
+   },
+   "ref": null,
+}
+```
+
+## 心跳
+
+检测信号消息应每 30 秒发送一次，以避免连接超时。
+
+```ts
+{
+   "event": "heartbeat",
+   "topic": "phoenix",
+   "payload": {},
+   "ref": string
+}
+```
+
+## 访问令牌
+
+若要更新访问令牌，需要向服务器发送一条消息，在payload.access_token值中指定新令牌。
+
+```ts
+{
+   "event": "access_token",
+   "topic": string,
+   "payload":{
+      "access_token": string
+   },
+   "ref": string
+}
+```
+
+## Postgres CDC 消息
+
+Realtime 发送具有以下结构的消息
+
+```ts
+{
+   "event": "postgres_changes",
+   "topic": string,
+   "payload": {
+      "data": {
+         "columns": Array<{name: string, type: string}>,
+         "commit_timestamp": string,
+         "errors": null | string,
+         "old_record": {"id": number | string},
+         "record": {[key: string]: boolean | number | string | null},
+         "type": "*" | "INSERT" | "UPDATE" | "DELETE",
+         "schema": string,
+         "table": string
+      },
+      "ids": Array<number>
+   },
+   "ref": null
+}
+```
+
+## 广播消息
+
+广播事件的结构
+
+```ts
+{
+   "event": "broadcast",
+   "topic": string,
+   "payload": {
+      "event": string,
+      "payload": {[key: string]: boolean | number | string | null | undefined},
+      "type": "broadcast"
+   },
+   "ref": null
+}
+```
+
+## 状态消息
+
+状态事件允许客户端实时监控其他客户端的联机状态。
+
+### 状态更新
+
+加入后，服务器会向客户端发送一条包含状态信息的`presence_state`消息。payload 字段包含 UUID 格式的密钥，其中每个密钥表示一个客户端，其值是一个 JSON 对象，其中包含有关该客户端的信息。
+
+```ts
+{
+   "event": "presence_state",
+   "topic": string,
+   "payload": {
+      [key: string]: {metas: Array<{phx_ref: string, name: string, t: float}>}
+   },
+   "ref": null
+}
+```
+
+### 差异更新
+
+更改状态（例如客户端加入或离开）后，服务器会发送一条presence_diff消息以更新客户端的状态视图。payload 字段包含两个键，即 `join` 和 `leaves`，它们分别表示已加入和离开的客户端。与每个键关联的值是客户端的 UUID。
+
+
+
+```ts
+{
+   "event": "presence_diff",
+   "topic": string,
+   "payload": {
+      "joins": {metas: Array<{phx_ref: string, name: string, t: float}>},
+      "leaves": {metas: Array<{phx_ref: string, name: string, t: float}>}
+   },
+   "ref": null
+}
+```
+
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page

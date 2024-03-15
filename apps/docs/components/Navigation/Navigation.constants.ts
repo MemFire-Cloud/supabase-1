@@ -115,6 +115,8 @@ export const menuItems: NavMenu = {
       label: '认证',
       items: [
         { name: '概述', url: '/guides/auth', items: [] },
+        { name: '重定向 URL', url: '/guides/auth/redirect-urls', items: [] },
+        { name: '速率限制', url: '/guides/auth/rate-limiting', items: [] },
         {
           name: '身份验证',
           url: undefined,
@@ -131,6 +133,7 @@ export const menuItems: NavMenu = {
             // { name: '使用Facebook登录', url: '/guides/auth/auth-facebook', items: [] },
             { name: '使用Github登录', url: '/guides/auth/auth-github', items: [] },
             { name: '使用Gitlab登录', url: '/guides/auth/auth-gitlab', items: [] },
+            { name: '电子邮件模板', url: '/guides/auth/auth-email-templates', items: [] },
             // { name: '使用Google登录', url: '/guides/auth/auth-google', items: [] },
             // { name: '使用Keycloak登录', url: '/guides/auth/auth-keycloak', items: [] },
             // { name: '使用LinkedIn登录', url: '/guides/auth/auth-linkedin', items: [] },
@@ -249,6 +252,7 @@ export const menuItems: NavMenu = {
             { name: '复制', url: '/guides/database/replication', items: [] },
             { name: '密码', url: '/guides/database/managing-passwords', items: [] },
             { name: '时区', url: '/guides/database/managing-timezones', items: [] },
+            { name: '查询优化', url: '/guides/database/query-optimization', items: [] },
           ],
         },
       ],
@@ -300,8 +304,37 @@ export const menuItems: NavMenu = {
       label: 'Realtime',
       items: [
         { name: '概述', url: '/guides/realtime', items: [] },
+        { name: '概念', url: '/guides/realtime/concepts', items: [] },
         { name: '快速入门', url: '/guides/realtime/quickstart', items: [] },
-        { name: 'Postgres CDC', url: '/guides/realtime/postgres-cdc', items: [] },
+        // { name: 'Postgres CDC', url: '/guides/realtime/postgres-cdc', items: [] },
+        {
+          name: '用法',
+          url: undefined,
+          items: [
+            { name: '广播', url: '/guides/realtime/usage/broadcast', items: [] },
+            { name: 'Presence', url: '/guides/realtime/usage/presence', items: [] },
+            { name: 'Postgres 更改', url: '/guides/realtime/guides/postgres-changes', items: [] },
+          ],
+        },
+        {
+          name: '指南',
+          url: undefined,
+          items: [
+            { name: '限制消息', url: '/guides/realtime/guides/client-side-throttling', items: [] },
+            { name: '订阅数据库更改', url: '/guides/realtime/guides/subscribing-to-database-changes', items: [] },
+            { name: '将 Realtime 与 Next.js 结合使用', url: '/guides/realtime/guides/realtime-with-nextjs', items: [] },
+          ],
+        },
+        {
+          name: '深入了解',
+          url: undefined,
+          items: [
+            { name: '实时配额', url: '/guides/realtime/deep-dive/quotas', items: [] },
+            { name: '实时架构', url: '/guides/realtime/deep-dive/architecture', items: [] },
+            { name: '实时协议', url: '/guides/realtime/deep-dive/protocol', items: [] },
+            { name: '自带数据库', url: '/guides/realtime/deep-dive/bring-your-own-database', items: [] },
+          ],
+        },
         // { name: 'Rate Limits', url: '/guides/realtime/rate-limits', items: [] },
       ],
     },

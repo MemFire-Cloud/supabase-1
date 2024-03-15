@@ -1,0 +1,23 @@
+import Layout from '~/layouts/DefaultGuideLayout'
+
+export const meta = {
+  id: '将 Realtime 与 Next.js 结合使用',
+  title: '将 Realtime 与 Next.js 结合使用',
+  description: "将 Realtime 与 Next.js 结合使用",
+}
+
+在本指南中，我们将探讨使用 Next.js 应用程序接收实时 Postgres 更改的最佳方法。
+我们将展示客户端和服务器端更新，并探讨哪个选项最好。
+
+<div className="video-container">
+  <iframe
+    src="https://www.youtube-nocookie.com/embed/YR-xP6PPXXA"
+    frameBorder="1"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowFullScreen
+  ></iframe>
+</div>
+
+export const Page = ({ children }) => <Layout meta={meta} children={children} />
+
+export default Page
